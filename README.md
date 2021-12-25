@@ -1,3 +1,33 @@
+### Orange Cleaning (AU) API Server
+
+#### This project will contain all necessary APIs required for mobile Apps and WEb App.
+
+For Developers:
+
+1. Clone the Project Repo:
+`git clone git@bitbucket.org:bmnepali/orange-cleaning-api-server.git`
+
+2. Go to the project forlder:
+`cd orange-cleaning-api-server`
+
+3. Copy contents form `env.example` to the `.env` file.
+
+4. Add mail credentials for Email Configuration
+
+5. Make sure you have docker installed. Then run following command form your terminal within the project root.
+`docker-compose up dev`
+
+This will run all required insfastructure to start the API server in the devlopment mode.
+Once all is working, you can access the api in `http://localhost:3000` or in the port you have assigned in `.env` file.
+
+Note: For api calls, make sure to include following header in each request:
+`Accept: application/json;v=1.0.0`
+
+For APIs that are versioned. We will improve this as we progress.
+
+Cheers!!!
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
