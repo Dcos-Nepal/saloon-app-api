@@ -13,11 +13,11 @@ const saltRounds = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>) { }
+  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
 
   /**
    * Finds User using the email address
-   * 
+   *
    * @param id ObjectId | string
    * @returns Promise<User>
    */
@@ -35,7 +35,7 @@ export class UsersService {
 
   /**
    * Finds User using the email address
-   * 
+   *
    * @param email string
    * @returns Promise<User>
    */
@@ -45,7 +45,7 @@ export class UsersService {
 
   /**
    * Creates New User in the System
-   * 
+   *
    * @param newUser CreateUserDto
    * @returns Promise<User>
    */
@@ -56,7 +56,7 @@ export class UsersService {
         if (!userRegistered) {
           newUser.password = await bcrypt.hash(newUser.password, saltRounds);
           const createdUser = new this.userModel(newUser);
-          createdUser.roles = ["User"];
+          createdUser.roles = ['User'];
           return await createdUser.save();
         } else if (!userRegistered.auth.email.valid) {
           return userRegistered;
@@ -67,29 +67,30 @@ export class UsersService {
         throw new HttpException('REGISTRATION.MISSING_MANDATORY_PARAMETERS', HttpStatus.FORBIDDEN);
       }
     } catch (error) {
-      console.log("ERROR: ", error);
+      console.log('ERROR: ', error);
       throw new HttpException('REGISTRATION.ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   /**
    * Check if the given email is a valid email address
-   * 
+   *
    * @param email string
    * @returns Boolean
    */
   isValidEmail(email: string): boolean {
     if (email) {
-      const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      const re =
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
     }
 
-    return false
+    return false;
   }
 
   /**
    * Sets New Password
-   * 
+   *
    * @param email string
    * @param newPassword string
    * @returns Promise<boolean>
@@ -106,12 +107,12 @@ export class UsersService {
 
   /**
    * Updates User Profile Info
-   * 
+   *
    * @param profileDto ProfileDto
    * @returns Promise<User>
    */
   async updateProfile(profileDto: ProfileDto): Promise<User> {
-    let userFromDb: User = await this.userModel.findOne({ email: profileDto.email });
+    const userFromDb: User = await this.userModel.findOne({ email: profileDto.email });
 
     if (!userFromDb) {
       throw new HttpException('COMMON.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
@@ -120,7 +121,7 @@ export class UsersService {
     if (profileDto.firstName) {
       userFromDb.firstName = profileDto.firstName;
     }
-    
+
     if (profileDto.lastName) {
       userFromDb.lastName = profileDto.lastName;
     }
@@ -135,7 +136,7 @@ export class UsersService {
 
   /**
    * Updates User's Settings
-   * 
+   *
    * @param settingsDto SettingsDto
    * @returns Promise<User>
    */
@@ -148,8 +149,8 @@ export class UsersService {
 
     userFromDb.settings = userFromDb.settings;
 
-    for (var key in settingsDto) {
-      if (settingsDto.hasOwnProperty(key) && key != "email") {
+    for (const key in settingsDto) {
+      if (settingsDto.hasOwnProperty(key) && key != 'email') {
         userFromDb.settings[key] = settingsDto[key];
       }
     }
@@ -160,7 +161,7 @@ export class UsersService {
 
   /**
    * Validates User using its User id
-   * 
+   *
    * @param id ObjectId | string
    * @returns Promise<User>
    */
@@ -178,7 +179,7 @@ export class UsersService {
    * Generates sample UUID
    * @returns string
    */
-   guid(): string {
+  guid(): string {
     const s4 = () => {
       return Math.floor((1 + Math.random()) * 0x10000)
         .toString(16)
