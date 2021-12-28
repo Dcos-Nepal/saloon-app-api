@@ -1,7 +1,7 @@
-import { Document } from 'mongoose';
+import { Document } from 'mongoose'
 
-export interface EmailVerification extends Document{
-    email: string;
-    emailToken: string;
-    timestamp: Date;
-  }
+export interface EmailVerification extends Document {
+  email: string
+  emailToken: string
+  timestamp: Date
+}

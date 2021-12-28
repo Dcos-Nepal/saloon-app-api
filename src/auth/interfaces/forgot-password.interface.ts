@@ -1,7 +1,7 @@
-import { Document } from 'mongoose';
+import { Document } from 'mongoose'
 
-export interface ForgotPassword extends Document{
-    email: string;
-    newPasswordToken: string;
-    timestamp: Date;
-  }
+export interface ForgotPassword extends Document {
+  email: string
+  newPasswordToken: string
+  timestamp: Date
+}
