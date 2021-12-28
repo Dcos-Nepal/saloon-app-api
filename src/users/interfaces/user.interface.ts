@@ -1,18 +1,25 @@
-import { Document, ObjectId } from 'mongoose';
-import { Setting } from './setting.interface';
+import { Document, ObjectId } from 'mongoose'
+import { ISetting } from './setting.interface'
 
-export interface User extends Document{
-  _id?: string | ObjectId;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
-  roles: string[];
+export type IUserRole = 'ADMIN' | 'CLIENT' | 'WORKER'
+
+export interface IUser {
+  _id?: string
+  firstName: string
+  lastName: string
+  fullName: string
+  email: string
+  phoneNumber: string
+  password: string
+  roles: IUserRole[]
   auth: {
-    email : {
-      valid : boolean,
+    email: {
+      valid: boolean
     }
-  },
-  settings: Setting,
+  }
+  settings: ISetting
+}
+
+export interface User extends IUser, Document {
+  _id?: string
 }

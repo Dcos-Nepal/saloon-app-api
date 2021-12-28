@@ -1,4 +1,5 @@
-import * as mongoose from 'mongoose';
+import * as mongoose from 'mongoose'
+import { User } from '../interfaces/user.interface'
 
 export const SettingsSchema = new mongoose.Schema(
   {
@@ -7,12 +8,13 @@ export const SettingsSchema = new mongoose.Schema(
     value: String
   },
   { _id: false }
-);
+)
 
 export const UserSchema = new mongoose.Schema(
   {
     firstName: String,
     lastName: String,
+    fullName: String,
     email: { type: String, required: true },
     phoneNumber: {
       type: String,
@@ -22,10 +24,14 @@ export const UserSchema = new mongoose.Schema(
         message: 'Phone number must be exactly of 10 digits.'
       }
     },
+    location: {
+      type: { type: String, default: 'Point' },
+      coordinates: { type: [Number], default: [0.0, 0.0] }
+    },
     password: {
       type: String,
       required: function () {
-        return this.email;
+        return this.email
       }
     },
     roles: [{ type: String, required: true }],
@@ -41,4 +47,10 @@ export const UserSchema = new mongoose.Schema(
     toJSON: { getters: true },
     toObject: { getters: true }
   }
-);
+)
+
+UserSchema.index({ location: '2dsphere' })
+UserSchema.pre('save', function (this: User, next) {
+  this.fullName = `${this.firstName} ${this.lastName}`
+  next()
+})

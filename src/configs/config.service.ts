@@ -1,11 +1,11 @@
-import * as dotenv from 'dotenv';
+import * as dotenv from 'dotenv'
 
 export class ConfigService {
-  private readonly envConfig: Record<string, string>;
+  private readonly envConfig: Record<string, string>
 
   constructor() {
-    const result = dotenv.config();
-    this.envConfig = result.error ? process.env : result.parsed;
+    const result = dotenv.config()
+    this.envConfig = result.error ? process.env : result.parsed
   }
 
   /**
@@ -15,7 +15,7 @@ export class ConfigService {
    * @returns Number | String
    */
   get(key: string): any {
-    return this.envConfig[key];
+    return this.envConfig[key]
   }
 
   /**
@@ -28,8 +28,8 @@ export class ConfigService {
       MAIL_PORT: this.get('MAIL_PORT'),
       MAIL_SECURE: this.get('MAIL_SECURE') === 'true' ? true : false,
       MAIL_USER: this.get('MAIL_USER'),
-      MAIL_PASS: this.get('MAIL_PASS'),
-    };
+      MAIL_PASS: this.get('MAIL_PASS')
+    }
   }
 
   /**
@@ -41,8 +41,8 @@ export class ConfigService {
       AWS_ACCESS_KEY_ID: this.get('AWS_ACCESS_KEY_ID'),
       AWS_SECRET_ACCESS_KEY: this.get('AWS_SECRET_ACCESS_KEY'),
       AWS_REGION: this.get('AWS_REGION'),
-      AWS_PUBLIC_BUCKET: this.get('AWS_PUBLIC_BUCKET'),
-    };
+      AWS_PUBLIC_BUCKET: this.get('AWS_PUBLIC_BUCKET')
+    }
   }
 
   /**
@@ -51,7 +51,7 @@ export class ConfigService {
    */
   public getMongoConfig() {
     return {
-      uri: this.get('MONGO_URI'),
-    };
+      uri: this.get('MONGO_URI')
+    }
   }
 }
