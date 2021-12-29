@@ -12,7 +12,7 @@ export class AppController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  getWelcome(@CurrentUser() user: any): string {
+  getWelcome(): string {
     return this.appService.getWelcome()
   }
 }

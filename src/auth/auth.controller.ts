@@ -4,11 +4,9 @@ import { Login } from './interfaces/login.interface'
 import { ResponseSuccess, ResponseError } from '../common/dto/response.dto'
 import { IResponse } from '../common/interfaces/response.interface'
 import { CreateUserDto } from '../users/dto/create-user.dto'
-import { UserDto } from '../users/dto/user.dto'
 import { UsersService } from '../users/users.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
 import { ForgotPasswordDto } from './dto/forgot-password.dto'
-import { User } from 'src/users/interfaces/user.interface'
 
 @Controller({
   path: '/auth',

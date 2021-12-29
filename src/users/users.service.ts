@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import * as bcrypt from 'bcryptjs'
 import { AnyObject, FilterQuery, Model, ObjectId } from 'mongoose'
 import { InjectModel } from '@nestjs/mongoose'
