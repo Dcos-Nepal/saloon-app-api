@@ -1,6 +1,7 @@
-import { Document } from 'mongoose';
+import { Document } from 'mongoose'
 
-export interface Setting extends Document{
-  key: string;
-  value: string;
+export interface ISetting {
+  key: string
+  value: string
 }
+export interface Setting extends ISetting, Document {}
