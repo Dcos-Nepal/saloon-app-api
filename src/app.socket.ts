@@ -1,14 +1,6 @@
 import { Server } from 'ws'
 import { Socket } from 'socket.io'
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  OnGatewayInit,
-  WebSocketServer,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  WsResponse
-} from '@nestjs/websockets'
+import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, WsResponse } from '@nestjs/websockets'
 import { Logger } from '@nestjs/common'
 
 @WebSocketGateway({ namespace: '/chat', cors: { origin: '*' } })

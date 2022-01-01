@@ -21,9 +21,7 @@ export class LoggerMiddleware implements NestMiddleware {
       }
 
       if (offuscateRequest != {}) {
-        this.logger.log(
-          new Date().toString() + ' - [Request] ' + req.baseUrl + ' - ' + JSON.stringify(offuscateRequest)
-        )
+        this.logger.log(new Date().toString() + ' - [Request] ' + req.baseUrl + ' - ' + JSON.stringify(offuscateRequest))
       }
     } catch (error) {
       this.logger.log(new Date().toString() + ' - [Request] ' + req.baseUrl + ' - ' + JSON.stringify(error))

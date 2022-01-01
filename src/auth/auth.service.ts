@@ -94,11 +94,7 @@ export class AuthService {
    *
    * @returns Promise<ConsentRegistry>
    */
-  async saveUserConsent(
-    userId: Types.ObjectId,
-    consentType: ConsentType,
-    isAccepted: boolean
-  ): Promise<ConsentRegistry> {
+  async saveUserConsent(userId: Types.ObjectId, consentType: ConsentType, isAccepted: boolean): Promise<ConsentRegistry> {
     try {
       const http = new HttpService()
       const consent = new this.consentRegistryModel()

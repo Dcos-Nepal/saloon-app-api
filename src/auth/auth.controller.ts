@@ -19,7 +19,7 @@ export class AuthController {
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
-  public async login(@Body() login: Login): Promise<IResponse> {
+  public async login(@Body() login): Promise<IResponse> {
     try {
       const response = await this.authService.validateLogin(login.email, login.password)
       return new ResponseSuccess('LOGIN.SUCCESS', response)
@@ -109,10 +109,7 @@ export class AuthController {
         }
       } else if (resetPassword.newPasswordToken) {
         const forgottenPasswordModel = await this.authService.getForgotPasswordModel(resetPassword.newPasswordToken)
-        isNewPasswordChanged = await this.userService.setPassword(
-          forgottenPasswordModel.email,
-          resetPassword.newPassword
-        )
+        isNewPasswordChanged = await this.userService.setPassword(forgottenPasswordModel.email, resetPassword.newPassword)
         if (isNewPasswordChanged) await forgottenPasswordModel.remove()
       } else {
         return new ResponseError('RESET_PASSWORD.CHANGE_PASSWORD_ERROR')

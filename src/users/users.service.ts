@@ -1,13 +1,15 @@
 import * as bcrypt from 'bcryptjs'
-import { AnyObject, FilterQuery, Model, ObjectId } from 'mongoose'
+import { AnyObject, ClientSession, FilterQuery, Model, ObjectId } from 'mongoose'
 import { InjectModel } from '@nestjs/mongoose'
 import { Injectable, HttpStatus, HttpException, NotFoundException } from '@nestjs/common'
 
 import { ProfileDto } from './dto/profile.dto'
 import { SettingsDto } from './dto/settings.dto'
-import { User } from './interfaces/user.interface'
+import { IUser, User } from './interfaces/user.interface'
 import { CreateUserDto } from './dto/create-user.dto'
-import BaseService, { IServiceOptions } from 'src/base/base-service'
+import BaseService from 'src/base/base-service'
+import { IServiceOptions } from 'src/interfaces'
+import { ForbiddenException } from 'src/common/exceptions/forbidden.exception'
 
 const saltRounds = 10
 
@@ -22,6 +24,7 @@ export class UsersService extends BaseService<User> {
     const limit = parseInt(query['limit'] || 10)
     const skip = (parseInt(query['page']) - 1) * limit
     if (query.q) cond.fullName = { $regex: query.q, $options: 'i' }
+    if (query.roles) cond.roles = { $in: query.roles.split(',') }
     if (query.nearBy && query.lat && query.lon) {
       cond.location = {
         $near: {
@@ -30,11 +33,22 @@ export class UsersService extends BaseService<User> {
         }
       }
     }
-    return await this.userModel
-      .find(cond)
-      .limit(limit)
-      .skip(skip)
-      .sort({ [query.sort || 'createdAt']: -1 })
+    const [users, totalCount] = await Promise.all([
+      this.userModel
+        .find(cond)
+        .select('-password')
+        .limit(limit)
+        .skip(skip)
+        .sort({ [query.sort || 'createdAt']: -1 }),
+      this.userModel.countDocuments(cond)
+    ])
+    return { rows: users, totalCount }
+  }
+
+  async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
+    if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException()
+    if (body.location) body.location.type = 'Point'
+    return await this.userModel.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session }).select('-password -__v')
   }
 
   /**
