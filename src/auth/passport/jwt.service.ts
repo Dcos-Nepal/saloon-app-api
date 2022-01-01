@@ -8,10 +8,7 @@ import { ConfigService } from 'src/configs/config.service'
 
 @Injectable()
 export class JWTService {
-  constructor(
-    @InjectModel('User') private readonly userModel: Model<User>,
-    private readonly configService: ConfigService
-  ) {}
+  constructor(@InjectModel('User') private readonly userModel: Model<User>, private readonly configService: ConfigService) {}
 
   /**
    *

@@ -24,13 +24,7 @@ import NodeMailerHelper from 'src/helpers/node-mailer-helper'
     ])
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    UsersService,
-    JWTService,
-    JwtStrategy,
-    { provide: 'NodeMailer', useClass: NodeMailerHelper }
-  ],
+  providers: [AuthService, UsersService, JWTService, JwtStrategy, { provide: 'NodeMailer', useClass: NodeMailerHelper }],
   exports: [AuthService, UsersService, JWTService, JwtStrategy]
 })
 export class AuthModule implements NestModule {
