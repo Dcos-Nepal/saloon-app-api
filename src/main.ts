@@ -24,6 +24,7 @@ async function bootstrap() {
   // Uses Validation Pipes
   app.useGlobalPipes(
     new ValidationPipe({
+      whitelist: true,
       transformOptions: {
         enableImplicitConversion: true
       }
@@ -69,14 +70,8 @@ async function bootstrap() {
     })
 
   // Apply request limit to user login/register API endpoint
-  app.use(
-    '/auth/login',
-    requestLimiter(5, 15, 'Too many login attempts from this IP, please try again after 5 minutes')
-  )
-  app.use(
-    '/auth/register',
-    requestLimiter(20, 10, 'Too many register attempts from this IP, please try again after 20 minutes')
-  )
+  app.use('/auth/login', requestLimiter(5, 15, 'Too many login attempts from this IP, please try again after 5 minutes'))
+  app.use('/auth/register', requestLimiter(20, 10, 'Too many register attempts from this IP, please try again after 20 minutes'))
   // /** End Security **/
 
   //Lister Requests on SERVER_PORT

@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query } from '@nestjs/common'
+import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query, Put } from '@nestjs/common'
+import { InjectConnection } from '@nestjs/mongoose'
+import * as mongoose from 'mongoose'
+
 import { UserDto } from './dto/user.dto'
 import { UsersService } from './users.service'
 import { IResponse } from '../common/interfaces/response.interface'
@@ -11,7 +14,8 @@ import { ProfileDto } from './dto/profile.dto'
 import { SettingsDto } from './dto/settings.dto'
 import { RolesGuard } from 'src/auth/guards/roles.guard'
 import { CurrentUser } from 'src/common/decorators/current-user'
-import { User } from './interfaces/user.interface'
+import { IUser, User } from './interfaces/user.interface'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Controller({
   path: '/users',
@@ -20,16 +24,13 @@ import { User } from './interfaces/user.interface'
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const users = await this.usersService.findAll(query, { authUser })
-      return new ResponseSuccess(
-        'COMMON.SUCCESS',
-        users.map((user) => new UserDto(user.toJSON()))
-      )
+      return new ResponseSuccess('COMMON.SUCCESS', users)
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error)
     }
@@ -41,7 +42,19 @@ export class UsersController {
   async findById(@Param() params): Promise<IResponse> {
     try {
       const user = await this.usersService.findById(params.id)
-      return new ResponseSuccess('COMMON.SUCCESS', new UserDto(user))
+      return new ResponseSuccess('COMMON.SUCCESS', user)
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error)
+    }
+  }
+
+  @Put('/:id')
+  async update(@Body() body: UpdateUserDto, @Param() params, @CurrentUser() authUser: IUser): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession()
+      session.startTransaction()
+      const updatedUser = await this.usersService.update(params.id, body, session, { authUser })
+      return new ResponseSuccess('COMMON.SUCCESS', updatedUser)
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error)
     }

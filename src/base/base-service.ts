@@ -1,10 +1,5 @@
 import { FilterQuery, Model, ObjectId } from 'mongoose'
-import { User } from 'src/users/interfaces/user.interface'
-
-export interface IServiceOptions {
-  authUser?: User
-}
-
+import { IServiceOptions } from 'src/interfaces'
 class BaseService<Entity> {
   constructor(readonly model: Model<Entity>) {}
 
@@ -26,8 +21,9 @@ class BaseService<Entity> {
    * @returns Promise<Entity[]>
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async findAll(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<Entity[]> {
-    return await this.model.find(query)
+  async findAll(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<{ rows: Entity[]; totalCount: number }> {
+    const [rows, totalCount] = await Promise.all([this.model.find(query), this.model.countDocuments(query)])
+    return { rows, totalCount }
   }
 
   /**
