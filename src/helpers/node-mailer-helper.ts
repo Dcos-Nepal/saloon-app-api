@@ -1,13 +1,13 @@
-import { ConfigService } from 'src/configs/config.service'
-import * as nodemailer from 'nodemailer'
-import IMail, { IMailResponse } from 'src/interfaces/mail-interface'
-import { Injectable } from '@nestjs/common'
-import SMTPTransport from 'nodemailer/lib/smtp-transport'
+import { ConfigService } from 'src/configs/config.service';
+import * as nodemailer from 'nodemailer';
+import IMail, { IMailResponse } from 'src/interfaces/mail-interface';
+import { Injectable } from '@nestjs/common';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 @Injectable()
 class NodeMailerHelper implements IMail {
-  private transporter: SMTPTransport.Options
-  private from: string
+  private transporter: SMTPTransport.Options;
+  private from: string;
 
   constructor(public configService: ConfigService) {
     this.transporter = {
@@ -18,18 +18,18 @@ class NodeMailerHelper implements IMail {
         user: this.configService.get('MAIL_USER'),
         pass: this.configService.get('MAIL_PASS')
       }
-    }
+    };
 
-    this.from = `Orange Cleaning (AU) <${this.configService.get('MAIL_USER')}>`
+    this.from = `Orange Cleaning (AU) <${this.configService.get('MAIL_USER')}>`;
   }
 
   async sendEmail(to: string | string[], subject: string, html: string): Promise<IMailResponse> {
-    to = Array.isArray(to) ? to.join() : to
-    const mailer = nodemailer.createTransport(this.transporter)
-    const mailOptions = { from: this.from, to, subject, html }
-    const sent = await mailer.sendMail(mailOptions)
-    return { messageId: sent.messageId }
+    to = Array.isArray(to) ? to.join() : to;
+    const mailer = nodemailer.createTransport(this.transporter);
+    const mailOptions = { from: this.from, to, subject, html };
+    const sent = await mailer.sendMail(mailOptions);
+    return { messageId: sent.messageId };
   }
 }
 
-export default NodeMailerHelper
+export default NodeMailerHelper;

@@ -1,7 +1,6 @@
-import { Controller, Get, UseGuards, VERSION_NEUTRAL } from '@nestjs/common'
-import { AppService } from './app.service'
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
-import { CurrentUser } from './common/decorators/current-user'
+import { Controller, Get, UseGuards, VERSION_NEUTRAL } from '@nestjs/common';
+import { AppService } from './app.service';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Controller({
   path: '/',
@@ -13,6 +12,6 @@ export class AppController {
   @Get()
   @UseGuards(JwtAuthGuard)
   getWelcome(): string {
-    return this.appService.getWelcome()
+    return this.appService.getWelcome();
   }
 }

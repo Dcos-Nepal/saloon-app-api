@@ -1,48 +1,55 @@
-import { Server } from 'ws'
-import { Socket } from 'socket.io'
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  OnGatewayInit,
-  WebSocketServer,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  WsResponse
-} from '@nestjs/websockets'
-import { Logger } from '@nestjs/common'
+import { Server } from 'ws';
+import { Socket } from 'socket.io';
+import { WebSocketGateway, OnGatewayInit, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { Global, Logger } from '@nestjs/common';
 
-@WebSocketGateway({ namespace: '/chat', cors: { origin: '*' } })
-export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server
+@Global()
+@WebSocketGateway({ namespace: '/ws', cors: { origin: '*' } })
+export class AppSocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer() server: Server;
 
-  private logger: Logger = new Logger('SocketGateway')
+  private logger: Logger = new Logger('AppSocketGateway');
 
-  @SubscribeMessage('chat:send-message')
-  public handleMessage(client: Socket, payload: any): Promise<WsResponse<any>> {
-    return this.server.to(payload.room).emit('chat:receive-message', payload)
-  }
+  /**
+   * For handling events from clients
+   * @SubscribeMessage('app:display-alert')
+   * public handleMessage(client: Socket, payload: any): Promise<WsResponse<any>> {
+   *   return this.server.emit('app:receive-alert', payload);
+   * }
+   */
 
-  @SubscribeMessage('chat:join-room')
-  public joinRoom(client: Socket, room: string): void {
-    client.join(room)
-    client.emit('chat:room-joined', room)
-  }
-
-  @SubscribeMessage('chat:leave-room')
-  public leaveRoom(client: Socket, room: string): void {
-    client.leave(room)
-    client.emit('chat:room-left', room)
+  /**
+   * Publishes events to all connected cients.
+   *
+   * @param event String
+   * @param payload Object
+   * @returns void
+   */
+  public publishEvent(event: string, payload: any): void {
+    return this.server.emit(event, payload);
   }
 
   public afterInit(): void {
-    return this.logger.log('Socket Server Initialized!')
+    return this.logger.log('App Socket Server Initialized!');
   }
 
+  /**
+   * Handles Client Disconnection
+   *
+   * @param client Socket
+   * @returns Void
+   */
   public handleDisconnect(client: Socket): void {
-    return this.logger.log(`Client disconnected: ${client.id}`)
+    return this.logger.log(`Client disconnected: ${client.id}`);
   }
 
+  /**
+   * Handles Client Connection
+   *
+   * @param client Socket
+   * @returns Void
+   */
   public handleConnection(client: Socket): void {
-    return this.logger.log(`Client connected: ${client.id}`)
+    return this.logger.log(`Client connected: ${client.id}`);
   }
 }
