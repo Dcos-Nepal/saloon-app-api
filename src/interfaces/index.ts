@@ -1,7 +1,8 @@
-import { IUser } from 'src/users/interfaces/user.interface'
+import { IUser } from 'src/modules/users/interfaces/user.interface';
 
 interface IServiceOptions {
-  authUser?: IUser
+  authUser?: IUser;
+  fields?: string;
 }
 
-export { IUser, IServiceOptions }
+export { IUser, IServiceOptions };

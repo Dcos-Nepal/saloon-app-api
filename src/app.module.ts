@@ -1,16 +1,17 @@
-import { Module } from '@nestjs/common'
-import { MongooseModule } from '@nestjs/mongoose'
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 
-import { AppService } from './app.service'
-import { SocketGateway } from './app.socket'
-import { AppController } from './app.controller'
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 
-import { ConfigModule } from './configs/config.module'
-import { ConfigService } from './configs/config.service'
+import { ConfigModule } from './configs/config.module';
+import { ConfigService } from './configs/config.service';
 
-import { UsersModule } from './users/users.module'
-import { AuthModule } from './auth/auth.module'
-import NodeMailerHelper from './helpers/node-mailer-helper'
+import NodeMailerHelper from './helpers/node-mailer-helper';
+import { AppSocketGateway } from './app.socket';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -21,9 +22,10 @@ import NodeMailerHelper from './helpers/node-mailer-helper'
       useFactory: async (configService: ConfigService) => configService.getMongoConfig()
     }),
     UsersModule,
-    AuthModule
+    AuthModule,
+    ChatModule
   ],
   controllers: [AppController],
-  providers: [ConfigService, AppService, SocketGateway, { provide: 'NodeMailer', useClass: NodeMailerHelper }]
+  providers: [ConfigService, AppService, AppSocketGateway, { provide: 'NodeMailer', useClass: NodeMailerHelper }]
 })
 export class AppModule {}
