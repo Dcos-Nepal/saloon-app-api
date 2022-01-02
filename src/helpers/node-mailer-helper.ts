@@ -1,8 +1,9 @@
-import { ConfigService } from 'src/configs/config.service';
 import * as nodemailer from 'nodemailer';
-import IMail, { IMailResponse } from 'src/interfaces/mail-interface';
 import { Injectable } from '@nestjs/common';
+
+import { ConfigService } from 'src/configs/config.service';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import IMail, { IMailResponse } from 'src/common/interfaces/mail-interface';
 
 @Injectable()
 class NodeMailerHelper implements IMail {
@@ -23,6 +24,13 @@ class NodeMailerHelper implements IMail {
     this.from = `Orange Cleaning (AU) <${this.configService.get('MAIL_USER')}>`;
   }
 
+  /**
+   * Send Email Function using node-mailer
+   * @param to String[]
+   * @param subject String
+   * @param html String
+   * @returns Object
+   */
   async sendEmail(to: string | string[], subject: string, html: string): Promise<IMailResponse> {
     to = Array.isArray(to) ? to.join() : to;
     const mailer = nodemailer.createTransport(this.transporter);

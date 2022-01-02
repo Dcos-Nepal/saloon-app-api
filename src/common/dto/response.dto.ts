@@ -1,5 +1,7 @@
-// success: true => message, data
-// success: false => errorMessage, error
+/**
+ * success: true => message, data
+ * success: false => errorMessage, error
+ */
 import { IResponse } from '../interfaces/response.interface';
 
 export class ResponseError implements IResponse {

@@ -9,7 +9,7 @@ import { JWTService } from './passport/jwt.service';
 import { ConfigService } from 'src/configs/config.service';
 
 import { UserDto } from '../users/dto/user.dto';
-import IMail from 'src/interfaces/mail-interface';
+import IMail from 'src/common/interfaces/mail-interface';
 import { User } from '../users/interfaces/user.interface';
 import { ConsentType } from './schemas/consent-registry.schema';
 import { ForgotPassword } from './interfaces/forgot-password.interface';

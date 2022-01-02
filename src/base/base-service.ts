@@ -1,5 +1,5 @@
 import { ClientSession, FilterQuery, Model, ObjectId } from 'mongoose';
-import { IServiceOptions } from 'src/interfaces';
+import { IServiceOptions } from 'src/common/interfaces';
 
 class BaseService<EntityModel, Entity> {
   constructor(readonly model: Model<EntityModel>) {}
