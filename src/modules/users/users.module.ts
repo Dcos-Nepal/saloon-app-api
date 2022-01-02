@@ -4,11 +4,18 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UserSchema } from './schemas/user.schema';
 import { LoggerMiddleware } from '../../common/middlewares/logger.middleware';
+import { PropertiesService } from '../properties/properties.service';
+import { PropertySchema } from '../properties/schemas/property.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: 'User', schema: UserSchema },
+      { name: 'Property', schema: PropertySchema }
+    ])
+  ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, PropertiesService],
   exports: [UsersService]
 })
 export class UsersModule implements NestModule {

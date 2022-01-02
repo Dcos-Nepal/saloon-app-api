@@ -12,6 +12,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerMiddleware } from '../../common/middlewares/logger.middleware';
 import { ConfigModule } from 'src/configs/config.module';
 import NodeMailerHelper from 'src/helpers/node-mailer-helper';
+import { PropertiesService } from '../properties/properties.service';
+import { PropertySchema } from '../properties/schemas/property.schema';
 
 @Module({
   imports: [
@@ -20,11 +22,12 @@ import NodeMailerHelper from 'src/helpers/node-mailer-helper';
       { name: 'User', schema: UserSchema },
       { name: 'EmailVerification', schema: EmailVerificationSchema },
       { name: 'ForgotPassword', schema: ForgotPasswordSchema },
-      { name: 'ConsentRegistry', schema: ConsentRegistrySchema }
+      { name: 'ConsentRegistry', schema: ConsentRegistrySchema },
+      { name: 'Property', schema: PropertySchema }
     ])
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersService, JWTService, JwtStrategy, { provide: 'NodeMailer', useClass: NodeMailerHelper }],
+  providers: [AuthService, UsersService, PropertiesService, JWTService, JwtStrategy, { provide: 'NodeMailer', useClass: NodeMailerHelper }],
   exports: [AuthService, UsersService, JWTService, JwtStrategy]
 })
 export class AuthModule implements NestModule {

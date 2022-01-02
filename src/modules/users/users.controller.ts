@@ -16,6 +16,9 @@ import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { IUser, User } from './interfaces/user.interface';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserPropertyDto } from './dto/create-user-property.dto';
+import { Property } from '../properties/interfaces/property.interface';
+import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 
 @Controller({
   path: '/users',
@@ -42,7 +45,18 @@ export class UsersController {
   async findById(@Param() params): Promise<IResponse> {
     try {
       const user = await this.usersService.findById(params.id);
-      return new ResponseSuccess('COMMON.SUCCESS', user);
+      return new ResponseSuccess('COMMON.SUCCESS', new UserDto(user));
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+    }
+  }
+
+  @Get('/:id/properties')
+  @UseGuards(RolesGuard)
+  async findProperties(@Param() params, @Query() query): Promise<IResponse> {
+    try {
+      const properties = await this.usersService.findProperties(params.id, query);
+      return new ResponseSuccess('COMMON.SUCCESS', properties);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
     }
@@ -52,8 +66,10 @@ export class UsersController {
   async update(@Body() body: UpdateUserDto, @Param() params, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      session.startTransaction();
-      const updatedUser = await this.usersService.update(params.id, body, session, { authUser });
+      let updatedUser: User;
+      await session.withTransaction(async () => {
+        updatedUser = await this.usersService.update(params.id, body, session, { authUser });
+      });
       return new ResponseSuccess('COMMON.SUCCESS', updatedUser);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
@@ -93,6 +109,23 @@ export class UsersController {
       return new ResponseSuccess('SETTINGS.UPDATE_SUCCESS', new UserDto(user));
     } catch (error) {
       return new ResponseError('SETTINGS.UPDATE_ERROR', error);
+    }
+  }
+
+  @Post('/:userId/properties')
+  @UseGuards(RolesGuard)
+  @UseGuards(SelfOrAdminGuard)
+  @Roles('ADMIN', 'WORKER')
+  async createProperty(@Param() params, @Body() property: CreateUserPropertyDto, @CurrentUser() authUser: IUser): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let newProperty: Property;
+      await session.withTransaction(async () => {
+        newProperty = await this.usersService.addProperty({ ...property, user: params.userId }, session, { authUser });
+      });
+      return new ResponseSuccess('PROPERTY_CREATED', newProperty);
+    } catch (error) {
+      return new ResponseError('PROPERTY_CREATE_ERROR', error);
     }
   }
 }

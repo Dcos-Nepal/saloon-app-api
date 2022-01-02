@@ -12,6 +12,7 @@ import { AppSocketGateway } from './app.socket';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { PropertiesModule } from './modules/properties/properties.module';
 import { LineItemsModule } from './modules/line-items/line-items.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { LineItemsModule } from './modules/line-items/line-items.module';
     UsersModule,
     AuthModule,
     ChatModule,
+    PropertiesModule,
     LineItemsModule
   ],
   controllers: [AppController],

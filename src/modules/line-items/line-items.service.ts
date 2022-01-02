@@ -1,14 +1,14 @@
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { CreateLineItemDto, LineItemQueryDto } from './dto/create-line-item.dto';
 import { UpdateLineItemDto } from './dto/update-line-item.dto';
-import { LineItem } from './interfaces/line-item.interface';
+import { ILineItem, LineItem } from './interfaces/line-item.interface';
 import BaseService from 'src/base/base-service';
 
 @Injectable()
-export class LineItemsService extends BaseService<LineItem> {
+export class LineItemsService extends BaseService<LineItem, ILineItem> {
   private logger: Logger;
 
   constructor(@InjectModel('LineItem') private readonly lineItemModel: Model<LineItem>) {
@@ -96,12 +96,10 @@ export class LineItemsService extends BaseService<LineItem> {
    * @param id String
    * @returns LineItem
    */
-  async remove(id: string) {
+  async remove(id: string, session: ClientSession) {
     this.logger.log(`Delete: delete line item of id ${id}`);
-    const result = await this.lineItemModel.findOneAndUpdate({ _id: id }, { isDeleted: true }, { new: true }).exec();
-
+    const removedItem = await this.lineItemModel.findOneAndUpdate({ _id: id }, { isDeleted: true }, { new: true, session }).exec();
     this.logger.log(`Delete: line item soft deleted successfully`);
-
-    return result;
+    return removedItem && removedItem._id;
   }
 }

@@ -1,27 +1,3 @@
-import { IsOptional, IsString } from 'class-validator';
+import { AddressDto } from 'src/common/dto/address.dto';
 
-export class UserAddressDto {
-  @IsString()
-  @IsOptional()
-  street1: string;
-
-  @IsString()
-  @IsOptional()
-  street2?: string;
-
-  @IsString()
-  @IsOptional()
-  city: string;
-
-  @IsString()
-  @IsOptional()
-  state: string;
-
-  @IsString()
-  @IsOptional()
-  postalCode: number;
-
-  @IsString()
-  @IsOptional()
-  country: string;
-}
+export class UserAddressDto extends AddressDto {}
