@@ -66,10 +66,18 @@ export const UserSchema = new mongoose.Schema(
 );
 
 UserSchema.index({ location: '2dsphere' });
+
+/**
+ * Before saving new User
+ */
 UserSchema.pre('save', function (this: User, next) {
   this.fullName = `${this.firstName} ${this.lastName}`;
   next();
 });
+
+/**
+ * Before finding and updating the User
+ */
 UserSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());
   this.set('fullName', `${this.getUpdate()['firstName'] || docToUpdate.firstName} ${this.getUpdate()['lastName'] || docToUpdate.lastName}`);

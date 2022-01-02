@@ -47,7 +47,7 @@ export class ChatController {
   @UseGuards(AuthGuard('jwt'))
   async getChatRequests(@Query() query: ChatRequestQueryDto) {
     try {
-      const chatRequests = await this.chatRequestService.ferchChatRequests(query);
+      const chatRequests = await this.chatRequestService.fetchChatRequests(query);
 
       if (chatRequests) {
         return new ResponseSuccess('CHAT.REQUESTS', chatRequests);
@@ -55,7 +55,7 @@ export class ChatController {
         return new ResponseError('CHAT.ERROR.FETCH_REQUESTS_FAILED');
       }
     } catch (error) {
-      // this.logger.error('Error: ', error);
+      this.logger.error('Error: ', error);
       return new ResponseError('CHAT.ERROR.FETCH_REQUESTS_FAILED', error);
     }
   }
@@ -72,7 +72,7 @@ export class ChatController {
         return new ResponseError('CHAT.ERROR.FETCH_REQUESTS_FAILED');
       }
     } catch (error) {
-      // this.logger.error('Error: ', error);
+      this.logger.error('Error: ', error);
       return new ResponseError('CHAT.ERROR.FETCH_REQUESTS_FAILED', error);
     }
   }
@@ -95,7 +95,7 @@ export class ChatController {
         return new ResponseError('CHAT.ERROR.FETCH_ROOMS_FAILED');
       }
     } catch (error) {
-      // this.logger.error('Error: ', error);
+      this.logger.error('Error: ', error);
       return new ResponseError('CHAT.ERROR.FETCH_ROOMS_FAILED', error);
     }
   }
@@ -112,7 +112,7 @@ export class ChatController {
         return new ResponseError('CHAT.ERROR.FETCH_ROOM_FAILED');
       }
     } catch (error) {
-      // this.logger.error('Error: ', error);
+      this.logger.error('Error: ', error);
       return new ResponseError('CHAT.ERROR.FETCH_ROOM_FAILED', error);
     }
   }
@@ -133,7 +133,7 @@ export class ChatController {
         return new ResponseError('CHAT.ERROR.CREATE_MESSAGE_FAILED');
       }
     } catch (error) {
-      // this.logger.error('Error: ', error);
+      this.logger.error('Error: ', error);
       return new ResponseError('CHAT.ERROR.CREATE_MESSAGE_FAILED', error);
     }
   }
@@ -154,7 +154,7 @@ export class ChatController {
         return new ResponseError('CHAT.ERROR.CREATE_MESSAGE_FAILED');
       }
     } catch (error) {
-      // this.logger.error('Error: ', error);
+      this.logger.error('Error: ', error);
       return new ResponseError('CHAT.ERROR.CREATE_MESSAGE_FAILED', error);
     }
   }
