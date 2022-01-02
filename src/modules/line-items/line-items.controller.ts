@@ -4,6 +4,8 @@ import { CreateLineItemDto, LineItemQueryDto } from './dto/create-line-item.dto'
 import { UpdateLineItemDto } from './dto/update-line-item.dto';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { InjectConnection } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
 
 @Controller({
   path: '/line-items',
@@ -12,7 +14,7 @@ import { AuthGuard } from '@nestjs/passport';
 export class LineItemsController {
   private logger: Logger;
 
-  constructor(private readonly lineItemsService: LineItemsService) {
+  constructor(private readonly lineItemsService: LineItemsService, @InjectConnection() private readonly connection: mongoose.Connection) {
     this.logger = new Logger(LineItemsController.name);
   }
 
@@ -88,13 +90,12 @@ export class LineItemsController {
   @UseGuards(AuthGuard('jwt'))
   async remove(@Param('lineItemId') lineItemId: string) {
     try {
-      const removedItem = await await this.lineItemsService.remove(lineItemId);
-
-      if (removedItem && removedItem?._id) {
-        return new ResponseSuccess('LINE_ITEM.DELETE', removedItem);
-      } else {
-        return new ResponseError('LINE_ITEM.ERROR.DELETE_LINE_ITEM_FAILED');
-      }
+      const session = await this.connection.startSession();
+      let removedItem: boolean;
+      await session.withTransaction(async () => {
+        removedItem = await this.lineItemsService.remove(lineItemId, session);
+      });
+      return new ResponseSuccess('LINE_ITEM.DELETE', removedItem);
     } catch (error) {
       this.logger.error('Error: ', error);
       return new ResponseError('LINE_ITEM.ERROR.DELETE_LINE_ITEM_FAILED', error);
