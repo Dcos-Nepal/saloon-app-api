@@ -3,7 +3,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import BaseService from 'src/base/base-service';
-import { ChatMessage } from './interfaces/chat-message.interface';
+import { ChatMessage, IChatMessage } from './interfaces/chat-message.interface';
 import { User } from '../users/interfaces/user.interface';
 import { ChatMessageDto, ChatMessageQueryDto } from './dto/chat-message.dto';
 import { ChatRoomService } from './chat-room.service';
@@ -11,7 +11,7 @@ import { ChatSocketGateway } from './chat.socket';
 import { ChatRoom } from './interfaces/chat-room.interface';
 
 @Injectable()
-export class ChatMessageService extends BaseService<ChatMessage> {
+export class ChatMessageService extends BaseService<ChatMessage, IChatMessage> {
   private logger: Logger;
 
   constructor(

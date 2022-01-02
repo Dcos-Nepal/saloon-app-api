@@ -1,5 +1,6 @@
 import { IUser } from '../interfaces/user.interface';
 import { SettingsDto } from './settings.dto';
+import { UserAddressDto } from './user-address.dto';
 
 export class UserDto {
   constructor(object: IUser) {
@@ -8,6 +9,7 @@ export class UserDto {
     this.lastName = object.lastName;
     this.email = object.email;
     this.phoneNumber = object.phoneNumber;
+    this.address = object.address;
     this.settings = new SettingsDto(object.settings);
   }
 
@@ -17,4 +19,5 @@ export class UserDto {
   email: string;
   phoneNumber: string;
   settings?: SettingsDto;
+  address?: UserAddressDto;
 }

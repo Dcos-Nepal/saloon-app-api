@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { IBaseAddress } from 'src/common/interfaces';
 import { ISetting } from './setting.interface';
 
 export type IUserRole = 'ADMIN' | 'CLIENT' | 'WORKER';
@@ -6,15 +7,6 @@ export type IUserRole = 'ADMIN' | 'CLIENT' | 'WORKER';
 export interface IUserLocation {
   type: string;
   coordinates: number[];
-}
-
-export interface IUserAddress {
-  street1: string;
-  street2?: string;
-  city: string;
-  state: string;
-  postalCode: number;
-  country: string;
 }
 
 export interface IUserDocument {
@@ -31,7 +23,7 @@ export interface IUser {
   phoneNumber: string;
   password: string;
   roles: IUserRole[];
-  address?: IUserAddress;
+  address?: IBaseAddress;
   userDocuments?: [IUserDocument];
   location: IUserLocation;
   lastOnline?: Date;

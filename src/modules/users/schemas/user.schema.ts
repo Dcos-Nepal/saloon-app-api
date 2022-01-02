@@ -25,12 +25,14 @@ export const UserSchema = new mongoose.Schema(
       }
     },
     address: {
-      street1: { type: String, required: true },
-      street2: { type: String },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      postalCode: { type: Number, required: true },
-      country: { type: String, required: true }
+      type: {
+        street1: { type: String, required: true },
+        street2: { type: String },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        postalCode: { type: Number, required: true },
+        country: { type: String, required: true }
+      }
     },
     location: {
       type: { type: String, default: 'Point' },

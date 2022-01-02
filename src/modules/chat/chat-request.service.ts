@@ -3,14 +3,14 @@ import { Injectable, InternalServerErrorException, Logger, NotFoundException } f
 import { InjectModel } from '@nestjs/mongoose';
 
 import BaseService from 'src/base/base-service';
-import { ChatRequest } from './interfaces/chat-request.interface';
+import { ChatRequest, IChatRequest } from './interfaces/chat-request.interface';
 import { ChatRequestDto, ChatRequestQueryDto } from './dto/chat-request.dto';
 import { User } from '../users/interfaces/user.interface';
 import { ChatRoomService } from './chat-room.service';
 import { ChatRoomDto } from './dto/chat-room.dto';
 
 @Injectable()
-export class ChatRequestService extends BaseService<ChatRequest> {
+export class ChatRequestService extends BaseService<ChatRequest, IChatRequest> {
   private logger: Logger;
 
   constructor(@InjectModel('C_Request') private readonly chatReqModel: Model<ChatRequest>, private readonly chatRoomService: ChatRoomService) {

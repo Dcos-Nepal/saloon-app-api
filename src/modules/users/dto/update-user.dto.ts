@@ -19,6 +19,7 @@ export class UpdateUserDto {
   })
   lastName: string;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => UserAddressDto)
   address: UserAddressDto;

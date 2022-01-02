@@ -3,11 +3,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import BaseService from 'src/base/base-service';
-import { ChatRoom } from './interfaces/chat-room.interface';
+import { ChatRoom, IChatRoom } from './interfaces/chat-room.interface';
 import { ChatRoomDto, ChatRoomQueryDto } from './dto/chat-room.dto';
 
 @Injectable()
-export class ChatRoomService extends BaseService<ChatRoom> {
+export class ChatRoomService extends BaseService<ChatRoom, IChatRoom> {
   private logger: Logger;
 
   constructor(@InjectModel('C_Room') private readonly chatRoomModel: Model<ChatRoom>) {
@@ -37,7 +37,7 @@ export class ChatRoomService extends BaseService<ChatRoom> {
    * @param query ChatRoomQueryDto
    * @returns ChatRoom[]
    */
-  async ferchChatRooms(query: ChatRoomQueryDto) {
+  async fetchChatRooms(query: ChatRoomQueryDto) {
     this.logger.log(`FindAll: fetch chat request, set query payload `);
 
     const { owner, member, limit = 10, offset = 0, sort = 'createdAt', order = 'desc' } = query;

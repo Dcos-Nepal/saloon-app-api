@@ -87,7 +87,7 @@ export class ChatController {
   @UseGuards(AuthGuard('jwt'))
   async getUserChatRooms(@Query() query: ChatRequestQueryDto) {
     try {
-      const chatRooms = await this.chatRoomService.ferchChatRooms(query);
+      const chatRooms = await this.chatRoomService.fetchChatRooms(query);
 
       if (chatRooms) {
         return new ResponseSuccess('CHAT.ROOMS', chatRooms);

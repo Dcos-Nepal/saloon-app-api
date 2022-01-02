@@ -10,12 +10,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import BaseService from 'src/base/base-service';
 import { IServiceOptions } from 'src/interfaces';
 import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
+import { PropertiesService } from '../properties/properties.service';
+import { IProperty } from '../properties/interfaces/property.interface';
 
 const saltRounds = 10;
 
 @Injectable()
-export class UsersService extends BaseService<User> {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>) {
+export class UsersService extends BaseService<User, IUser> {
+  constructor(@InjectModel('User') private readonly userModel: Model<User>, private readonly propertiesService: PropertiesService) {
     super(userModel);
   }
 
@@ -203,5 +205,13 @@ export class UsersService extends BaseService<User> {
         .substring(1);
     };
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  }
+
+  async findProperties(userId: string, query: AnyObject) {
+    return await this.propertiesService.findAll({ ...query, user: userId });
+  }
+
+  async addProperty(property: IProperty, session: ClientSession, { authUser }: IServiceOptions) {
+    return await this.propertiesService.create(property, session, { authUser });
   }
 }
