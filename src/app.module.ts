@@ -12,6 +12,7 @@ import { AppSocketGateway } from './app.socket';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { LineItemsModule } from './modules/line-items/line-items.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { ChatModule } from './modules/chat/chat.module';
     }),
     UsersModule,
     AuthModule,
-    ChatModule
+    ChatModule,
+    LineItemsModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway, { provide: 'NodeMailer', useClass: NodeMailerHelper }]
