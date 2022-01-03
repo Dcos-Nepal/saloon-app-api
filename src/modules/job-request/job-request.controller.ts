@@ -1,46 +1,46 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
-import { PropertiesService } from './properties.service';
+import { JobRequestService } from './job-request.service';
 import { CurrentUser } from 'src/common/decorators/current-user';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 import { User } from '../users/interfaces/user.interface';
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { CreatePropertyDto } from './dto/create-property.dto';
-import { Property } from './interfaces/property.interface';
+import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
+import { CreateJobRequestDto } from './dto/create-job-request.dto';
+import { JobRequest } from './interfaces/job-request.interface';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
-import { UpdatePropertyDto } from './dto/update-property.dto';
+import { UpdatePropertyDto } from './dto/update-job-request.dto';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 
 @Controller({
-  path: '/properties',
+  path: '/job-requests',
   version: '1.0.0'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
-export class PropertiesController {
-  constructor(private readonly propertiesService: PropertiesService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+export class JobRequestController {
+  constructor(private readonly jobRequestService: JobRequestService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const properties = await this.propertiesService.findAll(query, { authUser });
+      const properties = await this.jobRequestService.findAll(query, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', properties);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
     }
   }
 
-  @Get('/:propertyId')
+  @Get('/:requestId')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const property = await this.propertiesService.findById(param.propertyId, { authUser });
+      const property = await this.jobRequestService.findById(param.requestId, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', property);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
@@ -51,12 +51,13 @@ export class PropertiesController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  async create(@Body() property: CreatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  @SelfKey('client')
+  async create(@Body() property: CreateJobRequestDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let newProperty: Property;
+      let newProperty: JobRequest;
       await session.withTransaction(async () => {
-        newProperty = await this.propertiesService.create(property, session, { authUser });
+        newProperty = await this.jobRequestService.create(property, session, { authUser });
       });
       return new ResponseSuccess('COMMON.SUCCESS', newProperty);
     } catch (error) {
@@ -71,9 +72,9 @@ export class PropertiesController {
   async update(@Param() param, @Body() property: UpdatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let updatedProperty: Property;
+      let updatedProperty: JobRequest;
       await session.withTransaction(async () => {
-        updatedProperty = await this.propertiesService.update(param.propertyId, property, session, { authUser });
+        updatedProperty = await this.jobRequestService.update(param.propertyId, property, session, { authUser });
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
@@ -89,7 +90,7 @@ export class PropertiesController {
       const session = await this.connection.startSession();
       let updatedProperty: boolean;
       await session.withTransaction(async () => {
-        updatedProperty = await this.propertiesService.remove(param.propertyId, session, { authUser });
+        updatedProperty = await this.jobRequestService.remove(param.propertyId, session, { authUser });
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
