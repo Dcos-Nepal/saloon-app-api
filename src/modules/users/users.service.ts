@@ -8,7 +8,7 @@ import { SettingsDto } from './dto/settings.dto';
 import { IUser, User } from './interfaces/user.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import BaseService from 'src/base/base-service';
-import { IServiceOptions } from 'src/interfaces';
+import { IServiceOptions } from 'src/common/interfaces';
 import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
 import { PropertiesService } from '../properties/properties.service';
 import { IProperty } from '../properties/interfaces/property.interface';
