@@ -15,6 +15,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { LineItemsModule } from './modules/line-items/line-items.module';
 import { JobRequestModule } from './modules/job-request/job-request.module';
+import { QuoteModule } from './modules/quotes/quotes.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { JobRequestModule } from './modules/job-request/job-request.module';
     ChatModule,
     PropertiesModule,
     LineItemsModule,
-    JobRequestModule
+    JobRequestModule,
+    QuoteModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway, { provide: 'NodeMailer', useClass: NodeMailerHelper }]
