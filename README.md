@@ -18,7 +18,7 @@ For Developers:
 `docker-compose up dev`
 
 This will run all required insfastructure to start the API server in the devlopment mode.
-Once all is working, you can access the api in `http://localhost:3000` or in the port you have assigned in `.env` file.
+Once all is working, you can access the api in `http://localhost:4000` or in the port you have assigned in `.env` file.
 
 Note: For api calls, make sure to include following header in each request:
 `Accept: application/json;v=1.0.0`
