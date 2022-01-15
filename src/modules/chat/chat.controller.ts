@@ -2,7 +2,9 @@ import { Body, Controller, Get, Logger, Param, Post, Query, UseGuards } from '@n
 import { AuthGuard } from '@nestjs/passport';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from 'src/common/decorators/current-user';
+import { Roles } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../users/interfaces/user.interface';
 import { ChatMessageService } from './chat-message.service';
 import { ChatRequestService } from './chat-request.service';
@@ -15,6 +17,7 @@ import { ChatRoomDto } from './dto/chat-room.dto';
   path: '/chat',
   version: '1.0.0'
 })
+@UseGuards(AuthGuard('jwt'))
 export class ChatController {
   private logger: Logger;
 
@@ -27,7 +30,8 @@ export class ChatController {
   }
 
   @Post('/requests')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('CLIENT')
+  @UseGuards(RolesGuard)
   async requestForChat(@CurrentUser() authUser: User, @Body() chatReqDto: ChatRequestDto) {
     try {
       const chatRequest = await this.chatRequestService.createChatRequest(authUser, chatReqDto);
@@ -44,7 +48,8 @@ export class ChatController {
   }
 
   @Get('/requests')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN', 'WORKER', 'CLIENT')
+  @UseGuards(RolesGuard)
   async getChatRequests(@Query() query: ChatRequestQueryDto) {
     try {
       const chatRequests = await this.chatRequestService.fetchChatRequests(query);
@@ -61,7 +66,8 @@ export class ChatController {
   }
 
   @Get('/requests/:requestId/accept')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('WORKER')
+  @UseGuards(RolesGuard)
   async acceptChatRequest(@CurrentUser() authUser: User, @Param('requestId') requestId: string) {
     try {
       const isAccepted = await this.chatRequestService.acceptChatRequest(authUser, requestId);
@@ -78,13 +84,15 @@ export class ChatController {
   }
 
   @Get('/requests/:id/reject')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('WORKER')
+  @UseGuards(RolesGuard)
   rejectChatRequest() {
     // TODO
   }
 
   @Get('/rooms')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN', 'WORKER', 'CLIENT')
+  @UseGuards(RolesGuard)
   async getUserChatRooms(@Query() query: ChatRequestQueryDto) {
     try {
       const chatRooms = await this.chatRoomService.fetchChatRooms(query);
@@ -101,7 +109,8 @@ export class ChatController {
   }
 
   @Post('/rooms')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('WORKER', 'CLIENT')
+  @UseGuards(RolesGuard)
   async createUserChatRoom(@Query() createRoomDto: ChatRoomDto) {
     try {
       const chatRoom = await this.chatRoomService.createRoom(createRoomDto);
@@ -118,7 +127,8 @@ export class ChatController {
   }
 
   @Post('/rooms/:roomId/messages')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN', 'WORKER', 'CLIENT')
+  @UseGuards(RolesGuard)
   async sendChatMessage(@CurrentUser() authUser: User, @Param('roomId') roomId: string, @Body() createMessgeDto: ChatMessageDto) {
     if (!isValidObjectId(roomId)) {
       return new ResponseError('CHAT.ERROR.SEND_MESSAGE', 'Invalid Room ID provided.');
@@ -139,7 +149,8 @@ export class ChatController {
   }
 
   @Get('/rooms/:roomId/messages')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN', 'WORKER', 'CLIENT')
+  @UseGuards(RolesGuard)
   async getChatMessages(@Param('roomId') roomId: string, @Query() query: ChatMessageQueryDto) {
     if (!isValidObjectId(roomId)) {
       return new ResponseError('CHAT.ERROR.SEND_MESSAGE', 'Invalid Room ID provided.');

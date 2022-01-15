@@ -6,11 +6,14 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller({
   path: '/line-items',
   version: '1.0.0'
 })
+@UseGuards(AuthGuard('jwt'))
 export class LineItemsController {
   private logger: Logger;
 
@@ -19,7 +22,8 @@ export class LineItemsController {
   }
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   async create(@Body() createLineItemDto: CreateLineItemDto) {
     try {
       const lineItem = await this.lineItemsService.create(createLineItemDto);
@@ -36,7 +40,6 @@ export class LineItemsController {
   }
 
   @Get()
-  @UseGuards(AuthGuard('jwt'))
   async findAll(@Query() query: LineItemQueryDto) {
     try {
       const lineItems = await this.lineItemsService.filterLineItems(query);
@@ -53,7 +56,6 @@ export class LineItemsController {
   }
 
   @Get('/:lineItemId')
-  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('lineItemId') lineItemId: string) {
     try {
       const lineItem = await this.lineItemsService.findOne({ _id: lineItemId });
@@ -70,7 +72,8 @@ export class LineItemsController {
   }
 
   @Patch('/:lineItemId')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   async update(@Param('lineItemId') lineItemId: string, @Body() updateLineItemDto: UpdateLineItemDto) {
     try {
       const lineItem = await this.lineItemsService.update(lineItemId, updateLineItemDto);
@@ -87,7 +90,8 @@ export class LineItemsController {
   }
 
   @Delete('/:lineItemId')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   async remove(@Param('lineItemId') lineItemId: string) {
     try {
       const session = await this.connection.startSession();

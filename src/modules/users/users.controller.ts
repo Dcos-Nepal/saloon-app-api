@@ -41,7 +41,7 @@ export class UsersController {
 
   @Get('/:id')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT')
   async findById(@Param() params): Promise<IResponse> {
     try {
       const user = await this.usersService.findById(params.id);
@@ -63,6 +63,8 @@ export class UsersController {
   }
 
   @Put('/:id')
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   async update(@Body() body: UpdateUserDto, @Param() params, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -77,8 +79,8 @@ export class UsersController {
   }
 
   @Get('/:email')
+  @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  @Roles('User')
   async findByEmail(@Param() params): Promise<IResponse> {
     try {
       const user = await this.usersService.findByEmail(params.email);
@@ -89,8 +91,6 @@ export class UsersController {
   }
 
   @Post('/profile/update')
-  @UseGuards(RolesGuard)
-  @Roles('User')
   async updateProfile(@Body() profileDto: ProfileDto): Promise<IResponse> {
     try {
       const user = await this.usersService.updateProfile(profileDto);
@@ -101,8 +101,6 @@ export class UsersController {
   }
 
   @Post('settings/update')
-  @UseGuards(RolesGuard)
-  @Roles('User')
   async updateSettings(@Body() settingsDto: SettingsDto): Promise<IResponse> {
     try {
       const user = await this.usersService.updateSettings(settingsDto);
@@ -113,9 +111,7 @@ export class UsersController {
   }
 
   @Post('/:userId/properties')
-  @UseGuards(RolesGuard)
   @UseGuards(SelfOrAdminGuard)
-  @Roles('ADMIN', 'WORKER')
   async createProperty(@Param() params, @Body() property: CreateUserPropertyDto, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();

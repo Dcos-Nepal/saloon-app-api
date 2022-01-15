@@ -38,8 +38,7 @@ async function bootstrap() {
 
   // Versioning API using MEDIA_TYPE
   app.enableVersioning({
-    type: VersioningType.MEDIA_TYPE,
-    key: 'v='
+    type: VersioningType.URI
   });
 
   // Request Body Parser

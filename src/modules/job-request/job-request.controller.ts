@@ -26,8 +26,6 @@ export class JobRequestController {
   constructor(private readonly jobRequestService: JobRequestService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const properties = await this.jobRequestService.findAll(query, { authUser });
@@ -48,8 +46,8 @@ export class JobRequestController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
   @UseGuards(SelfOrAdminGuard)
   @SelfKey('client')
   async create(@Body() property: CreateJobRequestDto, @CurrentUser() authUser: User): Promise<IResponse> {
@@ -66,9 +64,10 @@ export class JobRequestController {
   }
 
   @Put('/:propertyId')
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
   @UseGuards(SelfOrAdminGuard)
+  @SelfKey('client')
   async update(@Param() param, @Body() property: UpdatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -83,8 +82,8 @@ export class JobRequestController {
   }
 
   @Delete('/:propertyId')
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
   async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();

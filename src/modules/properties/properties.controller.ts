@@ -26,8 +26,6 @@ export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const properties = await this.propertiesService.findAll(query, { authUser });
@@ -65,8 +63,8 @@ export class PropertiesController {
   }
 
   @Put('/:propertyId')
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
   @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() property: UpdatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
@@ -82,8 +80,8 @@ export class PropertiesController {
   }
 
   @Delete('/:propertyId')
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
   async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();

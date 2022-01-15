@@ -20,14 +20,19 @@ For Developers:
 This will run all required insfastructure to start the API server in the devlopment mode.
 Once all is working, you can access the api in `http://localhost:4000` or in the port you have assigned in `.env` file.
 
-Note: For api calls, make sure to include following header in each request:
-`Accept: application/json;v=1.0.0`
+
+Note: For api calls, make sure to include API Version in each request:
+Format: `https://<host>:<port>/api/<API Version>/resources?query=value`
+Example: 
+- 1. `http:localhost:4000/api/v1.0.0/auth/login`
+- 2. `http:localhost:4000/api/v1.0.0/job-requests?clientId=8fue83n29rdks...`
 
 For APIs that are versioned. We will improve this as we progress.
 
 Cheers!!!
 
 
+### ====================================================  Framework Readme  =================================================
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
