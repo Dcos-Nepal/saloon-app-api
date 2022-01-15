@@ -1,5 +1,8 @@
 import { IsOptional, IsString } from 'class-validator';
 
+/**
+ * Standard Address DTO
+ */
 export class AddressDto {
   @IsString()
   street1: string;

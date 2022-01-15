@@ -86,7 +86,6 @@ export class UsersService extends BaseService<User, IUser> {
         throw new HttpException('REGISTRATION.MISSING_MANDATORY_PARAMETERS', HttpStatus.FORBIDDEN);
       }
     } catch (error) {
-      console.log('ERROR: ', error);
       throw new HttpException('REGISTRATION.ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

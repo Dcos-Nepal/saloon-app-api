@@ -6,7 +6,6 @@ import * as bcrypt from 'bcryptjs';
 import { Model, Types } from 'mongoose';
 
 import { JWTService } from './passport/jwt.service';
-import { ConfigService } from 'src/configs/config.service';
 
 import { UserDto } from '../users/dto/user.dto';
 import IMail from 'src/common/interfaces/mail-interface';
@@ -27,7 +26,6 @@ export class AuthService {
     @InjectModel('ForgotPassword') private readonly forgotPasswordModel: Model<ForgotPassword>,
     @InjectModel('ConsentRegistry') private readonly consentRegistryModel: Model<ConsentRegistry>,
     private readonly jwtService: JWTService,
-    private readonly configService: ConfigService,
     @Inject('NodeMailer') private readonly mailer: IMail
   ) {}
 

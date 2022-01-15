@@ -24,7 +24,7 @@ export class AuthController {
       return new ResponseSuccess('LOGIN.SUCCESS', response);
     } catch (error) {
       this.logger.error('Error: ', error);
-      return new ResponseError('LOGIN.ERROR', error);
+      return new ResponseError(error.message, error);
     }
   }
 
@@ -44,7 +44,7 @@ export class AuthController {
       return new ResponseError('REGISTRATION.ERROR.MAIL_NOT_SENT');
     } catch (error) {
       this.logger.error('Error: ', error);
-      return new ResponseError('REGISTRATION.ERROR.GENERIC_ERROR', error);
+      return new ResponseError(error.message, error);
     }
   }
 
