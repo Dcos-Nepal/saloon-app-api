@@ -19,7 +19,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserPropertyDto } from './dto/create-user-property.dto';
 import { Property } from '../properties/interfaces/property.interface';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller({
   path: '/users',
   version: '1.0.0'

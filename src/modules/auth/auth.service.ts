@@ -8,7 +8,7 @@ import { Model, Types } from 'mongoose';
 import { JWTService } from './passport/jwt.service';
 
 import { UserDto } from '../users/dto/user.dto';
-import IMail from 'src/common/interfaces/mail-interface';
+import IMail, { IMailResponse } from 'src/common/interfaces/mail-interface';
 import { User } from '../users/interfaces/user.interface';
 import { ConsentType } from './schemas/consent-registry.schema';
 import { ForgotPassword } from './interfaces/forgot-password.interface';
@@ -132,11 +132,12 @@ export class AuthService {
   }
 
   /**
+   * Creates a forgot password token
    *
-   * @param email
-   * @returns
+   * @param email String
+   * @returns Promise<ForgotPassword>
    */
-  async createForgotPasswordToken(email: string): Promise<ForgotPassword> {
+  private async createForgotPasswordToken(email: string): Promise<ForgotPassword> {
     const forgotPassword = await this.forgotPasswordModel.findOne({ email: email });
     if (forgotPassword && (new Date().getTime() - forgotPassword.timestamp.getTime()) / 60000 < 15) {
       throw new HttpException('RESET_PASSWORD.EMAIL_SENDED_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -159,9 +160,10 @@ export class AuthService {
   }
 
   /**
+   * Verifies the email
    *
-   * @param token
-   * @returns
+   * @param token String
+   * @returns Promise<boolean>
    */
   async verifyEmail(token: string): Promise<boolean> {
     const emailVerif = await this.emailVerificationModel.findOne({ emailToken: token });
@@ -178,33 +180,58 @@ export class AuthService {
     }
   }
 
+  /**
+   * Gets Forget Password model
+   *
+   * @param newPasswordToken String
+   * @returns Promise<ForgotPassword>
+   */
   async getForgotPasswordModel(newPasswordToken: string): Promise<ForgotPassword> {
     return await this.forgotPasswordModel.findOne({ newPasswordToken: newPasswordToken });
   }
 
+  /**
+   * Sends email verification mail
+   *
+   * @param email String
+   * @returns Promise<boolean>
+   */
   async sendEmailVerification(email: string): Promise<boolean> {
     const model = await this.emailVerificationModel.findOne({ email: email });
 
     if (model && model.emailToken) {
       const html = EmailVerificationTemplate(model.emailToken);
       try {
-        await this.mailer.sendEmail(email, 'Verify Email', html);
-        return true;
+        const mailResponse: IMailResponse = await this.mailer.sendEmail(email, 'Verify Email', html);
+        return mailResponse?.messageId ? true : false;
       } catch (error) {
-        return false;
+        throw new HttpException('REGISTER.ERROR.SEND_MAIL', HttpStatus.FORBIDDEN);
       }
     } else {
       throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
     }
   }
 
-  async checkPassword(email: string, password: string) {
+  /**
+   * Checks Password using the email
+   *
+   * @param email String
+   * @param password String
+   * @returns String
+   */
+  async checkPassword(email: string, password: string): Promise<string> {
     const userFromDb = await this.userModel.findOne({ email: email });
     if (!userFromDb) throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
 
     return await bcrypt.compare(password, userFromDb.password);
   }
 
+  /**
+   * Sends forgot password email
+   *
+   * @param email String
+   * @returns Promise<boolean>
+   */
   async sendEmailForgotPassword(email: string): Promise<boolean> {
     const userFromDb = await this.userModel.findOne({ email: email });
     if (!userFromDb) throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
@@ -215,7 +242,7 @@ export class AuthService {
       const html = ForgotPasswordTemplate(tokenModel.newPasswordToken);
 
       try {
-        await this.mailer.sendEmail(email, 'Frogotten Password', html);
+        await this.mailer.sendEmail(email, 'Forgotten Password', html);
         return true;
       } catch (error) {
         return false;

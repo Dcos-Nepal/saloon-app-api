@@ -6,7 +6,9 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Authentication')
 @Controller({
   path: '/auth',
   version: '1.0.0'
@@ -55,7 +57,7 @@ export class AuthController {
       return new ResponseSuccess('LOGIN.EMAIL_VERIFIED', isEmailVerified);
     } catch (error) {
       this.logger.error('Error: ', error);
-      return new ResponseError('LOGIN.ERROR', error);
+      return new ResponseError(error.message, error);
     }
   }
 
@@ -66,13 +68,13 @@ export class AuthController {
       const isEmailSent = await this.authService.sendEmailVerification(forgotPasswordDto.email);
 
       if (isEmailSent) {
-        return new ResponseSuccess('LOGIN.EMAIL_RESENT', null);
-      } else {
-        return new ResponseError('REGISTRATION.ERROR.MAIL_NOT_SENT');
+        return new ResponseSuccess('REGISTER.EMAIL_RESENT');
       }
+
+      return new ResponseError('REGISTER.ERROR.MAIL_NOT_SENT');
     } catch (error) {
       this.logger.error('Error: ', error);
-      return new ResponseError('LOGIN.ERROR.SEND_EMAIL', error);
+      return new ResponseError(error.message, error);
     }
   }
 
@@ -94,7 +96,7 @@ export class AuthController {
 
   @Post('/reset-password')
   @HttpCode(HttpStatus.OK)
-  public async setNewPassord(@Body() resetPassword: ResetPasswordDto): Promise<IResponse> {
+  public async setNewPassword(@Body() resetPassword: ResetPasswordDto): Promise<IResponse> {
     try {
       let isNewPasswordChanged = false;
 
