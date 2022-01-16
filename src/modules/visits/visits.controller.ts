@@ -1,15 +1,15 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
-import { QuoteService } from './quote.service';
+import { VisitsService } from './visits.service';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Quote } from './interfaces/quote.interface';
-import { CreateQuoteDto } from './dto/create-quote.dto';
+import { IVisit } from './interfaces/visit.interface';
+import { CreateVisitDto } from './dto/create-visit.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { UpdateQuoteDto } from './dto/update-quote.dto';
+import { UpdateVisitDto } from './dto/update-visit.dto';
 import { User } from '../users/interfaces/user.interface';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
-import { UpdateQuoteStatusDto } from './dto/update-quote-status-dto';
+import { UpdateJobStatusDto } from './dto/update-visit-status-dto';
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
@@ -18,33 +18,33 @@ import { TransformInterceptor } from 'src/common/interceptors/transform.intercep
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 
 @Controller({
-  path: '/quotes',
+  path: '/jobs',
   version: '1.0.0'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
-export class QuoteController {
-  constructor(private readonly quoteService: QuoteService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+export class VisitsController {
+  constructor(private readonly visitsService: VisitsService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const quotes = await this.quoteService.findAll(query, { authUser });
-      return new ResponseSuccess('COMMON.SUCCESS', quotes);
+      const jobs = await this.visitsService.findAll(query, { authUser });
+      return new ResponseSuccess('COMMON.SUCCESS', jobs);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Get('/:quoteId')
+  @Get('/:jobId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const quote = await this.quoteService.findById(param.quoteId, { authUser });
-      return new ResponseSuccess('COMMON.SUCCESS', quote);
+      const job = await this.visitsService.findById(param.jobId, { authUser });
+      return new ResponseSuccess('COMMON.SUCCESS', job);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
@@ -54,66 +54,66 @@ export class QuoteController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  @SelfKey('quoteFor')
-  async create(@Body() quote: CreateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  @SelfKey('jobFor')
+  async create(@Body() job: CreateVisitDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let newQuote: Quote;
+      let newJob: IVisit;
       await session.withTransaction(async () => {
-        newQuote = await this.quoteService.create(quote, session, { authUser });
+        newJob = await this.visitsService.create(job, session, { authUser });
       });
-      return new ResponseSuccess('COMMON.SUCCESS', newQuote);
+      return new ResponseSuccess('COMMON.SUCCESS', newJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Put('/:quoteId')
+  @Put('/:jobId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  async update(@Param() param, @Body() property: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async update(@Param() param, @Body() property: UpdateVisitDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let updatedQuote: Quote;
+      let updatedJob: IVisit;
       await session.withTransaction(async () => {
-        updatedQuote = await this.quoteService.update(param.quoteId, property, session, { authUser });
+        updatedJob = await this.visitsService.update(param.jobId, property, session, { authUser });
       });
-      return new ResponseSuccess('COMMON.SUCCESS', updatedQuote);
+      return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Put('/:quoteId/update-status')
+  @Put('/:jobId/update-status')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  @SelfKey('quoteFor')
-  async updateStatus(@Param() param, @Body() quote: UpdateQuoteStatusDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  @SelfKey('jobFor')
+  async updateStatus(@Param() param, @Body() job: UpdateJobStatusDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let updatedQuote: Quote;
+      let updatedJob: IVisit;
       await session.withTransaction(async () => {
-        updatedQuote = await this.quoteService.updateStatus(param.quoteId, quote.status, session, { authUser });
+        updatedJob = await this.visitsService.updateStatus(param.jobId, job.status, session, { authUser });
       });
-      return new ResponseSuccess('COMMON.SUCCESS', updatedQuote);
+      return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Delete('/:quoteId')
+  @Delete('/:jobId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let deletedQuote: boolean;
+      let deletedJob: boolean;
       await session.withTransaction(async () => {
-        deletedQuote = await this.quoteService.remove(param.quoteId, session, { authUser });
+        deletedJob = await this.visitsService.remove(param.jobId, session, { authUser });
       });
-      return new ResponseSuccess('COMMON.SUCCESS', deletedQuote);
+      return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }

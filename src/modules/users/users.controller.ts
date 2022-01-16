@@ -37,7 +37,7 @@ export class UsersController {
       const users = await this.usersService.findAll(query, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', users);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -49,7 +49,7 @@ export class UsersController {
       const user = await this.usersService.findById(params.id);
       return new ResponseSuccess('COMMON.SUCCESS', new UserDto(user));
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -60,7 +60,7 @@ export class UsersController {
       const properties = await this.usersService.findProperties(params.id, query);
       return new ResponseSuccess('COMMON.SUCCESS', properties);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -76,7 +76,7 @@ export class UsersController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedUser);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -88,7 +88,7 @@ export class UsersController {
       const user = await this.usersService.findByEmail(params.email);
       return new ResponseSuccess('COMMON.SUCCESS', new UserDto(user));
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 

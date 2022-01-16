@@ -16,6 +16,8 @@ import { PropertiesModule } from './modules/properties/properties.module';
 import { LineItemsModule } from './modules/line-items/line-items.module';
 import { JobRequestModule } from './modules/job-request/job-request.module';
 import { QuoteModule } from './modules/quotes/quotes.module';
+import { JobsModule } from './modules/jobs/jobs.module';
+import { VisitsModule } from './modules/visits/visits.module';
 
 @Module({
   imports: [
@@ -31,7 +33,9 @@ import { QuoteModule } from './modules/quotes/quotes.module';
     PropertiesModule,
     LineItemsModule,
     JobRequestModule,
-    QuoteModule
+    QuoteModule,
+    JobsModule,
+    VisitsModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway, { provide: 'NodeMailer', useClass: NodeMailerHelper }]

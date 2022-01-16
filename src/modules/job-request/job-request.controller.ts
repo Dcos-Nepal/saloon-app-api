@@ -31,7 +31,7 @@ export class JobRequestController {
       const properties = await this.jobRequestService.findAll(query, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', properties);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -41,7 +41,7 @@ export class JobRequestController {
       const property = await this.jobRequestService.findById(param.requestId, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', property);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -59,7 +59,7 @@ export class JobRequestController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', newProperty);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -77,7 +77,7 @@ export class JobRequestController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -93,7 +93,7 @@ export class JobRequestController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 }
