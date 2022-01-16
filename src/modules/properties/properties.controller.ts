@@ -31,7 +31,7 @@ export class PropertiesController {
       const properties = await this.propertiesService.findAll(query, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', properties);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -41,7 +41,7 @@ export class PropertiesController {
       const property = await this.propertiesService.findById(param.propertyId, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', property);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -58,7 +58,7 @@ export class PropertiesController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', newProperty);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -75,7 +75,7 @@ export class PropertiesController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -91,7 +91,7 @@ export class PropertiesController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 }

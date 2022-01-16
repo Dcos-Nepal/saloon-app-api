@@ -9,7 +9,6 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { User } from '../users/interfaces/user.interface';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
-import { UpdateJobStatusDto } from './dto/update-job-status-dto';
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
@@ -34,7 +33,7 @@ export class JobsController {
       const jobs = await this.jobsService.findAll(query, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', jobs);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -46,7 +45,7 @@ export class JobsController {
       const job = await this.jobsService.findById(param.jobId, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', job);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -64,7 +63,7 @@ export class JobsController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -81,25 +80,7 @@ export class JobsController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
-    }
-  }
-
-  @Put('/:jobId/update-status')
-  @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
-  @SelfKey('jobFor')
-  async updateStatus(@Param() param, @Body() job: UpdateJobStatusDto, @CurrentUser() authUser: User): Promise<IResponse> {
-    try {
-      const session = await this.connection.startSession();
-      let updatedJob: IJob;
-      await session.withTransaction(async () => {
-        updatedJob = await this.jobsService.updateStatus(param.jobId, job.status, session, { authUser });
-      });
-      return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
-    } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
@@ -115,7 +96,7 @@ export class JobsController {
       });
       return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
     } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error);
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 }

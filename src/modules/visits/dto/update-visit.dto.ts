@@ -1,25 +1,28 @@
 import { Type } from 'class-transformer';
+import { JobLineItem } from 'src/modules/jobs/dto/job-line-items.dto';
 import { IsArray, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { JobLineItem } from './job-line-items.dto';
 
-export class UpdateJobDto {
+export class UpdateVisitDto {
   @IsString()
   @IsOptional()
-  title: string;
+  title?: string;
 
   @IsString()
   @IsOptional()
-  instruction: string;
+  instruction?: string;
+
+  @IsArray()
+  @IsOptional()
+  @IsMongoId({ each: true })
+  team?: string[];
 
   @IsString()
-  @IsMongoId()
   @IsOptional()
-  quoteFor: string;
+  rruleSet?: string;
 
   @IsString()
-  @IsMongoId()
   @IsOptional()
-  jobRequest: string;
+  excRrule?: string;
 
   @IsArray()
   @IsOptional()

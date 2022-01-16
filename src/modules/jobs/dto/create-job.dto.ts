@@ -1,6 +1,8 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { JobLineItem } from './quote-line-items.dto';
+import { IsArray, IsBoolean, IsEnum, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { JobType } from '../interfaces/job.interface';
+import { JobLineItem } from './job-line-items.dto';
+import { Schedule } from './schedule';
 
 export class CreateJobDto {
   @IsString()
@@ -13,12 +15,14 @@ export class CreateJobDto {
   @IsMongoId()
   jobFor: string;
 
-  @IsArray()
-  @IsMongoId({ each: true })
-  team: string[];
+  @IsEnum(JobType)
+  type: JobType;
 
-  @IsString()
-  @IsMongoId()
+  @IsArray()
+  @IsOptional()
+  @IsMongoId({ each: true })
+  team?: string[];
+
   createdBy: string;
 
   @IsBoolean()
@@ -26,7 +30,13 @@ export class CreateJobDto {
   remindInvoicing?: boolean;
 
   @IsArray()
+  @IsOptional()
   @ValidateNested()
   @Type(() => JobLineItem)
-  lineItems: JobLineItem[];
+  lineItems?: JobLineItem[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => Schedule)
+  schedule?: Schedule;
 }

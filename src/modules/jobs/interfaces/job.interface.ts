@@ -6,13 +6,11 @@ export interface IJob {
   title: string;
   instruction: string;
   jobFor: string | User;
-  remindInvoicing: boolean;
-  status?: IJobStatus;
-  statusRevision?: IJobStatus[];
+  remindInvoicing?: boolean;
   type: JobType;
   team?: string[] | User[];
   createdBy: string | User;
-  lineItems: {
+  lineItems?: {
     lineItem: string | LineItem;
     quantity: number;
     unitPrice: number;
@@ -22,18 +20,6 @@ export interface IJob {
 export enum JobType {
   'ONE-OFF' = 'ONE-OFF',
   'RECURRING' = 'RECURRING'
-}
-
-export interface IJobStatus {
-  updatedAt: Date;
-  status: IJobStatusType;
-  updatedBy: string | User;
-}
-
-export enum IJobStatusType {
-  'PENDING' = 'PENDING',
-  'IN-PROGRESS' = 'IN-PROGRESS',
-  'COMPLETED' = 'COMPLETED'
 }
 
 export interface Job extends IJob, Document {
