@@ -65,7 +65,7 @@ export class ChatRequestService extends BaseService<ChatRequest, IChatRequest> {
     }
 
     // Throw Exception!
-    throw new NotFoundException('Chat Requet is not found!');
+    throw new NotFoundException('Chat Request is not found!');
   }
 
   /**

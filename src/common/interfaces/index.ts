@@ -14,4 +14,9 @@ interface IServiceOptions {
   fields?: string;
 }
 
-export { IUser, IServiceOptions };
+interface IMailOption {
+  template: string;
+  context: Record<string, string>;
+}
+
+export { IUser, IServiceOptions, IMailOption };

@@ -2,7 +2,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PropertiesService } from './properties.service';
 import { PropertiesController } from './properties.controller';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { LoggerMiddleware } from 'src/common/middlewares/logger.middleware';
+import { LoggerMiddleware } from 'src/common/middlewares/middleware';
 import { PropertySchema } from './schemas/property.schema';
 
 @Module({

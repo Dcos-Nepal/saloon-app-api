@@ -77,7 +77,7 @@ async function bootstrap() {
 
   // Swagger Documentation
   const options = new DocumentBuilder()
-    .setTitle('Orange Ceaning (AU) API')
+    .setTitle('Orange Cleaning (AU) API')
     .setDescription('Orange Cleaning for workers, clients and admin.')
     .setVersion('1.0.0')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'Token' }, 'Authorization')

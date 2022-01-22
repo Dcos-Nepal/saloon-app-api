@@ -26,9 +26,9 @@ export class ConfigService {
     return {
       MAIL_HOST: this.get('MAIL_HOST'),
       MAIL_PORT: this.get('MAIL_PORT'),
-      MAIL_SECURE: this.get('MAIL_SECURE') === 'true' ? true : false,
       MAIL_USER: this.get('MAIL_USER'),
-      MAIL_PASS: this.get('MAIL_PASS')
+      MAIL_PASS: this.get('MAIL_PASS'),
+      MAIL_SECURE: this.get('MAIL_SECURE') === 'true' ? true : false
     };
   }
 
@@ -46,7 +46,7 @@ export class ConfigService {
   }
 
   /**
-   * Gets MONGO Congifuration
+   * Gets MONGO Configuration
    * @returns MongoConfig
    */
   public getMongoConfig() {

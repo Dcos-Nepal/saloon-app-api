@@ -9,11 +9,12 @@ import { ConsentRegistrySchema } from './schemas/consent-registry.schema';
 import { UsersService } from '../users/users.service';
 import { JWTService } from './passport/jwt.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { LoggerMiddleware } from '../../common/middlewares/logger.middleware';
+import { LoggerMiddleware } from '../../common/middlewares/middleware';
 import { ConfigModule } from 'src/configs/config.module';
-import NodeMailerHelper from 'src/helpers/node-mailer-helper';
 import { PropertiesService } from '../properties/properties.service';
 import { PropertySchema } from '../properties/schemas/property.schema';
+import { MailModule } from 'src/common/modules/mail/mail.module';
+import { MailService } from 'src/common/modules/mail/mail.service';
 
 @Module({
   imports: [
@@ -24,10 +25,11 @@ import { PropertySchema } from '../properties/schemas/property.schema';
       { name: 'ForgotPassword', schema: ForgotPasswordSchema },
       { name: 'ConsentRegistry', schema: ConsentRegistrySchema },
       { name: 'Property', schema: PropertySchema }
-    ])
+    ]),
+    MailModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersService, PropertiesService, JWTService, JwtStrategy, { provide: 'NodeMailer', useClass: NodeMailerHelper }],
+  providers: [AuthService, UsersService, PropertiesService, JWTService, JwtStrategy, MailService],
   exports: [AuthService, UsersService, JWTService, JwtStrategy]
 })
 export class AuthModule implements NestModule {
