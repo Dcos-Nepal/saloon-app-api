@@ -30,13 +30,13 @@ export class ResponseSuccess implements IResponse {
   constructor(message: string, data?: any, notLog?: boolean) {
     this.success = true;
     this.message = message;
-    this.data = data;
+    this.data = { ...data };
 
     if (!notLog) {
       try {
-        const offuscateRequest = JSON.parse(JSON.stringify(data));
-        if (offuscateRequest && offuscateRequest.token) offuscateRequest.token = '*******';
-        console.log(new Date().toString() + ' - [Response]: ' + JSON.stringify(offuscateRequest));
+        const obfuscateRequest = JSON.parse(JSON.stringify(data));
+        if (obfuscateRequest && obfuscateRequest.token) obfuscateRequest.token = '*******';
+        console.log(new Date().toString() + ' - [Response]: ' + JSON.stringify(obfuscateRequest));
       } catch (error) {
         console.log('Error parsing the data from API');
       }

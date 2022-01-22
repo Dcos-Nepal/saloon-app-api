@@ -7,7 +7,7 @@ import { ConfigService } from 'src/configs/config.service';
 const config = new ConfigService();
 const pubClient = new RedisClient({
   host: config.get('REDIS_HOST'),
-  port: parseInt(config.get('REDIS_PORT'))
+  port: +config.get('REDIS_PORT')
 });
 const subClient = pubClient.duplicate();
 const redisAdapter = createAdapter({ pubClient, subClient });
@@ -21,7 +21,7 @@ export class RedisIoAdapter extends IoAdapter {
 }
 
 /**
- * ---- FOR FUTURE IMPLEMENTION -----
+ * ---- FOR FUTURE IMPLEMENTATION -----
  * Using @socket.io/redis-adapter library
  */
 

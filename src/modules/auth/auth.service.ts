@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 
 import * as bcrypt from 'bcryptjs';
 import { Model, Types } from 'mongoose';
@@ -8,13 +8,14 @@ import { Model, Types } from 'mongoose';
 import { JWTService } from './passport/jwt.service';
 
 import { UserDto } from '../users/dto/user.dto';
-import IMail, { IMailResponse } from 'src/common/interfaces/mail-interface';
+import { IMailResponse } from 'src/common/interfaces/mail-interface';
 import { User } from '../users/interfaces/user.interface';
 import { ConsentType } from './schemas/consent-registry.schema';
 import { ForgotPassword } from './interfaces/forgot-password.interface';
 import { ConsentRegistry } from './interfaces/consent-registry.interface';
 import { EmailVerification } from './interfaces/email-verification.interface';
-import { EmailVerificationTemplate, ForgotPasswordTemplate } from 'src/email-templates';
+import { MailService } from 'src/common/modules/mail/mail.service';
+import { ConfigService } from 'src/configs/config.service';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,8 @@ export class AuthService {
     @InjectModel('ForgotPassword') private readonly forgotPasswordModel: Model<ForgotPassword>,
     @InjectModel('ConsentRegistry') private readonly consentRegistryModel: Model<ConsentRegistry>,
     private readonly jwtService: JWTService,
-    @Inject('NodeMailer') private readonly mailer: IMail
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService
   ) {}
 
   /**
@@ -166,13 +168,13 @@ export class AuthService {
    * @returns Promise<boolean>
    */
   async verifyEmail(token: string): Promise<boolean> {
-    const emailVerif = await this.emailVerificationModel.findOne({ emailToken: token });
-    if (emailVerif && emailVerif.email) {
-      const userFromDb = await this.userModel.findOne({ email: emailVerif.email });
+    const emailVerify = await this.emailVerificationModel.findOne({ emailToken: token });
+    if (emailVerify && emailVerify.email) {
+      const userFromDb = await this.userModel.findOne({ email: emailVerify.email });
       if (userFromDb) {
         userFromDb.auth.email.valid = true;
         const savedUser = await userFromDb.save();
-        await emailVerif.remove();
+        await emailVerify.remove();
         return !!savedUser;
       }
     } else {
@@ -200,9 +202,14 @@ export class AuthService {
     const model = await this.emailVerificationModel.findOne({ email: email });
 
     if (model && model.emailToken) {
-      const html = EmailVerificationTemplate(model.emailToken);
       try {
-        const mailResponse: IMailResponse = await this.mailer.sendEmail(email, 'Verify Email', html);
+        const mailResponse: IMailResponse = await this.mailService.sendEmail('Verify Email', 'Orange Cleaning', email, {
+          template: 'confirm-account',
+          context: {
+            receiverName: 'Example User',
+            linkToActivate: `${this.configService.get('WEB_APP_URL')}/verify-email/${model.emailToken}`
+          }
+        });
         return mailResponse?.messageId ? true : false;
       } catch (error) {
         throw new HttpException('REGISTER.ERROR.SEND_MAIL', HttpStatus.FORBIDDEN);
@@ -239,10 +246,10 @@ export class AuthService {
     const tokenModel = await this.createForgotPasswordToken(email);
 
     if (tokenModel && tokenModel.newPasswordToken) {
-      const html = ForgotPasswordTemplate(tokenModel.newPasswordToken);
+      //const html = ForgotPasswordTemplate(tokenModel.newPasswordToken);
 
       try {
-        await this.mailer.sendEmail(email, 'Forgotten Password', html);
+        // await this.mailer.sendEmail(email, 'Forgotten Password', html);
         return true;
       } catch (error) {
         return false;

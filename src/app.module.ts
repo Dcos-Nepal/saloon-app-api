@@ -7,7 +7,6 @@ import { AppController } from './app.controller';
 import { ConfigModule } from './configs/config.module';
 import { ConfigService } from './configs/config.service';
 
-import NodeMailerHelper from './helpers/node-mailer-helper';
 import { AppSocketGateway } from './app.socket';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -38,6 +37,6 @@ import { VisitsModule } from './modules/visits/visits.module';
     VisitsModule
   ],
   controllers: [AppController],
-  providers: [ConfigService, AppService, AppSocketGateway, { provide: 'NodeMailer', useClass: NodeMailerHelper }]
+  providers: [ConfigService, AppService, AppSocketGateway]
 })
 export class AppModule {}

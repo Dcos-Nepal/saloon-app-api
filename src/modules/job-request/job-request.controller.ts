@@ -29,7 +29,8 @@ export class JobRequestController {
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const properties = await this.jobRequestService.findAll(query, { authUser });
-      return new ResponseSuccess('COMMON.SUCCESS', properties);
+      const response = new ResponseSuccess('COMMON.SUCCESS', properties);
+      return response;
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
@@ -66,8 +67,8 @@ export class JobRequestController {
   @Put('/:propertyId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  @UseGuards(SelfOrAdminGuard)
   @SelfKey('client')
+  @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() property: UpdatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
