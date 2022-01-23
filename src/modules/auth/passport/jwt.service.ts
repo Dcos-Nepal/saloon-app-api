@@ -19,18 +19,18 @@ export class JWTService {
    */
   async createToken(id: ObjectId | string, email: string, roles: string[]) {
     const accessTokenSecret = this.configService.get('ACCESS_TOKEN_SECRET');
-    const refressTokenSecret = this.configService.get('REFRESH_TOKEN_SECRET');
+    const refreshTokenSecret = this.configService.get('REFRESH_TOKEN_SECRET');
 
     const accessTokenExpiresIn = this.configService.get('ACCESS_TOKEN_EXPIRATION');
-    const refressTokenExpiresIn = this.configService.get('REFRESH_TOKEN_EXPIRATION');
+    const refreshTokenExpiresIn = this.configService.get('REFRESH_TOKEN_EXPIRATION');
 
     const userInfo = { id, email: email, roles: roles };
-    const accessTtoken = jwt.sign(userInfo, accessTokenSecret, { expiresIn: accessTokenExpiresIn });
-    const refressTtoken = jwt.sign(userInfo, refressTokenSecret, { expiresIn: refressTokenExpiresIn });
+    const accessToken = jwt.sign(userInfo, accessTokenSecret, { expiresIn: accessTokenExpiresIn });
+    const refreshToken = jwt.sign(userInfo, refreshTokenSecret, { expiresIn: refreshTokenExpiresIn });
 
     return {
-      access_token: accessTtoken,
-      refress_token: refressTtoken
+      access_token: accessToken,
+      refresh_token: refreshToken
     };
   }
 
