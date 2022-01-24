@@ -12,6 +12,7 @@ export interface IBaseAddress {
 interface IServiceOptions {
   authUser?: IUser;
   fields?: string;
+  toPopulate?: any;
 }
 
 interface IMailOption {

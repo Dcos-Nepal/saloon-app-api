@@ -32,7 +32,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
-  async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+  async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
     try {
       const users = await this.usersService.findAll(query, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', users);

@@ -24,7 +24,8 @@ export class UsersService extends BaseService<User, IUser> {
   async findAll(query: AnyObject, { authUser }: IServiceOptions) {
     const cond: FilterQuery<User> = { _id: { $ne: authUser._id } };
     const limit = parseInt(query['limit'] || 10);
-    const skip = (parseInt(query['page']) - 1) * limit;
+    const skip = ((parseInt(query['page']) || 1) - 1) * limit;
+
     if (query.q) cond.fullName = { $regex: query.q, $options: 'i' };
     if (query.roles) cond.roles = { $in: query.roles.split(',') };
     if (query.nearBy && query.lat && query.lon) {
