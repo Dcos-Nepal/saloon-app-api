@@ -5,46 +5,48 @@ class BaseService<EntityModel, Entity> {
   constructor(readonly model: Model<EntityModel>) {}
 
   /**
-   * Finds entityModel using id
+   * Finds Entity Model using Entity Id
    *
    * @param id ObjectId | string
-   * @returns Promise<User>
+   * @returns Promise<EntityModel>
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findById(id: ObjectId | string, options?: IServiceOptions): Promise<EntityModel> {
-    return await this.model.findById(id, options?.fields || '');
+    return await this.model.findById(id, options?.fields || '').populate([options.toPopulate]);
   }
 
   /**
-   * Finds one entityModel
+   * Finds one Entity Model
    *
    * @param query FilterQuery
    * @returns Promise<EntityModel[]>
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findOne(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<EntityModel> {
-    return await this.model.findOne(query, options?.fields || '');
+    return await this.model.findOne(query, options?.fields || '').populate([options.toPopulate]);
   }
 
   /**
-   * Finds all
+   * Finds all Entity Models
    *
    * @param query FilterQuery
    * @returns Promise<EntityModel[]>
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findAll(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<{ rows: EntityModel[]; totalCount: number }> {
     const limit = parseInt(query['limit'] || 10);
     const page = parseInt(query['page'] || 1);
     const skip = (page - 1) * limit;
-    const [rows, totalCount] = await Promise.all([this.model.find(query).limit(limit).skip(skip).sort('-createdAt'), this.model.countDocuments(query)]);
+
+    const [rows, totalCount] = await Promise.all([
+      this.model.find(query).populate([options.toPopulate]).limit(limit).skip(skip).sort('-createdAt'),
+      this.model.countDocuments(query)
+    ]);
+
     return { rows, totalCount };
   }
 
   /**
-   * Create a document
+   * Create a Entity Document
    *
-   * @param data Document data
+   * @param data Document Data
    * @returns Promise<EntityModel>
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -61,8 +63,11 @@ class BaseService<EntityModel, Entity> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async remove(id: string, session: ClientSession, options?: IServiceOptions) {
     const resource = await this.model.findById({ _id: id });
-    if (!resource) throw new Error('Model not found');
+
+    if (!resource) throw new Error('Entity Model not found');
+
     await resource.remove({ session });
+
     return true;
   }
 }

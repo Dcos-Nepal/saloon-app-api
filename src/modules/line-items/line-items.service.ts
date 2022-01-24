@@ -100,6 +100,6 @@ export class LineItemsService extends BaseService<LineItem, ILineItem> {
     this.logger.log(`Delete: delete line item of id ${id}`);
     const removedItem = await this.lineItemModel.findOneAndUpdate({ _id: id }, { isDeleted: true }, { new: true, session }).exec();
     this.logger.log(`Delete: line item soft deleted successfully`);
-    return removedItem && removedItem._id;
+    return removedItem && removedItem._id !== null;
   }
 }

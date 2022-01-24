@@ -3,9 +3,9 @@ import { JobsService } from './jobs.service';
 import { JobSchema } from './schemas/jobs.schema';
 import { JobsController } from './jobs.controller';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { LoggerMiddleware } from 'src/common/middlewares/logger.middleware';
 import { VisitsService } from '../visits/visits.service';
 import { VisitSchema } from '../visits/schemas/visits.schema';
+import { LoggerMiddleware } from 'src/common/middlewares/middleware';
 
 @Module({
   imports: [

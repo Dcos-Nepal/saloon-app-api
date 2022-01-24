@@ -28,9 +28,9 @@ export class JobRequestController {
   @Get()
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const properties = await this.jobRequestService.findAll(query, { authUser });
-      const response = new ResponseSuccess('COMMON.SUCCESS', properties);
-      return response;
+      const options = { authUser, toPopulate: [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }] };
+      const properties = await this.jobRequestService.findAll(query, options);
+      return new ResponseSuccess('COMMON.SUCCESS', { ...properties });
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
