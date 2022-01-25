@@ -20,11 +20,6 @@ import { PropertySchema } from '../properties/schemas/property.schema';
 })
 export class UsersModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      // .exclude(
-      //   { path: 'example', method: RequestMethod.GET },
-      // )
-      .forRoutes(UsersController);
+    consumer.apply(LoggerMiddleware).forRoutes(UsersController);
   }
 }
