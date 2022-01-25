@@ -1,21 +1,27 @@
 import { HttpService } from '@nestjs/axios';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { BadRequestException } from 'src/common/exceptions/bad-request.exception';
 
+import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { Model, Types } from 'mongoose';
 
-import { JWTService } from './passport/jwt.service';
+import { ConsentType } from './schemas/consent-registry.schema';
 
 import { UserDto } from '../users/dto/user.dto';
+
 import { IMailResponse } from 'src/common/interfaces/mail-interface';
 import { User } from '../users/interfaces/user.interface';
-import { ConsentType } from './schemas/consent-registry.schema';
 import { ForgotPassword } from './interfaces/forgot-password.interface';
 import { ConsentRegistry } from './interfaces/consent-registry.interface';
 import { EmailVerification } from './interfaces/email-verification.interface';
+
 import { MailService } from 'src/common/modules/mail/mail.service';
 import { ConfigService } from 'src/configs/config.service';
+import { JWTService } from './passport/jwt.service';
+
+import { Token } from './guards/jwt-auth.guard';
 
 @Injectable()
 export class AuthService {
@@ -169,12 +175,16 @@ export class AuthService {
    */
   async verifyEmail(token: string): Promise<boolean> {
     const emailVerify = await this.emailVerificationModel.findOne({ emailToken: token });
+
     if (emailVerify && emailVerify.email) {
       const userFromDb = await this.userModel.findOne({ email: emailVerify.email });
+
       if (userFromDb) {
         userFromDb.auth.email.valid = true;
         const savedUser = await userFromDb.save();
+
         await emailVerify.remove();
+
         return !!savedUser;
       }
     } else {
@@ -256,6 +266,36 @@ export class AuthService {
       }
     } else {
       throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  /**
+   * Validate Refresh Token and generate new pair of Tokens
+   *
+   * @param token String
+   * @returns Object
+   */
+  async refreshToken(token: string) {
+    const decodedToken = jwt.decode(token) as Token;
+
+    if (!decodedToken) {
+      throw new BadRequestException('Unable to decode refresh Token');
+    }
+
+    if (Date.now() >= decodedToken.exp * 1000) {
+      throw new BadRequestException('Refresh token expired');
+    }
+
+    try {
+      // Verifying refresh token
+      await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+      const user = await this.userModel.findById(decodedToken.id);
+      const tokenDetails = await this.jwtService.createToken(user._id, user.email, user.roles);
+
+      return { ...tokenDetails };
+    } catch (e) {
+      throw new BadRequestException('Invalid Refresh token provided');
     }
   }
 }

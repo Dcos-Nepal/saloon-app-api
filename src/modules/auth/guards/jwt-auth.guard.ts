@@ -69,15 +69,15 @@ export class JwtAuthGuard implements CanActivate {
     const authorization = client.headers.authorization?.split(' ');
 
     if (!authorization) {
-      this.throwException(ctx, 'Token not found');
+      this.throwException(ctx, 'Access Token not found');
     }
 
     if (authorization[0].toLowerCase() !== 'bearer') {
-      this.throwException(ctx, 'Authorization type not valid');
+      this.throwException(ctx, 'Authorization Token type not valid');
     }
 
     if (!authorization[1]) {
-      this.throwException(ctx, 'Token not provided');
+      this.throwException(ctx, 'Access Token not provided');
     }
 
     return authorization[1];
