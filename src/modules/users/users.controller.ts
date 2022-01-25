@@ -32,7 +32,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
-  async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(RolesGuard)
+  async findAll(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
     try {
       const users = await this.usersService.findAll(query, { authUser });
       return new ResponseSuccess('COMMON.SUCCESS', users);
@@ -41,9 +43,21 @@ export class UsersController {
     }
   }
 
-  @Get('/:id')
+  @Get('/me')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
+  async myProfile(@CurrentUser() authUser: User): Promise<IResponse> {
+    try {
+      const user = await this.usersService.findById(authUser.id);
+      return new ResponseSuccess('COMMON.SUCCESS', new UserDto(user));
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Get('/:id')
   @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
   async findById(@Param() params): Promise<IResponse> {
     try {
       const user = await this.usersService.findById(params.id);
@@ -54,6 +68,7 @@ export class UsersController {
   }
 
   @Get('/:id/properties')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async findProperties(@Param() params, @Query() query): Promise<IResponse> {
     try {
@@ -65,8 +80,7 @@ export class UsersController {
   }
 
   @Put('/:id')
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  @UseGuards(SelfOrAdminGuard)
   async update(@Body() body: UpdateUserDto, @Param() params, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -93,6 +107,7 @@ export class UsersController {
   }
 
   @Post('/profile/update')
+  @UseGuards(SelfOrAdminGuard)
   async updateProfile(@Body() profileDto: ProfileDto): Promise<IResponse> {
     try {
       const user = await this.usersService.updateProfile(profileDto);

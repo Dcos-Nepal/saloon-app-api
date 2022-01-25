@@ -1,4 +1,4 @@
-import { Controller, Post, HttpStatus, HttpCode, Get, Body, Param, Logger } from '@nestjs/common';
+import { Controller, Post, HttpStatus, HttpCode, Get, Body, Param, Logger, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ResponseSuccess, ResponseError } from '../../common/dto/response.dto';
 import { IResponse } from '../../common/interfaces/response.interface';
@@ -7,6 +7,7 @@ import { UsersService } from '../users/users.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @ApiTags('Authentication')
 @Controller({
@@ -95,7 +96,6 @@ export class AuthController {
   }
 
   @Post('/reset-password')
-  @HttpCode(HttpStatus.OK)
   public async setNewPassword(@Body() resetPassword: ResetPasswordDto): Promise<IResponse> {
     try {
       let isNewPasswordChanged = false;
@@ -119,6 +119,17 @@ export class AuthController {
     } catch (error) {
       this.logger.error('Error: ', error);
       return new ResponseError('RESET_PASSWORD.CHANGE_PASSWORD_ERROR', error);
+    }
+  }
+
+  @Put('/refresh')
+  public async refreshToken(@Body() refreshTokenReq: RefreshTokenDto): Promise<IResponse> {
+    try {
+      const token = await this.authService.refreshToken(refreshTokenReq.refreshToken);
+      return new ResponseSuccess('GENERIC.TOKEN_REFRESHED', token);
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError(error.message, error);
     }
   }
 }

@@ -11,7 +11,7 @@ export class UserDto {
     this.phoneNumber = object.phoneNumber;
     this.address = object.address;
     this.settings = new SettingsDto(object.settings);
-    this.roles=object.roles;
+    this.roles = object.roles;
   }
 
   _id: string;
@@ -21,5 +21,5 @@ export class UserDto {
   phoneNumber: string;
   settings?: SettingsDto;
   address?: UserAddressDto;
-  roles?:string[];
+  roles?: string[];
 }
