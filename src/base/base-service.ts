@@ -11,7 +11,13 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<EntityModel>
    */
   async findById(id: ObjectId | string, options?: IServiceOptions): Promise<EntityModel> {
-    return await this.model.findById(id, options?.fields || '').populate([options.toPopulate]);
+    const findByIdPromise = this.model.findById(id, options?.fields || '');
+
+    if (options?.toPopulate) {
+      return await findByIdPromise.populate([options.toPopulate]);
+    }
+
+    return await findByIdPromise;
   }
 
   /**
@@ -21,7 +27,13 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<EntityModel[]>
    */
   async findOne(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<EntityModel> {
-    return await this.model.findOne(query, options?.fields || '').populate([options.toPopulate]);
+    const findOnePromise = this.model.findOne(query, options?.fields || '');
+
+    if (options?.toPopulate) {
+      return await findOnePromise.populate([options.toPopulate]);
+    }
+
+    return await findOnePromise;
   }
 
   /**
@@ -35,10 +47,8 @@ class BaseService<EntityModel, Entity> {
     const page = parseInt(query['page'] || 1);
     const skip = (page - 1) * limit;
 
-    const [rows, totalCount] = await Promise.all([
-      this.model.find(query).populate([options.toPopulate]).limit(limit).skip(skip).sort('-createdAt'),
-      this.model.countDocuments(query)
-    ]);
+    const findPromise = options?.toPopulate ? this.model.find(query).populate([options.toPopulate]) : this.model.find(query);
+    const [rows, totalCount] = await Promise.all([findPromise.limit(limit).skip(skip).sort('-createdAt'), this.model.countDocuments(query)]);
 
     return { rows, totalCount };
   }
