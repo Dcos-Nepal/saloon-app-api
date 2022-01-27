@@ -38,7 +38,7 @@ export class ChatRoomService extends BaseService<ChatRoom, IChatRoom> {
    * @returns ChatRoom[]
    */
   async fetchChatRooms(query: ChatRoomQueryDto) {
-    this.logger.log(`FindAll: fetch chat request, set query payload `);
+    this.logger.log(`FindAll: fetch chat rooms, set query payload `);
 
     const { owner, member, limit = 10, offset = 0, sort = 'createdAt', order = 'desc' } = query;
 
@@ -49,7 +49,7 @@ export class ChatRoomService extends BaseService<ChatRoom, IChatRoom> {
     if (owner) dataQuery['owner'] = owner;
     if (member) dataQuery['members'] = { $elemMatch: { $eq: member } };
 
-    const chatRequest = await this.chatRoomModel
+    const chatRooms = await this.chatRoomModel
       .find({ ...dataQuery })
       .populate('owner', '_id firstName lastName')
       .populate('members', '_id firstName lastName')
@@ -59,6 +59,6 @@ export class ChatRoomService extends BaseService<ChatRoom, IChatRoom> {
       .exec();
 
     this.logger.log(`FindAll: fetched chat request successfully`);
-    return chatRequest;
+    return chatRooms;
   }
 }

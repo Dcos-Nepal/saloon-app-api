@@ -47,7 +47,7 @@ export class ChatMessageService extends BaseService<ChatMessage, IChatMessage> {
 
     this.logger.log(`Create: Created Chat message of ${message._id} successfully `);
 
-    this.sendMessageToRoom(chatRoom, sender.firstName + ' ' + sender.lastName, message);
+    this.sendMessageToRoom(chatRoom, { id: sender._id, name: sender.firstName + ' ' + sender.lastName }, message);
 
     // Then return the sent message
     return message;
@@ -60,7 +60,7 @@ export class ChatMessageService extends BaseService<ChatMessage, IChatMessage> {
    * @param message ChatMessage
    * @returns void
    */
-  private sendMessageToRoom = (room: ChatRoom, sender: string, chatMessage: ChatMessage): void => {
+  private sendMessageToRoom = (room: ChatRoom, sender: { id: string; name: string }, chatMessage: ChatMessage): void => {
     return this.chatSocket.server.to(`channel_${room._id}`).emit('chat:receive-message', {
       sender,
       message: chatMessage.message,

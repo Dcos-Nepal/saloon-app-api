@@ -129,13 +129,13 @@ export class ChatController {
   @Post('/rooms/:roomId/messages')
   @Roles('ADMIN', 'WORKER', 'CLIENT')
   @UseGuards(RolesGuard)
-  async sendChatMessage(@CurrentUser() authUser: User, @Param('roomId') roomId: string, @Body() createMessgeDto: ChatMessageDto) {
+  async sendChatMessage(@CurrentUser() authUser: User, @Param('roomId') roomId: string, @Body() createMessageDto: ChatMessageDto) {
     if (!isValidObjectId(roomId)) {
       return new ResponseError('CHAT.ERROR.SEND_MESSAGE', 'Invalid Room ID provided.');
     }
 
     try {
-      const chatMessage = await this.chatMessageService.createChatMessage(authUser, roomId, createMessgeDto);
+      const chatMessage = await this.chatMessageService.createChatMessage(authUser, roomId, createMessageDto);
 
       if (chatMessage) {
         return new ResponseSuccess('CHAT.MESSAGE', chatMessage);
