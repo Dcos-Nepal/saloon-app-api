@@ -13,6 +13,7 @@ import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
 import { PropertiesService } from '../properties/properties.service';
 import { IProperty } from '../properties/interfaces/property.interface';
 
+// For Encryption
 const saltRounds = 10;
 
 @Injectable()

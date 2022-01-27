@@ -31,7 +31,8 @@ export class QuoteController {
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const quotes = await this.quoteService.findAll(query, { authUser });
+      const populate = [{ path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }];
+      const quotes = await this.quoteService.findAll(query, { authUser, toPopulate: populate });
       return new ResponseSuccess('COMMON.SUCCESS', quotes);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -43,7 +44,8 @@ export class QuoteController {
   @Roles('ADMIN', 'CLIENT')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const quote = await this.quoteService.findById(param.quoteId, { authUser });
+      const populate = [{ path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }];
+      const quote = await this.quoteService.findById(param.quoteId, { authUser, toPopulate: populate });
       return new ResponseSuccess('COMMON.SUCCESS', quote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
