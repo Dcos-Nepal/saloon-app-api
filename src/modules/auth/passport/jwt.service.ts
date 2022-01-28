@@ -29,8 +29,8 @@ export class JWTService {
     const refreshToken = jwt.sign(userInfo, refreshTokenSecret, { expiresIn: refreshTokenExpiresIn });
 
     return {
-      access_token: accessToken,
-      refresh_token: refreshToken
+      accessToken,
+      refreshToken
     };
   }
 
