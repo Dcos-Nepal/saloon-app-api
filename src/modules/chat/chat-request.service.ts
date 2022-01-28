@@ -61,7 +61,7 @@ export class ChatRequestService extends BaseService<ChatRequest, IChatRequest> {
       }
 
       // Throw Exception!
-      throw new InternalServerErrorException('Something went wrong in creating chat channel!');
+      throw new InternalServerErrorException('Something went wrong in creating chat room!');
     }
 
     // Throw Exception!

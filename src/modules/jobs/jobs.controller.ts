@@ -61,6 +61,8 @@ export class JobsController {
       await session.withTransaction(async () => {
         newJob = await this.jobsService.create(job, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -78,6 +80,8 @@ export class JobsController {
       await session.withTransaction(async () => {
         updatedJob = await this.jobsService.update(param.jobId, property, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -94,6 +98,8 @@ export class JobsController {
       await session.withTransaction(async () => {
         deletedJob = await this.jobsService.remove(param.jobId, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

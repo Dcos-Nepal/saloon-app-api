@@ -59,7 +59,9 @@ export class JobRequestController {
       await session.withTransaction(async () => {
         newProperty = await this.jobRequestService.create(property, session, { authUser });
       });
-      return new ResponseSuccess('COMMON.SUCCESS', newProperty);
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', newProperty.toObject());
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }

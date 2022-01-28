@@ -62,6 +62,8 @@ export class VisitsController {
       await session.withTransaction(async () => {
         newJob = await this.visitsService.create(job, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -79,6 +81,8 @@ export class VisitsController {
       await session.withTransaction(async () => {
         updatedJob = await this.visitsService.update(param.jobId, property, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -97,6 +101,8 @@ export class VisitsController {
       await session.withTransaction(async () => {
         updatedJob = await this.visitsService.updateStatus(param.jobId, job.status, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -113,6 +119,8 @@ export class VisitsController {
       await session.withTransaction(async () => {
         deletedJob = await this.visitsService.remove(param.jobId, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

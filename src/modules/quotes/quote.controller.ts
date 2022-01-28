@@ -64,6 +64,8 @@ export class QuoteController {
       await session.withTransaction(async () => {
         newQuote = await this.quoteService.create(quote, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', newQuote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -81,6 +83,8 @@ export class QuoteController {
       await session.withTransaction(async () => {
         updatedQuote = await this.quoteService.update(param.quoteId, property, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedQuote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -99,6 +103,8 @@ export class QuoteController {
       await session.withTransaction(async () => {
         updatedQuote = await this.quoteService.updateStatus(param.quoteId, quote.status, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedQuote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -115,6 +121,8 @@ export class QuoteController {
       await session.withTransaction(async () => {
         deletedQuote = await this.quoteService.remove(param.quoteId, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', deletedQuote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

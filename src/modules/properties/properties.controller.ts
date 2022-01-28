@@ -73,6 +73,8 @@ export class PropertiesController {
       await session.withTransaction(async () => {
         updatedProperty = await this.propertiesService.update(param.propertyId, property, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
