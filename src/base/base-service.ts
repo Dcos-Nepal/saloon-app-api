@@ -47,8 +47,11 @@ class BaseService<EntityModel, Entity> {
     const page = parseInt(query['page'] || 1);
     const skip = (page - 1) * limit;
 
+    // Prepare Sort Options
+    const sortOptions = options?.sortBy ? options.sortBy : '-createdAt';
+
     const findPromise = options?.toPopulate ? this.model.find(query).populate([options.toPopulate]) : this.model.find(query);
-    const [rows, totalCount] = await Promise.all([findPromise.limit(limit).skip(skip).sort('-createdAt'), this.model.countDocuments(query)]);
+    const [rows, totalCount] = await Promise.all([findPromise.limit(limit).skip(skip).sort(sortOptions), this.model.countDocuments(query)]);
 
     return { rows, totalCount };
   }
