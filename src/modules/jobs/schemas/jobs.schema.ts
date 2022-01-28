@@ -10,7 +10,8 @@ export const JobSchema = new mongoose.Schema(
     team: [{ type: mongoose.Types.ObjectId, required: true, ref: 'User' }],
     lineItems: [
       {
-        lineItem: { type: mongoose.Types.ObjectId, required: true, ref: 'LineItem' },
+        name: { type: String, required: true },
+        description: { type: String },
         quantity: { type: Number, default: 1 },
         unitPrice: { type: Number, default: 0 }
       }

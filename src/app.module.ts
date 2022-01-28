@@ -17,6 +17,7 @@ import { JobRequestModule } from './modules/job-request/job-request.module';
 import { QuoteModule } from './modules/quotes/quotes.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { VisitsModule } from './modules/visits/visits.module';
+import { InvoiceModule } from './modules/invoice/invoice.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { VisitsModule } from './modules/visits/visits.module';
     JobRequestModule,
     QuoteModule,
     JobsModule,
-    VisitsModule
+    VisitsModule,
+    InvoiceModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway]

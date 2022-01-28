@@ -1,9 +1,12 @@
-import { IsMongoId, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class JobLineItem {
   @IsString()
-  @IsMongoId()
-  lineItem: string;
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsNumber()
   quantity: number;

@@ -1,3 +1,4 @@
+import { LineItem } from 'src/modules/line-items/interfaces/line-item.interface';
 import { IUser } from 'src/modules/users/interfaces/user.interface';
 
 export interface IBaseAddress {
@@ -18,6 +19,13 @@ interface IServiceOptions {
 interface IMailOption {
   template: string;
   context: Record<string, string>;
+}
+
+export interface ILineItemPricing {
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
 }
 
 export { IUser, IServiceOptions, IMailOption };
