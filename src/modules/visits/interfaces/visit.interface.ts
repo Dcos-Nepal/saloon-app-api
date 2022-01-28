@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 import { User } from 'src/modules/users/interfaces/user.interface';
-import { LineItem } from 'src/modules/line-items/interfaces/line-item.interface';
 import { Job } from 'src/modules/jobs/interfaces/job.interface';
+import { ILineItemPricing } from 'src/common/interfaces';
 
 export interface IVisit {
   title?: string;
@@ -15,11 +15,7 @@ export interface IVisit {
   endTime?: string;
   rruleSet: string;
   excRrule?: string;
-  lineItems?: {
-    lineItem: string | LineItem;
-    quantity: number;
-    unitPrice: number;
-  }[];
+  lineItems?: ILineItemPricing[];
   status?: IVisitStatus;
   statusRevision?: IVisitStatus[];
 }

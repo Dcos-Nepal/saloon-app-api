@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 import { User } from 'src/modules/users/interfaces/user.interface';
-import { LineItem } from 'src/modules/line-items/interfaces/line-item.interface';
+import { ILineItemPricing } from 'src/common/interfaces';
 
 export interface IJob {
   title: string;
@@ -10,11 +10,7 @@ export interface IJob {
   type: JobType;
   team?: string[] | User[];
   createdBy: string | User;
-  lineItems?: {
-    lineItem: string | LineItem;
-    quantity: number;
-    unitPrice: number;
-  }[];
+  lineItems?: ILineItemPricing[];
 }
 
 export enum JobType {

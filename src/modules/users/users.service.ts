@@ -37,6 +37,7 @@ export class UsersService extends BaseService<User, IUser> {
         }
       };
     }
+
     const [users, totalCount] = await Promise.all([
       this.userModel
         .find(cond)
