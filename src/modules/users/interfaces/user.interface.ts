@@ -34,6 +34,8 @@ export interface IUser {
     };
   };
   settings: ISetting;
+  referralCode: string;
+  referredBy: User;
 }
 
 export interface User extends IUser, Document {

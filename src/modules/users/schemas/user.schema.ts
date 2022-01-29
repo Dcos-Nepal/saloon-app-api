@@ -58,7 +58,9 @@ export const UserSchema = new mongoose.Schema(
         valid: { type: Boolean, default: false }
       }
     },
-    settings: { type: SettingsSchema, required: false }
+    settings: { type: SettingsSchema, required: false },
+    referralCode: { type: String, required: true, default: 'OC-00000' },
+    referredBy: { type: mongoose.Types.ObjectId, required: false, ref: 'User', default: null }
   },
   {
     timestamps: true,
@@ -74,6 +76,7 @@ UserSchema.index({ location: '2dsphere' });
  */
 UserSchema.pre('save', function (this: User, next) {
   this.fullName = `${this.firstName} ${this.lastName}`;
+  this.referralCode = `OC-${Math.random()}${Math.random()}${Math.random()}${Math.random()}`;
   next();
 });
 
