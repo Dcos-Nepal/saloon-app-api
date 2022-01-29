@@ -1,4 +1,4 @@
-import { LineItem } from 'src/modules/line-items/interfaces/line-item.interface';
+import { SortValues } from 'mongoose';
 import { IUser } from 'src/modules/users/interfaces/user.interface';
 
 export interface IBaseAddress {
@@ -10,10 +10,16 @@ export interface IBaseAddress {
   country: string;
 }
 
+interface IPopulate {
+  path: string;
+  select: string[];
+}
+
 interface IServiceOptions {
-  authUser?: IUser;
-  fields?: string;
-  toPopulate?: any;
+  authUser?: IUser; // Currently Logged in user
+  fields?: string; // Fields to select form the main entity
+  toPopulate?: IPopulate[]; // [{path: 'path', select: ['attributes list']}]
+  sortBy?: Record<string, SortValues>;
 }
 
 interface IMailOption {

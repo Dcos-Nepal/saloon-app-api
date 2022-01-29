@@ -56,6 +56,8 @@ export class PropertiesController {
       await session.withTransaction(async () => {
         newProperty = await this.propertiesService.create(property, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', newProperty);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -91,6 +93,8 @@ export class PropertiesController {
       await session.withTransaction(async () => {
         updatedProperty = await this.propertiesService.remove(param.propertyId, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
