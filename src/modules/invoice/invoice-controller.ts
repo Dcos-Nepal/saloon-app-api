@@ -42,6 +42,8 @@ export class InvoiceController {
       await session.withTransaction(async () => {
         newInvoice = await this.invoiceService.create(invoice, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', newInvoice.toJSON());
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -58,6 +60,8 @@ export class InvoiceController {
       await session.withTransaction(async () => {
         invoice = await this.invoiceService.sendInvoice(param.invoiceId, session);
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', invoice);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

@@ -14,7 +14,7 @@ import { CreateJobRequestDto } from './dto/create-job-request.dto';
 import { JobRequest } from './interfaces/job-request.interface';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 import { UpdatePropertyDto } from './dto/update-job-request.dto';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
 
 @Controller({
   path: '/job-requests',
@@ -26,10 +26,17 @@ export class JobRequestController {
   constructor(private readonly jobRequestService: JobRequestService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
-  async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+  async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
+    let filter: mongoose.FilterQuery<Type> = {};
+
     try {
+      if (query.q) {
+        filter = { name: { $regex: query.q, $options: 'i' } };
+      }
+
       const options = { authUser, toPopulate: [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }] };
-      const properties = await this.jobRequestService.findAll(query, options);
+      const properties = await this.jobRequestService.findAll(filter, options);
+
       return new ResponseSuccess('COMMON.SUCCESS', { ...properties });
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -41,6 +48,7 @@ export class JobRequestController {
     try {
       const populate = [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }];
       const property = await this.jobRequestService.findById(param.requestId, { authUser, toPopulate: populate });
+
       return new ResponseSuccess('COMMON.SUCCESS', property);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -79,6 +87,8 @@ export class JobRequestController {
       await session.withTransaction(async () => {
         updatedProperty = await this.jobRequestService.update(param.propertyId, property, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -95,6 +105,8 @@ export class JobRequestController {
       await session.withTransaction(async () => {
         updatedProperty = await this.jobRequestService.remove(param.propertyId, session, { authUser });
       });
+      session.endSession();
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

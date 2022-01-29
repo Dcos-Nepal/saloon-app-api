@@ -10,10 +10,15 @@ export interface IBaseAddress {
   country: string;
 }
 
+interface IPopulate {
+  path: string;
+  select: string[];
+}
+
 interface IServiceOptions {
   authUser?: IUser; // Currently Logged in user
   fields?: string; // Fields to select form the main entity
-  toPopulate?: { path: string; select: string[] }[]; // [{path: 'path', select: ['attributes list']}]
+  toPopulate?: IPopulate[]; // [{path: 'path', select: ['attributes list']}]
   sortBy?: Record<string, SortValues>;
 }
 

@@ -1,12 +1,12 @@
 import { Document } from 'mongoose';
-import { ILineItemPricing } from 'src/common/interfaces';
+import { ILineItem } from 'src/modules/line-items/interfaces/line-item.interface';
 import { User } from 'src/modules/users/interfaces/user.interface';
 
 export interface IInvoice {
   subject: string;
   clientMessage?: string;
   invoiceFor: string | User;
-  lineItems: ILineItemPricing[];
+  lineItems: ILineItem[];
   issued: boolean;
   issuedDate?: string | Date;
   total: number;
