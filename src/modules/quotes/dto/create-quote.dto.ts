@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsMongoId, IsString, ValidateNested } from 'class-validator';
-import { QuoteLineItem } from './quote-line-items.dto';
+import { JobLineItem } from 'src/modules/jobs/dto/job-line-items.dto';
 
 export class CreateQuoteDto {
   @IsString()
@@ -23,6 +23,6 @@ export class CreateQuoteDto {
 
   @IsArray()
   @ValidateNested()
-  @Type(() => QuoteLineItem)
-  lineItems: QuoteLineItem[];
+  @Type(() => JobLineItem)
+  lineItems: JobLineItem[];
 }

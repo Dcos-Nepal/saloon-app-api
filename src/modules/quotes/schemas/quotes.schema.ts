@@ -15,7 +15,8 @@ export const QuotesSchema = new mongoose.Schema(
     jobRequest: { type: mongoose.Types.ObjectId, required: true, ref: 'JobRequest' },
     lineItems: [
       {
-        lineItem: { type: mongoose.Types.ObjectId, required: true, ref: 'LineItem' },
+        name: { type: String, required: true },
+        description: { type: String },
         quantity: { type: Number, default: 1 },
         unitPrice: { type: Number, default: 0 }
       }
