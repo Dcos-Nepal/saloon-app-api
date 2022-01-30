@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, UseGuards, Type } from '@nestjs/common';
 import { LineItemsService } from './line-items.service';
 import { CreateLineItemDto, LineItemQueryDto } from './dto/create-line-item.dto';
 import { UpdateLineItemDto } from './dto/update-line-item.dto';
@@ -41,11 +41,17 @@ export class LineItemsController {
 
   @Get()
   async findAll(@Query() query: LineItemQueryDto) {
-    try {
-      const lineItems = await this.lineItemsService.filterLineItems(query);
+    let filter: mongoose.FilterQuery<Type> = {};
 
-      if (lineItems) {
-        return new ResponseSuccess('LINE_ITEM.FILTER', lineItems);
+    try {
+      if (query.q) {
+        filter = { name: { $regex: query.q, $options: 'i' } };
+      }
+
+      const lineItemsResponse = await this.lineItemsService.findAll(filter);
+
+      if (lineItemsResponse) {
+        return new ResponseSuccess('LINE_ITEM.FILTER', lineItemsResponse);
       } else {
         return new ResponseError('LINE_ITEM.ERROR.FILTER_LINE_ITEM_FAILED');
       }

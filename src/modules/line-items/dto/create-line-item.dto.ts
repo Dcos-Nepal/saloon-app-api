@@ -29,7 +29,7 @@ export class CreateLineItemDto {
 export class LineItemQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
-  name?: string;
+  q?: string;
 
   @IsOptional()
   @IsBoolean()
