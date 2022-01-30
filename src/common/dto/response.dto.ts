@@ -28,10 +28,6 @@ export class ResponseSuccess implements IResponse {
   data: any;
 
   constructor(message: string, data?: any, notLog?: boolean) {
-    this.success = true;
-    this.message = message;
-    this.data = { ...data };
-
     if (!notLog) {
       try {
         const obfuscateRequest = JSON.parse(JSON.stringify(data));
@@ -41,5 +37,9 @@ export class ResponseSuccess implements IResponse {
         console.log('Error parsing the data from API');
       }
     }
+
+    this.success = true;
+    this.message = message;
+    this.data = data;
   }
 }
