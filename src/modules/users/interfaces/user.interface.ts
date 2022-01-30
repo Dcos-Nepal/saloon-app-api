@@ -27,7 +27,10 @@ export interface IUser {
   userDocuments?: [IUserDocument];
   location: IUserLocation;
   lastOnline?: Date;
-  userImage?: string;
+  userImage?: {
+    key: string;
+    url: string;
+  };
   auth: {
     email: {
       valid: boolean;

@@ -44,7 +44,10 @@ export const UserSchema = new mongoose.Schema(
         type: { type: String, enum: ['ID-CARD', 'CLINICAL-CERTIFICATE', 'POLICE-CERTIFICATE'] }
       }
     ],
-    userImage: { type: String },
+    userImage: {
+      key: { type: String },
+      url: { type: String }
+    },
     password: {
       type: String,
       required: function () {

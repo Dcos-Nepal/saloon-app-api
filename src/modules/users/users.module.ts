@@ -6,6 +6,7 @@ import { UserSchema } from './schemas/user.schema';
 import { LoggerMiddleware } from '../../common/middlewares/middleware';
 import { PropertiesService } from '../properties/properties.service';
 import { PropertySchema } from '../properties/schemas/property.schema';
+import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { PropertySchema } from '../properties/schemas/property.schema';
     ])
   ],
   controllers: [UsersController],
-  providers: [UsersService, PropertiesService],
+  providers: [UsersService, PropertiesService, PublicFilesService],
   exports: [UsersService]
 })
 export class UsersModule implements NestModule {
