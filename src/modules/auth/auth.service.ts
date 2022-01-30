@@ -7,21 +7,21 @@ import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { Model, Types } from 'mongoose';
 
+import { Token } from './guards/jwt-auth.guard';
+
 import { ConsentType } from './schemas/consent-registry.schema';
 
 import { UserDto } from '../users/dto/user.dto';
 
-import { IMailResponse } from 'src/common/interfaces/mail-interface';
 import { User } from '../users/interfaces/user.interface';
+import { IMailResponse } from 'src/common/interfaces/mail-interface';
 import { ForgotPassword } from './interfaces/forgot-password.interface';
 import { ConsentRegistry } from './interfaces/consent-registry.interface';
 import { EmailVerification } from './interfaces/email-verification.interface';
 
-import { MailService } from 'src/common/modules/mail/mail.service';
-import { ConfigService } from 'src/configs/config.service';
 import { JWTService } from './passport/jwt.service';
-
-import { Token } from './guards/jwt-auth.guard';
+import { ConfigService } from 'src/configs/config.service';
+import { MailService } from 'src/common/modules/mail/mail.service';
 
 @Injectable()
 export class AuthService {
