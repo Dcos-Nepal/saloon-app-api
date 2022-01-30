@@ -51,7 +51,14 @@ class BaseService<EntityModel, Entity> {
     const sortOptions = options?.sortBy ? options.sortBy : '-createdAt';
 
     const findPromise = options?.toPopulate ? this.model.find(query).populate([options.toPopulate]) : this.model.find(query);
-    const [rows, totalCount] = await Promise.all([findPromise.limit(limit).skip(skip).sort(sortOptions), this.model.countDocuments(query)]);
+    const [rows, totalCount] = await Promise.all([
+      findPromise
+        .select(options?.fields ? options.fields : '')
+        .limit(limit)
+        .skip(skip)
+        .sort(sortOptions),
+      this.model.countDocuments(query)
+    ]);
 
     return { rows, totalCount };
   }
