@@ -54,10 +54,13 @@ export class QuoteController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'WORKER')
   @UseGuards(SelfOrAdminGuard)
   @SelfKey('quoteFor')
   async create(@Body() quote: CreateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
+    // Add Created by Id
+    quote.createdBy = authUser._id;
+
     try {
       const session = await this.connection.startSession();
       let newQuote: Quote;

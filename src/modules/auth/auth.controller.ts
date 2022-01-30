@@ -1,13 +1,16 @@
+import { ApiTags } from '@nestjs/swagger';
 import { Controller, Post, HttpStatus, HttpCode, Get, Body, Param, Logger, Put } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { ResponseSuccess, ResponseError } from '../../common/dto/response.dto';
+
 import { IResponse } from '../../common/interfaces/response.interface';
+
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { UsersService } from '../users/users.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ApiTags } from '@nestjs/swagger';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ResponseSuccess, ResponseError } from '../../common/dto/response.dto';
+
+import { AuthService } from './auth.service';
+import { UsersService } from '../users/users.service';
 
 @ApiTags('Authentication')
 @Controller({

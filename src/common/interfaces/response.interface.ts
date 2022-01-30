@@ -1,3 +1,5 @@
+import { Type } from '@nestjs/common';
+
 /**
  * API Response Object
  *
@@ -8,6 +10,6 @@
 export interface IResponse {
   success: boolean;
   message: string;
-  data?: any;
-  error?: any;
+  data?: Type;
+  error?: Type;
 }

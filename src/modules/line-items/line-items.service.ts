@@ -44,11 +44,11 @@ export class LineItemsService extends BaseService<LineItem, ILineItem> {
 
     const sortQuery = {};
     const dataQuery = {};
-    const { name, isActive = true, isDeleted = false, limit = 10, offset = 0, sort = 'createdAt', order = 'desc' } = query;
+    const { q, isActive = true, isDeleted = false, limit = 10, offset = 0, sort = 'createdAt', order = 'desc' } = query;
 
     sortQuery[sort] = order;
 
-    if (name) dataQuery['name'] = { $regex: name, $options: 'i' };
+    if (q) dataQuery['name'] = { $regex: q, $options: 'i' };
 
     const lineItems = await this.lineItemModel
       .find({ ...dataQuery, isActive: isActive, isDeleted: isDeleted })
@@ -63,7 +63,7 @@ export class LineItemsService extends BaseService<LineItem, ILineItem> {
   }
 
   /**
-   * Update Line Item eith given update info
+   * Update Line Item with given update info
    *
    * @param id String
    * @param updateLineItemDto UpdateLineItemDto

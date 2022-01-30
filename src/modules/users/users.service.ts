@@ -1,55 +1,45 @@
 import * as bcrypt from 'bcryptjs';
-import { AnyObject, ClientSession, FilterQuery, Model, ObjectId } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { AnyObject, ClientSession, Model, ObjectId } from 'mongoose';
 import { Injectable, HttpStatus, HttpException, NotFoundException } from '@nestjs/common';
 
 import { ProfileDto } from './dto/profile.dto';
 import { SettingsDto } from './dto/settings.dto';
-import { IUser, User } from './interfaces/user.interface';
 import { CreateUserDto } from './dto/create-user.dto';
-import BaseService from 'src/base/base-service';
+
 import { IServiceOptions } from 'src/common/interfaces';
+import { IUser, User } from './interfaces/user.interface';
+
 import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
+
+import BaseService from 'src/base/base-service';
 import { PropertiesService } from '../properties/properties.service';
-import { IProperty } from '../properties/interfaces/property.interface';
+import { IProperty, Property } from '../properties/interfaces/property.interface';
+import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 
 // For Encryption
 const saltRounds = 10;
 
 @Injectable()
 export class UsersService extends BaseService<User, IUser> {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>, private readonly propertiesService: PropertiesService) {
+  constructor(
+    @InjectModel('User') private readonly userModel: Model<User>,
+    private readonly publicFilesService: PublicFilesService,
+    private readonly propertiesService: PropertiesService
+  ) {
     super(userModel);
   }
 
-  async findAll(query: AnyObject, { authUser }: IServiceOptions) {
-    const cond: FilterQuery<User> = { _id: { $ne: authUser._id } };
-    const limit = parseInt(query['limit'] || 10);
-    const skip = ((parseInt(query['page']) || 1) - 1) * limit;
-
-    if (query.q) cond.fullName = { $regex: query.q, $options: 'i' };
-    if (query.roles) cond.roles = { $in: query.roles.split(',') };
-    if (query.nearBy && query.lat && query.lon) {
-      cond.location = {
-        $near: {
-          $maxDistance: +query.nearBy || 1000,
-          $geometry: { type: 'Point', coordinates: [+query.lat, +query.lon] }
-        }
-      };
-    }
-
-    const [users, totalCount] = await Promise.all([
-      this.userModel
-        .find(cond)
-        .select('-password')
-        .limit(limit)
-        .skip(skip)
-        .sort({ [query.sort || 'createdAt']: -1 }),
-      this.userModel.countDocuments(cond)
-    ]);
-    return { rows: users, totalCount };
-  }
-
+  /**
+   * Update User's Details
+   *
+   * @param id
+   * @param body
+   * @param session
+   * @param param IServiceOptions
+   *
+   * @returns
+   */
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
     if (body.location) body.location.type = 'Point';
@@ -197,6 +187,50 @@ export class UsersService extends BaseService<User, IUser> {
   }
 
   /**
+   * Adds User Avatar
+   *
+   * @param userId String
+   * @param imageBuffer Buffer
+   * @param filename String
+   * @param session ClientSession
+   *
+   * @returns
+   */
+  async addAvatar(userId: string, fileBuffer: Buffer, filename: string, session: ClientSession): Promise<User> {
+    const avatar = await this.publicFilesService.uploadPublicFile(fileBuffer, filename);
+    const user: User = await this.userModel.findById(userId);
+    user.userImage = {
+      key: avatar.Key,
+      url: avatar.Location
+    };
+
+    return await user.save({ session });
+  }
+
+  /**
+   * Find Propertied for given User
+   *
+   * @param userId String
+   * @param query AnyObject
+   * @returns Object
+   */
+  async findProperties(userId: string, query: AnyObject) {
+    return await this.propertiesService.findAll({ ...query, user: userId });
+  }
+
+  /**
+   * Add Property for given User
+   *
+   * @param property IProperty
+   * @param session ClientSession
+   * @param param IServiceOptions
+   * @returns Promise<Property>
+   */
+  async addProperty(property: IProperty, session: ClientSession, { authUser }: IServiceOptions): Promise<Property> {
+    return await this.propertiesService.create(property, session, { authUser });
+  }
+
+  /**
    * Generates sample UUID
    * @returns string
    */
@@ -207,13 +241,5 @@ export class UsersService extends BaseService<User, IUser> {
         .substring(1);
     };
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-  }
-
-  async findProperties(userId: string, query: AnyObject) {
-    return await this.propertiesService.findAll({ ...query, user: userId });
-  }
-
-  async addProperty(property: IProperty, session: ClientSession, { authUser }: IServiceOptions) {
-    return await this.propertiesService.create(property, session, { authUser });
   }
 }

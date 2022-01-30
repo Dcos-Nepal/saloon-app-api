@@ -15,6 +15,7 @@ import { PropertiesService } from '../properties/properties.service';
 import { PropertySchema } from '../properties/schemas/property.schema';
 import { MailModule } from 'src/common/modules/mail/mail.module';
 import { MailService } from 'src/common/modules/mail/mail.service';
+import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { MailService } from 'src/common/modules/mail/mail.service';
     MailModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersService, PropertiesService, JWTService, JwtStrategy, MailService],
+  providers: [AuthService, UsersService, PropertiesService, JWTService, JwtStrategy, MailService, PublicFilesService],
   exports: [AuthService, UsersService, JWTService, JwtStrategy]
 })
 export class AuthModule implements NestModule {

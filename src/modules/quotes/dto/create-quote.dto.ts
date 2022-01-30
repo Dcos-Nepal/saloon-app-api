@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsMongoId, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { JobLineItem } from 'src/modules/jobs/dto/job-line-items.dto';
 
 export class CreateQuoteDto {
@@ -14,10 +14,12 @@ export class CreateQuoteDto {
   quoteFor: string;
 
   @IsString()
+  @IsOptional()
   @IsMongoId()
   createdBy: string;
 
   @IsString()
+  @IsOptional()
   @IsMongoId()
   jobRequest: string;
 
