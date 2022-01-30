@@ -12,7 +12,7 @@ export const QuotesSchema = new mongoose.Schema(
       updatedBy: { type: mongoose.Types.ObjectId, ref: 'User' },
       status: { type: String, enum: Object.keys(IQuoteStatusType), default: 'PENDING' }
     },
-    jobRequest: { type: mongoose.Types.ObjectId, required: true, ref: 'JobRequest' },
+    jobRequest: { type: mongoose.Types.ObjectId, required: false, ref: 'JobRequest', default: null },
     lineItems: [
       {
         name: { type: String, required: true },
