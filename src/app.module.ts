@@ -18,6 +18,8 @@ import { QuoteModule } from './modules/quotes/quotes.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { VisitsModule } from './modules/visits/visits.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
+import { AWSModule } from './common/modules/aws/aws.module';
+import { FilesModule } from './common/modules/files/files.module';
 
 @Module({
   imports: [
@@ -27,6 +29,11 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => configService.getMongoConfig()
     }),
+    // Common Modules
+    AWSModule,
+    FilesModule,
+
+    // Custom Modules
     UsersModule,
     AuthModule,
     ChatModule,
