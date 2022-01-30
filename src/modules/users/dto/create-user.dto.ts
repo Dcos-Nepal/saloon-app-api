@@ -1,5 +1,8 @@
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested } from 'class-validator';
+
+import { UserAddressDto } from './user-address.dto';
 import { IUserRole } from '../interfaces/user.interface';
 
 export class CreateUserDto {
@@ -41,4 +44,9 @@ export class CreateUserDto {
     message: 'Invalid phone number provided'
   })
   phoneNumber: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UserAddressDto)
+  address: UserAddressDto;
 }
