@@ -36,12 +36,13 @@ export class ConfigService {
    * Gets AWS Related Configs (Sync)
    * @returns AWSConfig
    */
-  public getSyncAWSConfig() {
+  public getAWSConfig() {
     return {
+      AWS_REGION: this.get('AWS_REGION'),
       AWS_ACCESS_KEY_ID: this.get('AWS_ACCESS_KEY_ID'),
       AWS_SECRET_ACCESS_KEY: this.get('AWS_SECRET_ACCESS_KEY'),
-      AWS_REGION: this.get('AWS_REGION'),
-      AWS_PUBLIC_BUCKET: this.get('AWS_PUBLIC_BUCKET')
+      AWS_PUBLIC_BUCKET: this.get('AWS_PUBLIC_BUCKET'),
+      AWS_PRIVATE_BUCKET: this.get('AWS_PRIVATE_BUCKET')
     };
   }
 
