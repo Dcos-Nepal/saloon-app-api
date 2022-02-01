@@ -1,5 +1,6 @@
+import * as mongoose from 'mongoose';
 import { ApiTags } from '@nestjs/swagger';
-import { Controller, Post, HttpStatus, HttpCode, Get, Body, Param, Logger, Put } from '@nestjs/common';
+import { Controller, Post, HttpStatus, HttpCode, Get, Body, Param, Logger, Put, UseGuards, Delete } from '@nestjs/common';
 
 import { IResponse } from '../../common/interfaces/response.interface';
 
@@ -11,6 +12,11 @@ import { ResponseSuccess, ResponseError } from '../../common/dto/response.dto';
 
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { UserLoginDto } from './dto/user-login.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { InjectConnection } from '@nestjs/mongoose';
+import { UserLogoutDto } from './dto/user-logout.dto';
 
 @ApiTags('Authentication')
 @Controller({
@@ -20,19 +26,11 @@ import { UsersService } from '../users/users.service';
 export class AuthController {
   private logger: Logger = new Logger('AuthController');
 
-  constructor(private readonly authService: AuthService, private readonly userService: UsersService) {}
-
-  @Post('/login')
-  @HttpCode(HttpStatus.OK)
-  public async login(@Body() login): Promise<IResponse> {
-    try {
-      const response = await this.authService.validateLogin(login.email, login.password);
-      return new ResponseSuccess('LOGIN.SUCCESS', response);
-    } catch (error) {
-      this.logger.error('Error: ', error);
-      return new ResponseError(error.message, error);
-    }
-  }
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+    @InjectConnection() private readonly connection: mongoose.Connection
+  ) {}
 
   @Post('/register')
   @HttpCode(HttpStatus.OK)
@@ -48,6 +46,43 @@ export class AuthController {
       }
 
       return new ResponseError('REGISTRATION.ERROR.MAIL_NOT_SENT');
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError(error.message, error);
+    }
+  }
+
+  @Post('/login')
+  @HttpCode(HttpStatus.OK)
+  public async login(@Body() login: UserLoginDto): Promise<IResponse> {
+    const session = await this.connection.startSession();
+    try {
+      let response = null;
+      await session.withTransaction(async () => {
+        response = await this.authService.loginUser(login, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('LOGIN.SUCCESS', response);
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError(error.message, error);
+    }
+  }
+
+  @Delete('/logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'))
+  public async logout(@CurrentUser() user, @Body() logout: UserLogoutDto): Promise<IResponse> {
+    const session = await this.connection.startSession();
+    try {
+      let response = null;
+      await session.withTransaction(async () => {
+        response = await this.authService.logoutUser(user?._id.toString(), logout, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('LOGOUT.SUCCESS', response);
     } catch (error) {
       this.logger.error('Error: ', error);
       return new ResponseError(error.message, error);
@@ -111,8 +146,8 @@ export class AuthController {
         } else {
           return new ResponseError('RESET_PASSWORD.WRONG_CURRENT_PASSWORD');
         }
-      } else if (resetPassword.newPasswordToken) {
-        const forgottenPasswordModel = await this.authService.getForgotPasswordModel(resetPassword.newPasswordToken);
+      } else if (resetPassword.passwordToken) {
+        const forgottenPasswordModel = await this.authService.getForgotPasswordModel(resetPassword.passwordToken);
         isNewPasswordChanged = await this.userService.setPassword(forgottenPasswordModel.email, resetPassword.newPassword);
         if (isNewPasswordChanged) await forgottenPasswordModel.remove();
       } else {

@@ -1,17 +1,18 @@
 import { HttpService } from '@nestjs/axios';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
 import { BadRequestException } from 'src/common/exceptions/bad-request.exception';
 
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 
 import { Token } from './guards/jwt-auth.guard';
 
 import { ConsentType } from './schemas/consent-registry.schema';
 
 import { UserDto } from '../users/dto/user.dto';
+import { UserLoginDto } from './dto/user-login.dto';
 
 import { User } from '../users/interfaces/user.interface';
 import { IMailResponse } from 'src/common/interfaces/mail-interface';
@@ -22,6 +23,9 @@ import { EmailVerification } from './interfaces/email-verification.interface';
 import { JWTService } from './passport/jwt.service';
 import { ConfigService } from 'src/configs/config.service';
 import { MailService } from 'src/common/modules/mail/mail.service';
+import { UserDeviceService } from '../user-devices/user-devices.service';
+import { IUserDevice, UserDevice } from '../user-devices/interfaces/user-device.interface';
+import { UserLogoutDto } from './dto/user-logout.dto';
 
 @Injectable()
 export class AuthService {
@@ -34,8 +38,64 @@ export class AuthService {
     @InjectModel('ConsentRegistry') private readonly consentRegistryModel: Model<ConsentRegistry>,
     private readonly jwtService: JWTService,
     private readonly mailService: MailService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly userDeviceService: UserDeviceService
   ) {}
+
+  /**
+   * Logs in user and generate access and refresh token.
+   * @param userLogin
+   */
+  async loginUser(userLogin: UserLoginDto, session: ClientSession) {
+    const authUser = await this.validateLogin(userLogin.email, userLogin.password);
+
+    if (!authUser.user?._id) {
+      throw new NotFoundException('User for given credentials is not found');
+    }
+
+    const userDeviceDto: IUserDevice = {
+      user: authUser.user?._id.toString(),
+      deviceToken: userLogin.deviceToken,
+      deviceType: userLogin.deviceType
+    };
+
+    this.logger.log('Now check if the device already exists in the db.');
+    const userDevice: UserDevice = await this.userDeviceService.findOne(userDeviceDto);
+
+    if (!userDevice) {
+      this.logger.log('Registering new device for the user login');
+      await this.userDeviceService.create(userDeviceDto, session);
+    }
+
+    this.logger.log('Returning login info for user');
+    return authUser;
+  }
+
+  /**
+   * Logout user and clear device from database.
+   * @param userId
+   * @param userLogout
+   * @param session
+   * @returns
+   */
+  async logoutUser(userId: string, userLogout: UserLogoutDto, session: ClientSession) {
+    const userDeviceDto: IUserDevice = {
+      user: userId,
+      deviceToken: userLogout.deviceToken,
+      deviceType: userLogout.deviceType
+    };
+
+    this.logger.log('Now check if the device already exists in the db.');
+    const userDevice: UserDevice = await this.userDeviceService.findOne(userDeviceDto);
+
+    if (userDevice?.id) {
+      this.logger.log('Cleaning existing device for the user');
+      await this.userDeviceService.remove(userDevice?.id, session);
+    }
+
+    this.logger.log('Returning the logout status of the user');
+    return true;
+  }
 
   /**
    * Validates Login using email and password
@@ -255,7 +315,7 @@ export class AuthService {
 
     const tokenModel = await this.createForgotPasswordToken(email);
 
-    if (tokenModel && tokenModel.newPasswordToken) {
+    if (tokenModel && tokenModel.passwordToken) {
       //const html = ForgotPasswordTemplate(tokenModel.newPasswordToken);
 
       try {

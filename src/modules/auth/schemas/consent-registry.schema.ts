@@ -10,9 +10,9 @@ export const ConsentRegistrySchema = new mongoose.Schema(
   {
     user: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
     type: { type: String, enum: ConsentType, required: true },
-    content: String,
-    isAccepted: Boolean,
-    date: Date
+    content: { type: String },
+    isAccepted: { type: Boolean },
+    date: { type: Date }
   },
   {
     timestamps: true,
