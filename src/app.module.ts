@@ -20,6 +20,7 @@ import { VisitsModule } from './modules/visits/visits.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { AWSModule } from './common/modules/aws/aws.module';
 import { FilesModule } from './common/modules/files/files.module';
+import { UserDevicesModule } from './modules/user-devices/user-devices.module';
 
 @Module({
   imports: [
@@ -37,13 +38,14 @@ import { FilesModule } from './common/modules/files/files.module';
     UsersModule,
     AuthModule,
     ChatModule,
-    PropertiesModule,
+    JobsModule,
+    QuoteModule,
+    VisitsModule,
+    InvoiceModule,
     LineItemsModule,
     JobRequestModule,
-    QuoteModule,
-    JobsModule,
-    VisitsModule,
-    InvoiceModule
+    PropertiesModule,
+    UserDevicesModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway]
