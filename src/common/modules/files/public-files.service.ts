@@ -1,7 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { AWSError } from 'aws-sdk';
-import { AddObjectInput } from 'aws-sdk/clients/lakeformation';
-import { DeleteObjectOutput, PutObjectOutput } from 'aws-sdk/clients/s3';
+import { DeleteObjectOutput } from 'aws-sdk/clients/s3';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { ConfigService } from 'src/configs/config.service';
 import { v4 as uuid } from 'uuid';

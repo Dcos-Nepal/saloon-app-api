@@ -1,7 +1,6 @@
 import { Controller, Delete, Logger, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import path from 'path';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { BadRequestException } from 'src/common/exceptions/bad-request.exception';
