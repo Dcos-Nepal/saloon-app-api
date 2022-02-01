@@ -10,9 +10,9 @@ export const VisitSchema = new mongoose.Schema(
     endDate: { type: String },
     startTime: { type: String },
     endTime: { type: String },
-    job: { type: mongoose.Types.ObjectId, required: true, ref: 'Jobs' },
     rruleSet: { type: String, required: true },
     excRrule: { type: String },
+    job: { type: mongoose.Types.ObjectId, required: true, ref: 'Jobs' },
     team: { type: [mongoose.Types.ObjectId], ref: 'User' },
     lineItems: [
       {
