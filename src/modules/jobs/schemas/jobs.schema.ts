@@ -6,8 +6,8 @@ export const JobSchema = new mongoose.Schema(
     title: { type: String, required: true },
     instruction: { type: String, required: true },
     jobFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
-    remindInvoicing: { type: Boolean, required: true, default: false },
     team: [{ type: mongoose.Types.ObjectId, required: true, ref: 'User' }],
+    remindInvoicing: { type: Boolean, required: true, default: false },
     lineItems: [
       {
         name: { type: String, required: true },

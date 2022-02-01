@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyObject, ClientSession, Model, ObjectId } from 'mongoose';
-import { Injectable, HttpStatus, HttpException, NotFoundException } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException, NotFoundException, Logger } from '@nestjs/common';
 
 import { ProfileDto } from './dto/profile.dto';
 import { SettingsDto } from './dto/settings.dto';
@@ -22,6 +22,8 @@ const saltRounds = 10;
 
 @Injectable()
 export class UsersService extends BaseService<User, IUser> {
+  private logger: Logger = new Logger('UsersService');
+
   constructor(
     @InjectModel('User') private readonly userModel: Model<User>,
     private readonly publicFilesService: PublicFilesService,
@@ -38,11 +40,12 @@ export class UsersService extends BaseService<User, IUser> {
    * @param session
    * @param param IServiceOptions
    *
-   * @returns
+   * @returns Promise<User>
    */
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
     if (body.location) body.location.type = 'Point';
+
     return await this.userModel.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session }).select('-password -__v');
   }
 
@@ -81,22 +84,6 @@ export class UsersService extends BaseService<User, IUser> {
     } catch (error) {
       throw new HttpException('REGISTRATION.ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
     }
-  }
-
-  /**
-   * Check if the given email is a valid email address
-   *
-   * @param email string
-   * @returns Boolean
-   */
-  isValidEmail(email: string): boolean {
-    if (email) {
-      const re =
-        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return re.test(email);
-    }
-
-    return false;
   }
 
   /**
@@ -194,17 +181,28 @@ export class UsersService extends BaseService<User, IUser> {
    * @param filename String
    * @param session ClientSession
    *
-   * @returns
+   * @returns Promise<User>
    */
   async addAvatar(userId: string, fileBuffer: Buffer, filename: string, session: ClientSession): Promise<User> {
-    const avatar = await this.publicFilesService.uploadPublicFile(fileBuffer, filename);
     const user: User = await this.userModel.findById(userId);
+
+    if (!user?._id) {
+      throw new NotFoundException('User not found!');
+    }
+
+    this.logger.log('Uploading profile picture to AWS S3 bucket.');
+    const avatar = await this.publicFilesService.uploadPublicFile(fileBuffer, filename);
+
+    this.logger.log('Updating profile picture.');
     user.userImage = {
       key: avatar.Key,
       url: avatar.Location
     };
 
-    return await user.save({ session });
+    await user.save({ session });
+    this.logger.log('User profile picture updated.');
+
+    return user;
   }
 
   /**
@@ -241,5 +239,21 @@ export class UsersService extends BaseService<User, IUser> {
         .substring(1);
     };
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  }
+
+  /**
+   * Check if the given email is a valid email address
+   *
+   * @param email string
+   * @returns Boolean
+   */
+  isValidEmail(email: string): boolean {
+    if (email) {
+      const re =
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(email);
+    }
+
+    return false;
   }
 }
