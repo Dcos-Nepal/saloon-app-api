@@ -8,6 +8,8 @@ export const JobSchema = new mongoose.Schema(
     jobFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
     team: [{ type: mongoose.Types.ObjectId, required: true, ref: 'User' }],
     remindInvoicing: { type: Boolean, required: true, default: false },
+    isCompleted: { type: Boolean, default: false },
+    primaryVisit: { type: mongoose.Types.ObjectId, ref: 'Visit' },
     lineItems: [
       {
         name: { type: String, required: true },

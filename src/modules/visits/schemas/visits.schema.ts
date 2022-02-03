@@ -6,6 +6,7 @@ export const VisitSchema = new mongoose.Schema(
     title: { type: String },
     instruction: { type: String },
     inheritJob: { type: Boolean, required: true, default: false },
+    isPrimary: { type: Boolean, default: false },
     startDate: { type: String, required: true },
     endDate: { type: String },
     startTime: { type: String },
