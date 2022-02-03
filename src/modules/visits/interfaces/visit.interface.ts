@@ -18,7 +18,7 @@ export interface IVisit {
   lineItems?: ILineItemPricing[];
   status?: IVisitStatus;
   statusRevision?: IVisitStatus[];
-  isPrimary: boolean;
+  isPrimary?: boolean;
 }
 
 export interface IVisitStatus {
