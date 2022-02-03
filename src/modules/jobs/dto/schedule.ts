@@ -1,12 +1,12 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsDate, IsOptional, IsString } from 'class-validator';
 
 export class Schedule {
-  @IsString()
-  startDate: string;
+  @IsDate()
+  startDate: Date;
 
-  @IsString()
+  @IsDate()
   @IsOptional()
-  endDate?: string;
+  endDate?: Date;
 
   @IsString()
   @IsOptional()

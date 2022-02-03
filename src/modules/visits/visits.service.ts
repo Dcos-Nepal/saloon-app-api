@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
+import { rrulestr } from 'rrule';
 
 import BaseService from 'src/base/base-service';
 import { IServiceOptions } from 'src/common/interfaces';
@@ -27,5 +28,25 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     visit.status = { status: statusType, updatedBy: authUser._id, updatedAt: new Date() };
 
     return await this.update(visitId, visit, session, { authUser });
+  }
+
+  async getSummary(startDate: Date, endDate: Date) {
+    const visits = await this.visitModel.find({ startDate: { $gte: startDate, $lte: endDate } });
+    const visitSummaries = visits.reduce((acc, visit) => {
+      const totalPricePerVisit = visit.lineItems.reduce((acc, lineItem) => (acc += lineItem.quantity * lineItem.unitPrice), 0);
+      const singleVisits = rrulestr(visit.rruleSet)
+        .between(endDate, startDate, true)
+        .map((visitDate) => {
+          return {
+            startTime: visit.startTime,
+            status: visit.status,
+            totalPrice: totalPricePerVisit,
+            visitDate
+          };
+        });
+      acc = [...acc, ...singleVisits];
+      return acc;
+    }, []);
+    return visitSummaries;
   }
 }

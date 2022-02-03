@@ -9,8 +9,8 @@ export interface IVisit {
   team?: string[] | User[];
   inheritJob: boolean;
   job: string | Job;
-  startDate: string;
-  endDate?: string;
+  startDate: Date;
+  endDate?: Date;
   startTime?: string;
   endTime?: string;
   rruleSet: string;
