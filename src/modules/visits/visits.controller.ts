@@ -16,9 +16,10 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { VisitSummaryDto } from './dto/summary.dto';
 
 @Controller({
-  path: '/jobs',
+  path: '/visits',
   version: '1.0.0'
 })
 @UseGuards(AuthGuard('jwt'))
@@ -31,20 +32,32 @@ export class VisitsController {
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const jobs = await this.visitsService.findAll(query, { authUser });
-      return new ResponseSuccess('COMMON.SUCCESS', jobs);
+      const visits = await this.visitsService.findAll(query, { authUser });
+      return new ResponseSuccess('COMMON.SUCCESS', visits);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Get('/:jobId')
+  @Get('/summary')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT')
+  async getSummary(@Query() query: VisitSummaryDto): Promise<IResponse> {
+    try {
+      const visits = await this.visitsService.getSummary(query.startDate, query.endDate);
+      return new ResponseSuccess('COMMON.SUCCESS', visits);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Get('/:visitId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const job = await this.visitsService.findById(param.jobId, { authUser });
-      return new ResponseSuccess('COMMON.SUCCESS', job);
+      const visit = await this.visitsService.findById(param.visitId, { authUser });
+      return new ResponseSuccess('COMMON.SUCCESS', visit);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
@@ -52,15 +65,13 @@ export class VisitsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
-  @SelfKey('jobFor')
-  async create(@Body() job: CreateVisitDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  @Roles('ADMIN')
+  async create(@Body() visit: CreateVisitDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let newJob: IVisit;
       await session.withTransaction(async () => {
-        newJob = await this.visitsService.create(job, session, { authUser });
+        newJob = await this.visitsService.create(visit, session, { authUser });
       });
       session.endSession();
 
@@ -70,46 +81,44 @@ export class VisitsController {
     }
   }
 
-  @Put('/:jobId')
+  @Put('/:visitId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() property: UpdateVisitDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let updatedJob: IVisit;
+      let updatedVisit: IVisit;
       await session.withTransaction(async () => {
-        updatedJob = await this.visitsService.update(param.jobId, property, session, { authUser });
+        updatedVisit = await this.visitsService.update(param.visitId, property, session, { authUser });
       });
       session.endSession();
 
-      return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
+      return new ResponseSuccess('COMMON.SUCCESS', updatedVisit);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Put('/:jobId/update-status')
+  @Put('/:visitId/update-status')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
-  @SelfKey('jobFor')
   async updateStatus(@Param() param, @Body() job: UpdateJobStatusDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let updatedJob: IVisit;
+      let updatedVisit: IVisit;
       await session.withTransaction(async () => {
-        updatedJob = await this.visitsService.updateStatus(param.jobId, job.status, session, { authUser });
+        updatedVisit = await this.visitsService.updateStatus(param.visitId, job.status, session, { authUser });
       });
       session.endSession();
 
-      return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
+      return new ResponseSuccess('COMMON.SUCCESS', updatedVisit);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Delete('/:jobId')
+  @Delete('/:visitId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
@@ -117,7 +126,7 @@ export class VisitsController {
       const session = await this.connection.startSession();
       let deletedJob: boolean;
       await session.withTransaction(async () => {
-        deletedJob = await this.visitsService.remove(param.jobId, session, { authUser });
+        deletedJob = await this.visitsService.remove(param.visitId, session, { authUser });
       });
       session.endSession();
 

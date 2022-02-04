@@ -9,8 +9,8 @@ export interface IVisit {
   team?: string[] | User[];
   inheritJob: boolean;
   job: string | Job;
-  startDate: string;
-  endDate?: string;
+  startDate: Date;
+  endDate?: Date;
   startTime?: string;
   endTime?: string;
   rruleSet: string;
@@ -18,6 +18,7 @@ export interface IVisit {
   lineItems?: ILineItemPricing[];
   status?: IVisitStatus;
   statusRevision?: IVisitStatus[];
+  isPrimary?: boolean;
 }
 
 export interface IVisitStatus {

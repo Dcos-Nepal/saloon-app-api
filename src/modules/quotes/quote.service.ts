@@ -27,4 +27,12 @@ export class QuoteService extends BaseService<Quote, IQuote> {
 
     return await this.update(quoteId, quote, session, { authUser });
   }
+
+  async getSummary() {
+    const statusTypes = ['PENDING', 'ACCEPTED', 'REJECTED'];
+    const [pendingCount, acceptedCount, rejectedCount] = await Promise.all(
+      statusTypes.map((status) => this.quoteModel.countDocuments({ 'status.status': status }))
+    );
+    return { pendingCount, acceptedCount, rejectedCount };
+  }
 }

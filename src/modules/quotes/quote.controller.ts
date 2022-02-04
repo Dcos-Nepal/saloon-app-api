@@ -39,6 +39,18 @@ export class QuoteController {
     }
   }
 
+  @Get('/summary')
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  async getSummary(): Promise<IResponse> {
+    try {
+      const summary = await this.quoteService.getSummary();
+      return new ResponseSuccess('COMMON.SUCCESS', summary);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
   @Get('/:quoteId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')

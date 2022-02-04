@@ -9,4 +9,12 @@ export class JobRequestService extends BaseService<JobRequest, IJobRequest> {
   constructor(@InjectModel('JobRequest') private readonly jobRequestModel: Model<JobRequest>) {
     super(jobRequestModel);
   }
+
+  async getSummary() {
+    const statusTypes = ['PENDING', 'IN-PROGRESS', 'ACTIVE', 'IN-ACTIVE'];
+    const [pendingCount, inProgressCount, activeCount, inActiveCount] = await Promise.all(
+      statusTypes.map((status) => this.jobRequestModel.countDocuments({ status }))
+    );
+    return { pendingCount, inProgressCount, activeCount, inActiveCount };
+  }
 }

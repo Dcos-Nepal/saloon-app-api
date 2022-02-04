@@ -9,6 +9,13 @@ export interface IJobRequest {
   status: string;
 }
 
+export enum JobRequestStatus {
+  PENDING = 'PENDING',
+  'IN-PROGRESS' = 'IN-PROGRESS',
+  ACTIVE = 'ACTIVE',
+  'IN-ACTIVE' = 'IN-ACTIVE'
+}
+
 export interface JobRequest extends IJobRequest, Document {
   _id?: string;
 }

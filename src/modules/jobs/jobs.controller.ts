@@ -37,6 +37,18 @@ export class JobsController {
     }
   }
 
+  @Get('/summary')
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  async getSummary(): Promise<IResponse> {
+    try {
+      const summary = await this.jobsService.getSummary();
+      return new ResponseSuccess('COMMON.SUCCESS', summary);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
   @Get('/:jobId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
@@ -73,12 +85,12 @@ export class JobsController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  async update(@Param() param, @Body() property: UpdateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async update(@Param() param, @Body() property: UpdateJobDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedJob: IJob;
       await session.withTransaction(async () => {
-        updatedJob = await this.jobsService.update(param.jobId, property, session, { authUser });
+        updatedJob = await this.jobsService.update(param.jobId, property, session);
       });
       session.endSession();
 
