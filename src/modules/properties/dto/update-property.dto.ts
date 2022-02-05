@@ -19,9 +19,9 @@ export class UpdatePropertyDto {
   @IsOptional()
   state: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  postalCode: number;
+  postalCode: string;
 
   @IsString()
   @IsOptional()

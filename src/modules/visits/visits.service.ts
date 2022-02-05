@@ -30,6 +30,13 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     return await this.update(visitId, visit, session, { authUser });
   }
 
+  /**
+   *  Gets Summary for Visits
+   *
+   * @param startDate Date
+   * @param endDate Date
+   * @returns Visit[]
+   */
   async getSummary(startDate: Date, endDate: Date) {
     const visits = await this.visitModel.find({ startDate: { $gte: startDate, $lte: endDate } });
     const visitSummaries = visits.reduce((acc, visit) => {
@@ -38,8 +45,8 @@ export class VisitsService extends BaseService<Visit, IVisit> {
         .between(endDate, startDate, true)
         .map((visitDate) => {
           return {
-            startTime: visit.startTime,
             status: visit.status,
+            startTime: visit.startTime,
             totalPrice: totalPricePerVisit,
             visitDate
           };

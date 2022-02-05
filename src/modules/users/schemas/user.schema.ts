@@ -41,7 +41,7 @@ export const UserSchema = new mongoose.Schema(
     userDocuments: [
       {
         documentUrl: { type: String },
-        type: { type: String, enum: ['ID-CARD', 'CLINICAL-CERTIFICATE', 'POLICE-CERTIFICATE'] }
+        type: { type: String, enum: ['ID-CARD', 'CLEANING-CERTIFICATE', 'POLICE-CERTIFICATE'] }
       }
     ],
     userImage: {

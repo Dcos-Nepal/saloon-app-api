@@ -12,6 +12,7 @@ export interface IQuote {
   lineItems: ILineItemPricing[];
   jobRequest: string | JobRequest;
   statusRevision?: IQuoteStatus[];
+  isDeleted?: boolean;
 }
 
 export interface IQuoteStatus {
@@ -23,7 +24,9 @@ export interface IQuoteStatus {
 export enum IQuoteStatusType {
   'PENDING' = 'PENDING',
   'ACCEPTED' = 'ACCEPTED',
-  'REJECTED' = 'REJECTED'
+  'REJECTED' = 'REJECTED',
+  'ARCHIVED' = 'ARCHIVED',
+  'CHANGE_REQUESTED' = 'CHANGE_REQUESTED'
 }
 
 export interface Quote extends IQuote, Document {

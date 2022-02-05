@@ -64,6 +64,20 @@ class BaseService<EntityModel, Entity> {
   }
 
   /**
+   * Find All entities that match the given query filters
+   *
+   * @param query FilterQuery<Entity>
+   * @param options IServiceOptions
+   * @returns Promise<{ rows: EntityModel[] }
+   */
+  async find(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<{ rows: EntityModel[] }> {
+    const findPromise = options?.toPopulate ? this.model.find(query).populate([options.toPopulate]) : this.model.find(query);
+    const rows = await findPromise.select(options?.fields ? options.fields : '');
+
+    return { rows };
+  }
+
+  /**
    * Create a Entity Document
    *
    * @param data Document Data
@@ -76,12 +90,18 @@ class BaseService<EntityModel, Entity> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(id: string, body: Partial<Entity>, session: ClientSession, options?: IServiceOptions) {
+  async update(id: string, body: Partial<Entity>, session: ClientSession, options?: IServiceOptions): Promise<EntityModel> {
     return await this.model.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async remove(id: string, session: ClientSession, options?: IServiceOptions) {
+  /**
+   * Removes the given entity completely from database.
+   *
+   * @param id String
+   * @param session ClientSession
+   * @returns Promise<boolean>
+   */
+  async remove(id: string, session: ClientSession): Promise<boolean> {
     const resource = await this.model.findById({ _id: id });
 
     if (!resource) throw new Error('Entity Model not found');
@@ -89,6 +109,18 @@ class BaseService<EntityModel, Entity> {
     await resource.remove({ session });
 
     return true;
+  }
+
+  /**
+   * Marks the entity as deleted without removing it completely.
+   *
+   * @param id String
+   * @param session ClientSession
+   * @param options IServiceOptions<Optional>
+   * @returns Promise<EntityModel>
+   */
+  async softDelete(id: string, session: ClientSession): Promise<EntityModel> {
+    return await this.model.findByIdAndUpdate({ _id: id }, { isDeleted: true }, { new: true, lean: true, session });
   }
 }
 

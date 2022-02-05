@@ -8,6 +8,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { LineItem } from './interfaces/line-item.interface';
 
 @Controller({
   path: '/line-items',
@@ -101,9 +102,9 @@ export class LineItemsController {
   async remove(@Param('lineItemId') lineItemId: string) {
     try {
       const session = await this.connection.startSession();
-      let removedItem: boolean;
+      let removedItem: LineItem;
       await session.withTransaction(async () => {
-        removedItem = await this.lineItemsService.remove(lineItemId, session);
+        removedItem = await this.lineItemsService.softDelete(lineItemId, session);
       });
       return new ResponseSuccess('LINE_ITEM.DELETE', removedItem);
     } catch (error) {

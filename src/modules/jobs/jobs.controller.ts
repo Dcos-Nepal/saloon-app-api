@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { JobsService } from './jobs.service';
 import { InjectConnection } from '@nestjs/mongoose';
-import { IJob } from './interfaces/job.interface';
+import { IJob, Job } from './interfaces/job.interface';
 import { CreateJobDto } from './dto/create-job.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -103,12 +103,12 @@ export class JobsController {
   @Delete('/:jobId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
-  async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
+  async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let deletedJob: boolean;
+      let deletedJob: Job;
       await session.withTransaction(async () => {
-        deletedJob = await this.jobsService.remove(param.jobId, session, { authUser });
+        deletedJob = await this.jobsService.softDelete(param.jobId, session);
       });
       session.endSession();
 

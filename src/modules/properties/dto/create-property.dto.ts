@@ -17,8 +17,8 @@ export class CreatePropertyDto {
   @IsString()
   state: string;
 
-  @IsNumber()
-  postalCode: number;
+  @IsString()
+  postalCode: string;
 
   @IsString()
   country: string;

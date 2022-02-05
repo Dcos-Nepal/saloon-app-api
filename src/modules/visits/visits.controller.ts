@@ -11,7 +11,7 @@ import { CurrentUser } from 'src/common/decorators/current-user';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 import { UpdateJobStatusDto } from './dto/update-visit-status-dto';
 import { IResponse } from 'src/common/interfaces/response.interface';
-import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
@@ -121,16 +121,16 @@ export class VisitsController {
   @Delete('/:visitId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
-  async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
+  async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let deletedJob: boolean;
+      let isVisitDeleted: boolean;
       await session.withTransaction(async () => {
-        deletedJob = await this.visitsService.remove(param.visitId, session, { authUser });
+        isVisitDeleted = await this.visitsService.remove(param.visitId, session);
       });
       session.endSession();
 
-      return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
+      return new ResponseSuccess('COMMON.SUCCESS', isVisitDeleted);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }

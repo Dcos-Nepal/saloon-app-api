@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested } from 'class-validator';
 
 import { UserAddressDto } from './user-address.dto';
@@ -45,8 +45,15 @@ export class CreateUserDto {
   })
   phoneNumber: string;
 
+  @ApiPropertyOptional()
   @IsOptional()
   @ValidateNested()
   @Type(() => UserAddressDto)
   address: UserAddressDto;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  referrer?: string;
 }

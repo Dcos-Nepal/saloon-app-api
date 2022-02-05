@@ -86,12 +86,12 @@ export class PropertiesController {
   @Delete('/:propertyId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
+  async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedProperty: boolean;
       await session.withTransaction(async () => {
-        updatedProperty = await this.propertiesService.remove(param.propertyId, session, { authUser });
+        updatedProperty = <boolean>await this.propertiesService.remove(param.propertyId, session);
       });
       session.endSession();
 

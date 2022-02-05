@@ -1,4 +1,4 @@
-import { ClientSession, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
@@ -88,18 +88,5 @@ export class LineItemsService extends BaseService<LineItem, ILineItem> {
     this.logger.log(`Update: updated line item of id ${id} successfully`);
 
     return updatedLineItem;
-  }
-
-  /**
-   * Mark the line Item as deleted
-   *
-   * @param id String
-   * @returns LineItem
-   */
-  async remove(id: string, session: ClientSession) {
-    this.logger.log(`Delete: delete line item of id ${id}`);
-    const removedItem = await this.lineItemModel.findOneAndUpdate({ _id: id }, { isDeleted: true }, { new: true, session }).exec();
-    this.logger.log(`Delete: line item soft deleted successfully`);
-    return removedItem && removedItem._id !== null;
   }
 }

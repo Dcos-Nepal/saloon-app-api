@@ -6,23 +6,24 @@ export interface IBaseAddress {
   street2?: string;
   city: string;
   state: string;
-  postalCode: number;
+  postalCode: string;
   country: string;
 }
 
-interface IPopulate {
+export interface IPopulate {
   path: string;
   select: string[];
 }
 
-interface IServiceOptions {
+export interface IServiceOptions {
   authUser?: IUser; // Currently Logged in user
   fields?: string; // Fields to select form the main entity
   toPopulate?: IPopulate[]; // [{path: 'path', select: ['attributes list']}]
   sortBy?: Record<string, SortValues>;
+  isSoftDelete?: boolean; // Decides wether to delete partially or completely
 }
 
-interface IMailOption {
+export interface IMailOption {
   template: string;
   context: Record<string, string>;
 }
@@ -34,4 +35,9 @@ export interface ILineItemPricing {
   unitPrice: number;
 }
 
-export { IUser, IServiceOptions, IMailOption };
+export interface IFindAll<Entity> {
+  rows: Entity[];
+  totalCount: number;
+}
+
+export { IUser };

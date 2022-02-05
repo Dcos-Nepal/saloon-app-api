@@ -23,8 +23,8 @@ import { EmailVerification } from './interfaces/email-verification.interface';
 import { JWTService } from './passport/jwt.service';
 import { ConfigService } from 'src/configs/config.service';
 import { MailService } from 'src/common/modules/mail/mail.service';
-import { UserDeviceService } from '../user-devices/user-devices.service';
-import { IUserDevice, UserDevice } from '../user-devices/interfaces/user-device.interface';
+import { UserDeviceService } from '../devices/devices.service';
+import { IUserDevice, UserDevice } from '../devices/interfaces/device.interface';
 import { UserLogoutDto } from './dto/user-logout.dto';
 
 @Injectable()
@@ -90,7 +90,7 @@ export class AuthService {
 
     if (userDevice?.id) {
       this.logger.log('Cleaning existing device for the user');
-      await this.userDeviceService.remove(userDevice?.id, session);
+      await this.userDeviceService.softDelete(userDevice?.id, session);
     }
 
     this.logger.log('Returning the logout status of the user');

@@ -9,7 +9,7 @@ import { PropertySchema } from '../properties/schemas/property.schema';
 import { ForgotPasswordSchema } from './schemas/forgot-password.schema';
 import { ConsentRegistrySchema } from './schemas/consent-registry.schema';
 import { EmailVerificationSchema } from './schemas/email-verification.schema';
-import { UserDevicesSchema } from '../user-devices/schemas/user-devices.schema';
+import { UserDevicesSchema } from '../devices/schemas/devices.schema';
 
 import { ConfigModule } from 'src/configs/config.module';
 import { MailModule } from 'src/common/modules/mail/mail.module';
@@ -19,7 +19,7 @@ import { JWTService } from './passport/jwt.service';
 import { UsersService } from '../users/users.service';
 import { MailService } from 'src/common/modules/mail/mail.service';
 import { PropertiesService } from '../properties/properties.service';
-import { UserDeviceService } from '../user-devices/user-devices.service';
+import { UserDeviceService } from '../devices/devices.service';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 
 import { AuthController } from './auth.controller';

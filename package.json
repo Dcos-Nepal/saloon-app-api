@@ -41,6 +41,7 @@
     "code-config": "^1.0.40",
     "express": "^4.17.2",
     "express-rate-limit": "^5.5.1",
+    "firebase-admin": "^10.0.2",
     "helmet": "^4.6.0",
     "luxon": "^2.3.0",
     "mongoose": "^6.1.2",
@@ -51,7 +52,8 @@
     "rxjs": "^7.2.0",
     "socket.io": "^4.4.0",
     "socket.io-redis": "^6.1.1",
-    "swagger-ui-express": "^4.3.0"
+    "swagger-ui-express": "^4.3.0",
+    "web-push": "^3.4.5"
   },
   "devDependencies": {
     "@nestjs/axios": "0.0.3",
