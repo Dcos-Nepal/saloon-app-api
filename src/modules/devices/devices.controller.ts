@@ -1,7 +1,6 @@
-import * as webPush from 'web-push';
 import * as mongoose from 'mongoose';
 
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { generateHash } from 'src/common/utils';
