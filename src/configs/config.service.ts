@@ -67,4 +67,16 @@ export class ConfigService {
       uri: this.get('MONGO_URI')
     };
   }
+
+  /**
+   * Gets MONGO Configuration
+   * @returns MongoConfig
+   */
+  public getFirebaseConfig() {
+    return {
+      projectId: this.get('FIREBASE_PROJECT_ID'),
+      privateKey: this.get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n'),
+      clientEmail: this.get('FIREBASE_CLIENT_EMAIL')
+    };
+  }
 }

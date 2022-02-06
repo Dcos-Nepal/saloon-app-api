@@ -43,7 +43,7 @@ export class UserDeviceService extends BaseService<UserDevice, IUserDevice> {
       switch (subscription.deviceType) {
         case DeviceType.WEB:
           this.webNotificationService
-            .sendNotification(subscription.deviceToken, {
+            .sendNotification(subscription.subscription, {
               notification: payload.notification,
               data: payload.webData
             })
