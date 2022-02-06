@@ -96,13 +96,13 @@ export class JobRequestController {
   async update(@Param() param, @Body() property: UpdatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let updatedProperty: JobRequest;
+      let updatedJobReq: JobRequest;
       await session.withTransaction(async () => {
-        updatedProperty = await this.jobRequestService.update(param.propertyId, property, session, { authUser });
+        updatedJobReq = await this.jobRequestService.update(param.propertyId, property, session, { authUser });
       });
       session.endSession();
 
-      return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
+      return new ResponseSuccess('COMMON.SUCCESS', updatedJobReq);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
@@ -111,16 +111,16 @@ export class JobRequestController {
   @Delete('/:propertyId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
+  async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let updatedProperty: boolean;
+      let deletedJobReq: JobRequest;
       await session.withTransaction(async () => {
-        updatedProperty = await this.jobRequestService.remove(param.propertyId, session, { authUser });
+        deletedJobReq = await this.jobRequestService.softDelete(param.propertyId, session);
       });
       session.endSession();
 
-      return new ResponseSuccess('COMMON.SUCCESS', updatedProperty);
+      return new ResponseSuccess('COMMON.SUCCESS', deletedJobReq);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }

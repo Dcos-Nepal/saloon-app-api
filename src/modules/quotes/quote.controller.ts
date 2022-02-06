@@ -91,12 +91,12 @@ export class QuoteController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  async update(@Param() param, @Body() property: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async update(@Param() param, @Body() updatedQuote: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedQuote: Quote;
       await session.withTransaction(async () => {
-        updatedQuote = await this.quoteService.update(param.quoteId, property, session, { authUser });
+        updatedQuote = await this.quoteService.update(param.quoteId, updatedQuote, session, { authUser });
       });
       session.endSession();
 
@@ -111,7 +111,7 @@ export class QuoteController {
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
   @SelfKey('quoteFor')
-  async updateStatus(@Param() param, @Body() quote: UpdateQuoteStatusDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async updateStatus(@CurrentUser() authUser: User, @Param() param, @Body() quote: UpdateQuoteStatusDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedQuote: Quote;
@@ -129,12 +129,12 @@ export class QuoteController {
   @Delete('/:quoteId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
-  async delete(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
+  async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let deletedQuote: boolean;
+      let deletedQuote: Quote;
       await session.withTransaction(async () => {
-        deletedQuote = await this.quoteService.remove(param.quoteId, session, { authUser });
+        deletedQuote = await this.quoteService.softDelete(param.quoteId, session);
       });
       session.endSession();
 

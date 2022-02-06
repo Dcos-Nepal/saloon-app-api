@@ -33,6 +33,14 @@ export class JobsService extends BaseService<Job, IJob> {
     return job;
   }
 
+  async getSummary() {
+    const [activeJobsCount, isCompleted] = await Promise.all([
+      this.jobModel.countDocuments({ startDate: { $lte: new Date() }, isCompleted: false }),
+      this.jobModel.countDocuments({ isCompleted: true })
+    ]);
+    return { activeJobsCount, isCompleted };
+  }
+
   private async createPrimaryVisit(job: Job, schedule: Schedule, session: ClientSession) {
     const visitObj: IVisit = { ...schedule, job: job._id, inheritJob: true, isPrimary: true };
     if (schedule.excRrule) visitObj.excRrule = schedule.excRrule;
@@ -40,13 +48,5 @@ export class JobsService extends BaseService<Job, IJob> {
     job.primaryVisit = visit._id;
     job.startDate = visit.startDate;
     await job.save({ session });
-  }
-
-  async getSummary() {
-    const [activeJobsCount, isCompleted] = await Promise.all([
-      this.jobModel.countDocuments({ startDate: { $lte: new Date() }, isCompleted: false }),
-      this.jobModel.countDocuments({ isCompleted: true })
-    ]);
-    return { activeJobsCount, isCompleted };
   }
 }

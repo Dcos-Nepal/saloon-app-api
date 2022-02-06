@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateUserPropertyDto {
   @IsString()
@@ -17,8 +17,8 @@ export class CreateUserPropertyDto {
   @IsString()
   state: string;
 
-  @IsNumber()
-  postalCode: number;
+  @IsString()
+  postalCode: string;
 
   @IsString()
   country: string;

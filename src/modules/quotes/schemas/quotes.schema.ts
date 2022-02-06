@@ -6,6 +6,7 @@ export const QuotesSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     quoteFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
+    manager: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
     jobRequest: { type: mongoose.Types.ObjectId, required: false, ref: 'JobRequest', default: null },
     lineItems: [
       {
@@ -18,15 +19,18 @@ export const QuotesSchema = new mongoose.Schema(
     status: {
       updatedAt: { type: Date, required: true, default: new Date() },
       updatedBy: { type: mongoose.Types.ObjectId, ref: 'User' },
+      reason: { type: String, required: true },
       status: { type: String, enum: Object.keys(IQuoteStatusType), default: 'PENDING' }
     },
     statusRevision: [
       {
         updatedAt: { type: Date, required: true, default: new Date() },
         updatedBy: { type: mongoose.Types.ObjectId, ref: 'User' },
+        reason: { type: String, required: true },
         status: { type: String, enum: Object.keys(IQuoteStatusType), default: 'PENDING' }
       }
     ],
+    isDeleted: { type: Boolean, required: true, default: false },
     createdBy: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
   },
   {

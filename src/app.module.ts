@@ -20,7 +20,8 @@ import { VisitsModule } from './modules/visits/visits.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { AWSModule } from './common/modules/aws/aws.module';
 import { FilesModule } from './common/modules/files/files.module';
-import { UserDevicesModule } from './modules/user-devices/user-devices.module';
+import { UserDevicesModule } from './modules/devices/devices.module';
+import { NotificationModule } from './common/modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { UserDevicesModule } from './modules/user-devices/user-devices.module';
     // Common Modules
     AWSModule,
     FilesModule,
+    NotificationModule,
 
     // Custom Modules
     UsersModule,

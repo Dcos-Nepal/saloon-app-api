@@ -1,4 +1,4 @@
-import { IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class CreatePropertyDto {
   @IsString()
@@ -17,8 +17,8 @@ export class CreatePropertyDto {
   @IsString()
   state: string;
 
-  @IsNumber()
-  postalCode: number;
+  @IsString()
+  postalCode: string;
 
   @IsString()
   country: string;

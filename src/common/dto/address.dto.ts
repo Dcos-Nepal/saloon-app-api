@@ -18,7 +18,7 @@ export class AddressDto {
   state: string;
 
   @IsString()
-  postalCode: number;
+  postalCode: string;
 
   @IsString()
   country: string;

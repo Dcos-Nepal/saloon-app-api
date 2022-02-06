@@ -47,12 +47,36 @@ export class ConfigService {
   }
 
   /**
+   * Gets Web Push Configuration
+   * @returns MongoConfig
+   */
+  public getWebPushConfig() {
+    return {
+      subject: this.get('VAPID_SUBJECT'),
+      publicKey: this.get('VAPID_PUBLIC_KEY'),
+      privateKey: this.get('VAPID_PRIVATE_KEY')
+    };
+  }
+
+  /**
    * Gets MONGO Configuration
    * @returns MongoConfig
    */
   public getMongoConfig() {
     return {
       uri: this.get('MONGO_URI')
+    };
+  }
+
+  /**
+   * Gets MONGO Configuration
+   * @returns MongoConfig
+   */
+  public getFirebaseConfig() {
+    return {
+      projectId: this.get('FIREBASE_PROJECT_ID'),
+      privateKey: this.get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n'),
+      clientEmail: this.get('FIREBASE_CLIENT_EMAIL')
     };
   }
 }

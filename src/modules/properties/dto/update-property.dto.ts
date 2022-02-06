@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdatePropertyDto {
   name: string;
@@ -19,9 +19,9 @@ export class UpdatePropertyDto {
   @IsOptional()
   state: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  postalCode: number;
+  postalCode: string;
 
   @IsString()
   @IsOptional()

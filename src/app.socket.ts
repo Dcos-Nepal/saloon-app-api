@@ -6,9 +6,9 @@ import { Global, Logger } from '@nestjs/common';
 @Global()
 @WebSocketGateway({ namespace: '/ws', cors: { origin: '*' } })
 export class AppSocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
-
   private logger: Logger = new Logger('AppSocketGateway');
+
+  @WebSocketServer() server: Server;
 
   /**
    * For handling events from clients
@@ -19,7 +19,7 @@ export class AppSocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
    */
 
   /**
-   * Publishes events to all connected cients.
+   * Publishes events to all connected clients.
    *
    * @param event String
    * @param payload Object
