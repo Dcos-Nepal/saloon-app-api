@@ -29,6 +29,7 @@ export interface IMailOption {
 }
 
 export interface ILineItemPricing {
+  ref: string;
   name: string;
   description?: string;
   quantity: number;

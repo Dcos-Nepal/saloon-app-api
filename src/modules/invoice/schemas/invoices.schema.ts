@@ -15,6 +15,7 @@ export const InvoiceSchema = new mongoose.Schema(
     due: { type: Date },
     lineItems: [
       {
+        ref: { type: String, required: false },
         name: { type: String, required: true },
         description: { type: String },
         quantity: { type: Number, default: 1 },

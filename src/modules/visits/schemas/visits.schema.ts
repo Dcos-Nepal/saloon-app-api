@@ -17,6 +17,7 @@ export const VisitSchema = new mongoose.Schema(
     team: { type: [mongoose.Types.ObjectId], ref: 'User' },
     lineItems: [
       {
+        ref: { type: String, required: false },
         name: { type: String, required: true },
         description: { type: String },
         quantity: { type: Number, default: 1 },
