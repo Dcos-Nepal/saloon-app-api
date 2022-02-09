@@ -6,10 +6,10 @@ export const QuotesSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     quoteFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
-    manager: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
     jobRequest: { type: mongoose.Types.ObjectId, required: false, ref: 'JobRequest', default: null },
     lineItems: [
       {
+        ref: { type: String, required: false },
         name: { type: String, required: true },
         description: { type: String },
         quantity: { type: Number, default: 1 },
@@ -19,14 +19,14 @@ export const QuotesSchema = new mongoose.Schema(
     status: {
       updatedAt: { type: Date, required: true, default: new Date() },
       updatedBy: { type: mongoose.Types.ObjectId, ref: 'User' },
-      reason: { type: String, required: true },
+      reason: { type: String, required: false },
       status: { type: String, enum: Object.keys(IQuoteStatusType), default: 'PENDING' }
     },
     statusRevision: [
       {
         updatedAt: { type: Date, required: true, default: new Date() },
         updatedBy: { type: mongoose.Types.ObjectId, ref: 'User' },
-        reason: { type: String, required: true },
+        reason: { type: String, required: false },
         status: { type: String, enum: Object.keys(IQuoteStatusType), default: 'PENDING' }
       }
     ],

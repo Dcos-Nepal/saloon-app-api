@@ -13,6 +13,7 @@ export const JobSchema = new mongoose.Schema(
     primaryVisit: { type: mongoose.Types.ObjectId, ref: 'Visit' },
     lineItems: [
       {
+        ref: { type: String, required: false },
         name: { type: String, required: true },
         description: { type: String },
         quantity: { type: Number, default: 1 },

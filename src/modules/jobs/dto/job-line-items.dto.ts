@@ -1,6 +1,10 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class JobLineItem {
+  @IsOptional()
+  @IsString()
+  ref: string;
+
   @IsString()
   name: string;
 
