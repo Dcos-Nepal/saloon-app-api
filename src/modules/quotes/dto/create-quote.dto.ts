@@ -14,8 +14,13 @@ export class CreateQuoteDto {
   quoteFor: string;
 
   @IsString()
-  @IsOptional()
   @IsMongoId()
+  @IsOptional()
+  property: string;
+
+  @IsString()
+  @IsMongoId()
+  @IsOptional()
   createdBy: string;
 
   @IsString()

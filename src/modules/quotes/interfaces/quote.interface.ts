@@ -2,6 +2,7 @@ import { Document } from 'mongoose';
 import { User } from 'src/modules/users/interfaces/user.interface';
 import { JobRequest } from 'src/modules/job-request/interfaces/job-request.interface';
 import { ILineItemPricing } from 'src/common/interfaces';
+import { Property } from 'src/modules/properties/interfaces/property.interface';
 
 export interface IQuote {
   title: string;
@@ -9,6 +10,7 @@ export interface IQuote {
   status?: IQuoteStatus;
   quoteFor: string | User;
   createdBy: string | User;
+  property: string | Property;
   lineItems: ILineItemPricing[];
   jobRequest: string | JobRequest;
   statusRevision?: IQuoteStatus[];
