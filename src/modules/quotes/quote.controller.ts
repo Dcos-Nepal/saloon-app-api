@@ -31,7 +31,11 @@ export class QuoteController {
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const populate = [{ path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }];
+      const populate = [
+        { path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] },
+        { path: 'property', select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country', 'user', 'isDeleted'] }
+      ];
+
       const quotes = await this.quoteService.findAll(query, { authUser, toPopulate: populate });
       return new ResponseSuccess('COMMON.SUCCESS', quotes);
     } catch (error) {
@@ -56,7 +60,10 @@ export class QuoteController {
   @Roles('ADMIN', 'CLIENT')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const populate = [{ path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }];
+      const populate = [
+        { path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] },
+        { path: 'property', select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country', 'user', 'isDeleted'] }
+      ];
       const quote = await this.quoteService.findById(param.quoteId, { authUser, toPopulate: populate });
       return new ResponseSuccess('COMMON.SUCCESS', quote);
     } catch (error) {
@@ -91,12 +98,12 @@ export class QuoteController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  async update(@Param() param, @Body() updatedQuote: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async update(@Param() param, @Body() updatedQuoteDto: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedQuote: Quote;
       await session.withTransaction(async () => {
-        updatedQuote = await this.quoteService.update(param.quoteId, updatedQuote, session, { authUser });
+        updatedQuote = await this.quoteService.update(param.quoteId, updatedQuoteDto, session, { authUser });
       });
       session.endSession();
 
