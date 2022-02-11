@@ -51,7 +51,7 @@ export class UsersController {
     }
 
     try {
-      const users = await this.usersService.findAll(filter, { authUser, fields: '-password' });
+      const users = await this.usersService.findAll(filter, { authUser, query, fields: '-password' });
       return new ResponseSuccess('COMMON.SUCCESS', users);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

@@ -16,6 +16,7 @@ export interface IPopulate {
 }
 
 export interface IServiceOptions {
+  query?: Record<string, any>;
   authUser?: IUser; // Currently Logged in user
   fields?: string; // Fields to select form the main entity
   toPopulate?: IPopulate[]; // [{path: 'path', select: ['attributes list']}]

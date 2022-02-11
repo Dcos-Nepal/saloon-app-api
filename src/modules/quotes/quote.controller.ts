@@ -15,7 +15,7 @@ import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
 
 @Controller({
   path: '/quotes',
@@ -30,13 +30,15 @@ export class QuoteController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+    const filter: mongoose.FilterQuery<Type> = {};
+
     try {
       const populate = [
         { path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] },
         { path: 'property', select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country', 'user', 'isDeleted'] }
       ];
 
-      const quotes = await this.quoteService.findAll(query, { authUser, toPopulate: populate });
+      const quotes = await this.quoteService.findAll(filter, { authUser, query, toPopulate: populate });
       return new ResponseSuccess('COMMON.SUCCESS', quotes);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

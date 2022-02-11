@@ -42,22 +42,22 @@ class BaseService<EntityModel, Entity> {
    * @param query FilterQuery
    * @returns Promise<EntityModel[]>
    */
-  async findAll(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<{ rows: EntityModel[]; totalCount: number }> {
-    const limit = parseInt(query['limit'] || 10);
-    const page = parseInt(query['page'] || 1);
+  async findAll(filter: FilterQuery<Entity>, options?: IServiceOptions): Promise<{ rows: EntityModel[]; totalCount: number }> {
+    const limit = parseInt(options.query['limit'] || 10);
+    const page = parseInt(options.query['page'] || 1);
     const skip = (page - 1) * limit;
 
     // Prepare Sort Options
     const sortOptions = options?.sortBy ? options.sortBy : '-createdAt';
 
-    const findPromise = options?.toPopulate ? this.model.find(query).populate(options.toPopulate) : this.model.find(query);
+    const findPromise = options?.toPopulate ? this.model.find(filter).populate(options.toPopulate) : this.model.find(filter);
     const [rows, totalCount] = await Promise.all([
       findPromise
         .select(options?.fields ? options.fields : '')
         .limit(limit)
         .skip(skip)
         .sort(sortOptions),
-      this.model.countDocuments(query)
+      this.model.countDocuments(filter)
     ]);
 
     return { rows, totalCount };

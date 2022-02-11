@@ -34,7 +34,7 @@ export class JobRequestController {
         filter = { name: { $regex: query.q, $options: 'i' } };
       }
 
-      const options = { authUser, toPopulate: [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }] };
+      const options = { authUser, query, toPopulate: [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }] };
       const properties = await this.jobRequestService.findAll(filter, options);
 
       return new ResponseSuccess('COMMON.SUCCESS', { ...properties });
