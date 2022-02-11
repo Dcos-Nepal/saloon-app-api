@@ -61,7 +61,7 @@ export class QuoteController {
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const populate = [
-        { path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] },
+        { path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber', 'address'] },
         { path: 'property', select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country', 'user', 'isDeleted'] }
       ];
       const quote = await this.quoteService.findById(param.quoteId, { authUser, toPopulate: populate });

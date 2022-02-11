@@ -14,7 +14,7 @@ class BaseService<EntityModel, Entity> {
     const findByIdPromise = this.model.findById(id, options?.fields || '');
 
     if (options?.toPopulate) {
-      return await findByIdPromise.populate([options.toPopulate]);
+      return await findByIdPromise.populate(options.toPopulate);
     }
 
     return await findByIdPromise;
