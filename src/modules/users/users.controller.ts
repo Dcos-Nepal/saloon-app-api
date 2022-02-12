@@ -36,7 +36,7 @@ export class UsersController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async findAll(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<User> = { _id: { $ne: authUser._id } };
+    const filter: mongoose.FilterQuery<User> = { _id: { $ne: authUser._id }, ...query };
 
     if (query.q) filter.fullName = { $regex: query.q, $options: 'i' };
     if (query.roles) filter.roles = { $in: query.roles.split(',') };

@@ -25,7 +25,7 @@ export class InvoiceController {
   @UseGuards(RolesGuard)
   async find(@Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
     try {
-      const invoices = await this.invoiceService.findAll(query, { authUser });
+      const invoices = await this.invoiceService.findAll(query, { authUser, query });
       return new ResponseSuccess('COMMON.SUCCESS', invoices);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

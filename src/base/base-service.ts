@@ -50,6 +50,11 @@ class BaseService<EntityModel, Entity> {
     // Prepare Sort Options
     const sortOptions = options?.sortBy ? options.sortBy : '-createdAt';
 
+    // Remove pagination Query strings from filter
+    delete filter?.limit;
+    delete filter?.page;
+    delete filter?.q;
+
     const findPromise = options?.toPopulate ? this.model.find(filter).populate(options.toPopulate) : this.model.find(filter);
     const [rows, totalCount] = await Promise.all([
       findPromise

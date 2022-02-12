@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { VisitsService } from './visits.service';
 import { InjectConnection } from '@nestjs/mongoose';
-import { IVisit } from './interfaces/visit.interface';
+import { IVisit, Visit } from './interfaces/visit.interface';
 import { CreateVisitDto } from './dto/create-visit.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UpdateVisitDto } from './dto/update-visit.dto';
@@ -31,8 +31,14 @@ export class VisitsController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+    let filter: mongoose.FilterQuery<Visit> = { ...query };
+
+    if (query.q) {
+      filter = { title: { $regex: query.q, $options: 'i' } };
+    }
+
     try {
-      const visits = await this.visitsService.findAll(query, { authUser });
+      const visits = await this.visitsService.findAll(filter, { authUser, query });
       return new ResponseSuccess('COMMON.SUCCESS', visits);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

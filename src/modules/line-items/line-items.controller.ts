@@ -42,14 +42,14 @@ export class LineItemsController {
 
   @Get()
   async findAll(@Query() query: LineItemQueryDto) {
-    let filter: mongoose.FilterQuery<Type> = {};
+    let filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
       if (query.q) {
         filter = { name: { $regex: query.q, $options: 'i' } };
       }
 
-      const lineItemsResponse = await this.lineItemsService.findAll(filter);
+      const lineItemsResponse = await this.lineItemsService.findAll(filter, { query });
 
       if (lineItemsResponse) {
         return new ResponseSuccess('LINE_ITEM.FILTER', lineItemsResponse);

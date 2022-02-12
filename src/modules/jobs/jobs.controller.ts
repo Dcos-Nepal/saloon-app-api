@@ -14,7 +14,7 @@ import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
 
 @Controller({
   path: '/jobs',
@@ -29,8 +29,14 @@ export class JobsController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+    let filter: mongoose.FilterQuery<Type> = { ...query };
+
     try {
-      const jobs = await this.jobsService.findAll(query, { authUser });
+      if (query.q) {
+        filter = { title: { $regex: query.q, $options: 'i' } };
+      }
+
+      const jobs = await this.jobsService.findAll(filter, { authUser, query });
       return new ResponseSuccess('COMMON.SUCCESS', jobs);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

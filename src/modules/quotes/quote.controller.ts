@@ -30,7 +30,11 @@ export class QuoteController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<Type> = {};
+    let filter: mongoose.FilterQuery<Type> = { ...query };
+
+    if (query.q) {
+      filter = { title: { $regex: query.q, $options: 'i' } };
+    }
 
     try {
       const populate = [

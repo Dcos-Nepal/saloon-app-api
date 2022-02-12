@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
 import { PropertiesService } from './properties.service';
 import { CurrentUser } from 'src/common/decorators/current-user';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 import { User } from '../users/interfaces/user.interface';
@@ -27,8 +27,18 @@ export class PropertiesController {
 
   @Get()
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+    let filter: mongoose.FilterQuery<Type> = { ...query };
+
+    // Remove pagination Query strings from filter
+    delete filter?.limit;
+    delete filter?.page;
+
     try {
-      const properties = await this.propertiesService.findAll(query, { authUser });
+      if (query.q) {
+        filter = { name: { $regex: query.q, $options: 'i' } };
+      }
+
+      const properties = await this.propertiesService.findAll(filter, { authUser, query });
       return new ResponseSuccess('COMMON.SUCCESS', properties);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
