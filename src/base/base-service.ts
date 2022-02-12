@@ -43,8 +43,8 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<EntityModel[]>
    */
   async findAll(filter: FilterQuery<Entity>, options?: IServiceOptions): Promise<{ rows: EntityModel[]; totalCount: number }> {
-    const limit = parseInt(options.query['limit'] || 10);
-    const page = parseInt(options.query['page'] || 1);
+    const limit = parseInt(options?.query['limit'] || 10);
+    const page = parseInt(options?.query['page'] || 1);
     const skip = (page - 1) * limit;
 
     // Prepare Sort Options
