@@ -9,11 +9,16 @@ export class CreateJobDto {
   title: string;
 
   @IsString()
+  @IsOptional()
   instruction: string;
 
   @IsString()
   @IsMongoId()
   jobFor: string;
+
+  @IsString()
+  @IsMongoId()
+  property: string;
 
   @IsEnum(JobType)
   type: JobType;

@@ -6,11 +6,12 @@ export const JobSchema = new mongoose.Schema(
     title: { type: String, required: true },
     instruction: { type: String, required: true },
     jobFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
+    property: { type: mongoose.Types.ObjectId, required: true, ref: 'Property' },
     team: [{ type: mongoose.Types.ObjectId, required: true, ref: 'User' }],
     remindInvoicing: { type: Boolean, required: true, default: false },
     startDate: { type: Date },
     isCompleted: { type: Boolean, default: false },
-    primaryVisit: { type: mongoose.Types.ObjectId, ref: 'Visit' },
+    primaryVisit: { type: mongoose.Types.ObjectId, ref: 'Visits' },
     lineItems: [
       {
         ref: { type: String, required: false },
