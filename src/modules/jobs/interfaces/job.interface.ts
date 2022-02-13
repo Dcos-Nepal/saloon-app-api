@@ -2,11 +2,13 @@ import { Document } from 'mongoose';
 import { User } from 'src/modules/users/interfaces/user.interface';
 import { ILineItemPricing } from 'src/common/interfaces';
 import { Visit } from 'src/modules/visits/interfaces/visit.interface';
+import { Property } from 'src/modules/properties/interfaces/property.interface';
 
 export interface IJob {
   title: string;
   instruction: string;
   jobFor: string | User;
+  property: string | Property;
   remindInvoicing?: boolean;
   startDate?: Date;
   type: JobType;

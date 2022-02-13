@@ -36,7 +36,13 @@ export class JobsController {
         filter = { title: { $regex: query.q, $options: 'i' } };
       }
 
-      const jobs = await this.jobsService.findAll(filter, { authUser, query });
+      const toPopulate = [
+        { path: 'jobFor', select: ['fullName'] },
+        { path: 'property', select: [''] },
+        { path: 'primaryVisit', select: ['rruleSet'] }
+      ];
+
+      const jobs = await this.jobsService.findAll(filter, { authUser, query, toPopulate });
       return new ResponseSuccess('COMMON.SUCCESS', jobs);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
