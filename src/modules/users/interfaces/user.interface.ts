@@ -10,8 +10,9 @@ export interface IUserLocation {
 }
 
 export interface IUserDocument {
-  documentUrl: string;
-  type: 'ID-CARD' | 'CLINICAL-CERTIFICATE' | 'POLICE-CERTIFICATE';
+  key: string;
+  url: string;
+  type: 'ID_CARD' | 'CLEANING_CERTIFICATE' | 'POLICE_CERTIFICATE';
 }
 
 export interface IUser {
@@ -24,7 +25,7 @@ export interface IUser {
   password: string;
   roles: IUserRole[];
   address?: IBaseAddress;
-  userDocuments?: [IUserDocument];
+  documents?: [IUserDocument];
   location: IUserLocation;
   lastOnline?: Date;
   userImage?: {

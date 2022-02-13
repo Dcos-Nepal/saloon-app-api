@@ -38,10 +38,11 @@ export const UserSchema = new mongoose.Schema(
       type: { type: String, default: 'Point' },
       coordinates: { type: [Number], default: [0.0, 0.0] }
     },
-    userDocuments: [
+    documents: [
       {
-        documentUrl: { type: String },
-        type: { type: String, enum: ['ID-CARD', 'CLEANING-CERTIFICATE', 'POLICE-CERTIFICATE'] }
+        key: { type: String },
+        url: { type: String },
+        type: { type: String, enum: ['ID_CARD', 'CLEANING_CERTIFICATE', 'POLICE_CERTIFICATE'] }
       }
     ],
     userImage: {

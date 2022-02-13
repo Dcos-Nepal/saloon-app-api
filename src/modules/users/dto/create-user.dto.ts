@@ -53,6 +53,10 @@ export class CreateUserDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  documents?: any;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   referrer?: string;
