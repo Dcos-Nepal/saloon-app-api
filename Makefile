@@ -30,7 +30,7 @@ export TARGET_IMAGE_LATEST ?= $(TARGET_IMAGE):$(SOURCE_IMAGE)-$(GIT_BRANCH)-$(GI
 -include $(ENVIRONMENT_OVERRIDE_PATH)
 
 docker-build: ## build docker file
-	@docker build $(DOCKER_BUILD_FLAGS) --target  artifact -t $(SOURCE_IMAGE) -f $(DOCKER_FILE) $(DOCKER_BUILD_PATH)
+	@docker build $(DOCKER_BUILD_FLAGS) --targe artifact --platform=linux/amd64 -t $(SOURCE_IMAGE) -f $(DOCKER_FILE) $(DOCKER_BUILD_PATH)
 
 docker-tag: ## docker tag
 	@docker tag $(SOURCE_IMAGE) $(TARGET_IMAGE_LATEST)
