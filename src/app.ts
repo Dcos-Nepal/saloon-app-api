@@ -8,6 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { RedisIoAdapter } from './common/redis-adapter';
 import { AllExceptionsFilter } from './common/filters/all-exception.filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export async function createApp(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -37,8 +38,7 @@ export async function createApp(): Promise<NestExpressApplication> {
 
   // Versioning API using MEDIA_TYPE
   app.enableVersioning({
-    type: VersioningType.MEDIA_TYPE,
-    key: 'v='
+    type: VersioningType.URI,
   });
 
   // Request Body Parser
@@ -74,6 +74,15 @@ export async function createApp(): Promise<NestExpressApplication> {
   app.use('/auth/login', requestLimiter(5, 15, 'Too many login attempts from this IP, please try again after 5 minutes'));
   app.use('/auth/register', requestLimiter(20, 10, 'Too many register attempts from this IP, please try again after 20 minutes'));
   // /** End Security **/
+   // Swagger Documentation
+  const options = new DocumentBuilder()
+    .setTitle('Orange Cleaning (AU) API')
+    .setDescription('Orange Cleaning for workers, clients and admin.')
+    .setVersion('1.0.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'Token' }, 'Authorization')
+    .build();
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('api-docs', app, document);
 
   return app;
 }

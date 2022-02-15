@@ -1096,6 +1096,11 @@
   "resolved" "https://registry.npmjs.org/@tsconfig/node16/-/node16-1.0.2.tgz"
   "version" "1.0.2"
 
+"@types/aws-lambda@^8.10.92":
+  "integrity" "sha512-dB14TltT1SNq73z3MaZfKyyBZ37NAgAFl8jze59bisR4fJ6pB6AYGxItHFkooZbN7UcVJX/cFudM4p8wp1W4rA=="
+  "resolved" "https://registry.npmjs.org/@types/aws-lambda/-/aws-lambda-8.10.92.tgz"
+  "version" "8.10.92"
+
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.14":
   "integrity" "sha512-S7unDjm/C7z2A2R9NzfKCK1I+BAALDtxEmsJBwlB3EzNfb929ykjL++1CK9LO++EIp2fQrC8O+BwjKvz6UeDyQ=="
   "resolved" "https://registry.npmjs.org/@types/babel__core/-/babel__core-7.1.18.tgz"
@@ -1197,6 +1202,13 @@
   dependencies:
     "@types/express" "*"
     "@types/express-unless" "*"
+
+"@types/express-rate-limit@^6.0.0":
+  "integrity" "sha512-nZxo3nwU20EkTl/f2eGdndQkDIJYwkXIX4S3Vrp2jMdSdFJ6AWtIda8gOz0wiMuOFoeH/UUlCAiacz3x3eWNFA=="
+  "resolved" "https://registry.npmjs.org/@types/express-rate-limit/-/express-rate-limit-6.0.0.tgz"
+  "version" "6.0.0"
+  dependencies:
+    "express-rate-limit" "*"
 
 "@types/express-serve-static-core@^4.17.18":
   "integrity" "sha512-P1BJAEAW3E2DJUlkgq4tOL3RyMunoWXqbSCygWo5ZIWTjUgN1YnaXWW4VWl/oc8vs/XoYibEGBKP0uZyF4AHig=="
@@ -1456,6 +1468,11 @@
   dependencies:
     "@typescript-eslint/types" "4.33.0"
     "eslint-visitor-keys" "^2.0.0"
+
+"@vendia/serverless-express@^4.5.3":
+  "integrity" "sha512-EBBW1kt1A62FaSeQGh7jwzbii+3HVYDvKgMPpV76LCqJbgqMnyaRrgFQ26nSZ54iV4bh50eUmuSpSmJIZ6zq4w=="
+  "resolved" "https://registry.npmjs.org/@vendia/serverless-express/-/serverless-express-4.5.3.tgz"
+  "version" "4.5.3"
 
 "@webassemblyjs/ast@1.11.1":
   "integrity" "sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw=="
@@ -1865,7 +1882,17 @@
   "resolved" "https://registry.npmjs.org/at-least-node/-/at-least-node-1.0.0.tgz"
   "version" "1.0.0"
 
-"aws-sdk@^2.1066.0":
+"aws-lambda@^1.0.7":
+  "integrity" "sha512-9GNFMRrEMG5y3Jvv+V4azWvc+qNWdWLTjDdhf/zgMlz8haaaLWv0xeAIWxz9PuWUBawsVxy0zZotjCdR3Xq+2w=="
+  "resolved" "https://registry.npmjs.org/aws-lambda/-/aws-lambda-1.0.7.tgz"
+  "version" "1.0.7"
+  dependencies:
+    "aws-sdk" "^2.814.0"
+    "commander" "^3.0.2"
+    "js-yaml" "^3.14.1"
+    "watchpack" "^2.0.0-beta.10"
+
+"aws-sdk@^2.1066.0", "aws-sdk@^2.814.0":
   "integrity" "sha512-TtyHDL4ZEs8Zh/DqWY/hv745DTWrIwOyBAvfjBJ45RE9h0TjpWqCIowEtb6gRPAKyPPyfGH4s+rEYu07vNK1Hg=="
   "resolved" "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.1073.0.tgz"
   "version" "2.1073.0"
@@ -2386,6 +2413,11 @@
   "integrity" "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ=="
   "resolved" "https://registry.npmjs.org/commander/-/commander-2.20.3.tgz"
   "version" "2.20.3"
+
+"commander@^3.0.2":
+  "integrity" "sha512-Gar0ASD4BDyKC4hl4DwHqDrmvjoxWKZigVnAbn5H1owvm4CxCPdb0HQDehwNYMJpla5+M2tPmPARzhtYuwpHow=="
+  "resolved" "https://registry.npmjs.org/commander/-/commander-3.0.2.tgz"
+  "version" "3.0.2"
 
 "commander@4.1.1":
   "integrity" "sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA=="
@@ -3192,7 +3224,7 @@
     "jest-matcher-utils" "^27.5.1"
     "jest-message-util" "^27.5.1"
 
-"express-rate-limit@^5.5.1":
+"express-rate-limit@*", "express-rate-limit@^5.5.1":
   "integrity" "sha512-MTjE2eIbHv5DyfuFz4zLYWxpqVhEhkTiwFGuB74Q9CSou2WHO52nlE5y3Zlg6SIsiYUIPj6ifFxnkPz6O3sIUg=="
   "resolved" "https://registry.npmjs.org/express-rate-limit/-/express-rate-limit-5.5.1.tgz"
   "version" "5.5.1"
@@ -3885,7 +3917,7 @@
   "resolved" "https://registry.npmjs.org/human-signals/-/human-signals-2.1.0.tgz"
   "version" "2.1.0"
 
-"husky@^7.0.4":
+"husky@^7.0.0":
   "integrity" "sha512-vbaCKN2QLtP/vD4yvs6iz6hBEo6wkSzs8HpRah1Z6aGmF2KW5PdYuAd7uX5a+OyBZHBhd+TFLqgjUgytQr4RvQ=="
   "resolved" "https://registry.npmjs.org/husky/-/husky-7.0.4.tgz"
   "version" "7.0.4"
@@ -4650,7 +4682,7 @@
   "resolved" "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
   "version" "4.0.0"
 
-"js-yaml@^3.13.1":
+"js-yaml@^3.13.1", "js-yaml@^3.14.1":
   "integrity" "sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g=="
   "resolved" "https://registry.npmjs.org/js-yaml/-/js-yaml-3.14.1.tgz"
   "version" "3.14.1"
@@ -7262,7 +7294,7 @@
   dependencies:
     "makeerror" "1.0.12"
 
-"watchpack@^2.3.1":
+"watchpack@^2.0.0-beta.10", "watchpack@^2.3.1":
   "integrity" "sha512-x0t0JuydIo8qCNctdDrn1OzH/qDzk2+rdCOC3YzumZ42fiMqmQ7T3xQurykYMhYfHaPHTp4ZxAx2NfUo1K6QaA=="
   "resolved" "https://registry.npmjs.org/watchpack/-/watchpack-2.3.1.tgz"
   "version" "2.3.1"
