@@ -5,7 +5,7 @@ import { Injectable, HttpStatus, HttpException, NotFoundException, Logger } from
 
 import { ProfileDto } from './dto/profile.dto';
 import { SettingsDto } from './dto/settings.dto';
-import { CreateUserDto } from './dto/create-user.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
 
 import { IServiceOptions } from 'src/common/interfaces';
 import { IUser, User } from './interfaces/user.interface';
@@ -44,7 +44,7 @@ export class UsersService extends BaseService<User, IUser> {
    */
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
-    if (body.location) body.location.type = 'Point';
+    // if (body.location) body.location.type = 'Point';
 
     return await this.userModel.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session }).select('-password -__v');
   }
@@ -60,12 +60,12 @@ export class UsersService extends BaseService<User, IUser> {
   }
 
   /**
-   * Creates New User in the System
+   * Registers New User in the System
    *
-   * @param newUser CreateUserDto
+   * @param newUser RegisterUserDto
    * @returns Promise<User>
    */
-  async createNewUser(newUser: CreateUserDto): Promise<User> {
+  async registerUser(newUser: RegisterUserDto): Promise<User> {
     try {
       if (this.isValidEmail(newUser.email) && newUser.password) {
         const userRegistered = await this.findByEmail(newUser.email);
@@ -82,6 +82,7 @@ export class UsersService extends BaseService<User, IUser> {
         throw new HttpException('REGISTRATION.MISSING_MANDATORY_PARAMETERS', HttpStatus.FORBIDDEN);
       }
     } catch (error) {
+      this.logger.error('Error', JSON.stringify(error));
       throw new HttpException('REGISTRATION.ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -194,7 +195,7 @@ export class UsersService extends BaseService<User, IUser> {
     const avatar = await this.publicFilesService.uploadPublicFile(fileBuffer, filename);
 
     this.logger.log('Updating profile picture.');
-    user.userImage = {
+    user.avatar = {
       key: avatar.Key,
       url: avatar.Location
     };

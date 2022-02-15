@@ -10,13 +10,43 @@ export interface IUserLocation {
 }
 
 export interface IUserDocument {
-  key: string;
-  url: string;
-  type: 'ID_CARD' | 'CLEANING_CERTIFICATE' | 'POLICE_CERTIFICATE';
+  idCard?: {
+    url: string;
+    key: string;
+    type: 'ID_CARD';
+  };
+  cleaningCert?: {
+    url: string;
+    key: string;
+    type: 'CLEANING_CERTIFICATE';
+  };
+  policeCert?: {
+    url: string;
+    key: string;
+    type: 'POLICE_CERTIFICATE';
+  };
+}
+
+export interface IClient {
+  type?: string;
+  preferredTime?: [string];
+  referredBy?: string;
+  referralCode?: string;
+}
+
+export interface IWorker {
+  type?: string;
+  location?: IUserLocation;
+  documents?: IUserDocument;
+  workingDays?: [string];
+  workingHOurs?: string;
+  referredBy?: string;
+  referralCode?: string;
 }
 
 export interface IUser {
   _id?: string;
+  userCode?: string;
   firstName: string;
   lastName: string;
   fullName?: string;
@@ -25,21 +55,18 @@ export interface IUser {
   password: string;
   roles: IUserRole[];
   address?: IBaseAddress;
-  documents?: [IUserDocument];
-  location: IUserLocation;
-  lastOnline?: Date;
-  userImage?: {
+  avatar?: {
     key: string;
     url: string;
   };
-  auth: {
+  auth?: {
     email: {
       valid: boolean;
     };
   };
-  settings: ISetting;
-  referralCode: string;
-  referredBy: User;
+  userData: IClient | IWorker;
+  settings?: ISetting;
+  lastOnline?: Date;
 }
 
 export interface User extends IUser, Document {

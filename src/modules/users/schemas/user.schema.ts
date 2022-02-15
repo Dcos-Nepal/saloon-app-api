@@ -1,5 +1,11 @@
 import * as mongoose from 'mongoose';
+import { randomStringCaps } from 'src/common/utils/random-string';
 import { User } from '../interfaces/user.interface';
+
+export enum UserType {
+  CLIENT = 'CLIENT',
+  WORKER = 'WORKER'
+}
 
 export const SettingsSchema = new mongoose.Schema(
   {
@@ -10,11 +16,54 @@ export const SettingsSchema = new mongoose.Schema(
   { _id: false }
 );
 
+export const StaffSchema = new mongoose.Schema({}, { _id: false });
+
+export const ClientSchema = new mongoose.Schema({}, { _id: false });
+
+export const WorkerSchema = new mongoose.Schema({
+  location: {
+    type: { type: String, default: 'Point' },
+    coordinates: { type: [Number], default: [0.0, 0.0] }
+  },
+  documents: {
+    idCard: {
+      url: { type: String },
+      key: { type: String },
+      type: { type: String, enum: ['ID_CARD'] }
+    },
+    cleaningCert: {
+      url: { type: String },
+      key: { type: String },
+      type: { type: String, enum: ['CLEANING_CERTIFICATE'] }
+    },
+    policeCert: {
+      url: { type: String },
+      key: { type: String },
+      type: { type: String, enum: ['POLICE_CERTIFICATE'] }
+    }
+  },
+  workingDays: [{ type: String }],
+  workingHours: { type: String }
+});
+
+export const UserDataSchema = new mongoose.Schema(
+  {
+    referralCode: { type: String, required: true, default: 'OC-00000' },
+    referredBy: { type: mongoose.Types.ObjectId, required: false, ref: 'User', default: null }
+  },
+  {
+    _id: false,
+    discriminatorKey: 'type',
+    toJSON: { getters: true }
+  }
+);
+
 export const UserSchema = new mongoose.Schema(
   {
-    firstName: String,
-    lastName: String,
-    fullName: String,
+    userCode: { type: String },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    fullName: { type: String },
     email: { type: String, required: true },
     phoneNumber: {
       type: String,
@@ -34,18 +83,7 @@ export const UserSchema = new mongoose.Schema(
         country: { type: String, required: true }
       }
     },
-    location: {
-      type: { type: String, default: 'Point' },
-      coordinates: { type: [Number], default: [0.0, 0.0] }
-    },
-    documents: [
-      {
-        key: { type: String },
-        url: { type: String },
-        type: { type: String, enum: ['ID_CARD', 'CLEANING_CERTIFICATE', 'POLICE_CERTIFICATE'] }
-      }
-    ],
-    userImage: {
+    avatar: {
       key: { type: String },
       url: { type: String }
     },
@@ -55,16 +93,15 @@ export const UserSchema = new mongoose.Schema(
         return this.email;
       }
     },
-    roles: [{ type: String, required: true }],
-    lastOnline: { type: Date },
     auth: {
       email: {
         valid: { type: Boolean, default: false }
       }
     },
+    roles: [{ type: String, required: true }],
     settings: { type: SettingsSchema, required: false },
-    referralCode: { type: String, required: true, default: 'OC-00000' },
-    referredBy: { type: mongoose.Types.ObjectId, required: false, ref: 'User', default: null }
+    userData: UserDataSchema,
+    lastOnline: { type: Date }
   },
   {
     timestamps: true,
@@ -73,14 +110,21 @@ export const UserSchema = new mongoose.Schema(
   }
 );
 
+// Indexing
 UserSchema.index({ location: '2dsphere' });
 
 /**
  * Before saving new User
  */
 UserSchema.pre('save', function (this: User, next) {
+  this.userCode = `OCU-${randomStringCaps()}`;
   this.fullName = `${this.firstName} ${this.lastName}`;
-  this.referralCode = `OC-${Math.random()}${Math.random()}${Math.random()}${Math.random()}`;
+
+  if (this.roles.includes('CLIENT') || this.roles.includes('WORKER')) {
+    this.userData = this.userData ? this.userData : {};
+    this.userData.type = this.roles.includes('CLIENT') ? 'CLIENT' : 'WORKER';
+    this.userData.referralCode = `OC-${randomStringCaps()}`;
+  }
   next();
 });
 
@@ -92,3 +136,7 @@ UserSchema.pre('findOneAndUpdate', async function (next) {
   this.set('fullName', `${this.getUpdate()['firstName'] || docToUpdate.firstName} ${this.getUpdate()['lastName'] || docToUpdate.lastName}`);
   next();
 });
+
+// Schema Discrimination
+(UserSchema.path('userData') as mongoose.Schema.Types.DocumentArray).discriminator(UserType.CLIENT, ClientSchema);
+(UserSchema.path('userData') as mongoose.Schema.Types.DocumentArray).discriminator(UserType.WORKER, WorkerSchema);

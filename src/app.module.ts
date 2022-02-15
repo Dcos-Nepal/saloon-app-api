@@ -22,6 +22,7 @@ import { AWSModule } from './common/modules/aws/aws.module';
 import { FilesModule } from './common/modules/files/files.module';
 import { UserDevicesModule } from './modules/devices/devices.module';
 import { NotificationModule } from './common/modules/notification/notification.module';
+import { VerifyEmailModule } from './modules/verify-email/verify-email.module';
 
 @Module({
   imports: [
@@ -47,7 +48,8 @@ import { NotificationModule } from './common/modules/notification/notification.m
     LineItemsModule,
     JobRequestModule,
     PropertiesModule,
-    UserDevicesModule
+    UserDevicesModule,
+    VerifyEmailModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway]

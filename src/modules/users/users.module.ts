@@ -7,13 +7,15 @@ import { LoggerMiddleware } from '../../common/middlewares/middleware';
 import { PropertiesService } from '../properties/properties.service';
 import { PropertySchema } from '../properties/schemas/property.schema';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
+import { VerifyEmailModule } from '../verify-email/verify-email.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'Property', schema: PropertySchema }
-    ])
+    ]),
+    VerifyEmailModule
   ],
   controllers: [UsersController],
   providers: [UsersService, PropertiesService, PublicFilesService],
