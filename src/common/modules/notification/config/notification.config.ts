@@ -1,6 +1,3 @@
-import { join } from 'path';
-import { ConfigFactory } from 'code-config';
-
 const defaultValue = {
   vapid: {
     subject: '',
@@ -10,8 +7,9 @@ const defaultValue = {
 };
 
 // Get Notification Configuration from json file
-const notificationConfig = ConfigFactory.getConfig(join(__dirname, '/json/', 'notification.config.json'), defaultValue);
+//const notificationConfig = ConfigFactory.getConfig(join(__dirname, '/json/', 'notification.config.json'), defaultValue);
+const notificationConfig = defaultValue;
 
-notificationConfig.initPrettify();
+//notificationConfig.initPrettify();
 
 export { notificationConfig };
