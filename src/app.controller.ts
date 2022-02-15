@@ -1,6 +1,5 @@
-import { Controller, Get, UseGuards, VERSION_NEUTRAL } from '@nestjs/common';
+import { Controller, Get,  VERSION_NEUTRAL } from '@nestjs/common';
 import { AppService } from './app.service';
-import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Controller({
   path: '/',
