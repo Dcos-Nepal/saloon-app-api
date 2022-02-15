@@ -7,8 +7,8 @@ import { ConfigService } from 'src/configs/config.service';
 const config = new ConfigService();
 const pubClient = new RedisClient({
   host: config.get('REDIS_HOST'),
-  port: +config.get('REDIS_PORT'),
-  password: config.get("REDIS_PASSWORD")
+  port: parseInt(config.get('REDIS_PORT')),
+  password: config.get('REDIS_PASSWORD')
 });
 const subClient = pubClient.duplicate();
 const redisAdapter = createAdapter({ pubClient, subClient });

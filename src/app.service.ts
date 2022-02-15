@@ -5,7 +5,7 @@ import { ConfigService } from './configs/config.service';
 export class AppService {
   constructor(private readonly configService: ConfigService) {}
 
-  getWelcome(): string {
-    return 'Welcome to Orange Cleaning API server v1.0.0';
+  getWelcome(): any {
+    return {message: 'Welcome to Orange Cleaning API server v1.0.0'};
   }
 }

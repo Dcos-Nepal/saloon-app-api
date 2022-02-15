@@ -39,3 +39,8 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Ctags
+tags
+tags.lock
+tags.temp
