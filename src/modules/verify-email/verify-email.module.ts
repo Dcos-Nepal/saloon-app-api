@@ -1,5 +1,5 @@
 import { MongooseModule } from '@nestjs/mongoose';
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 import { UserSchema } from '../users/schemas/user.schema';
 import { EmailVerificationSchema } from './schemas/verify-email.schema';

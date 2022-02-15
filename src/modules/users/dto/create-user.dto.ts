@@ -4,6 +4,10 @@ import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, 
 
 import { UserAddressDto } from './user-address.dto';
 import { IUserRole } from '../interfaces/user.interface';
+import { BaseUserModel } from '../models/base-user.model';
+import { UserType } from '../schemas/user.schema';
+import { ClientModel } from '../models/client-user.model';
+import { WorkerModel } from '../models/worker-user.model';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -51,13 +55,18 @@ export class CreateUserDto {
   @Type(() => UserAddressDto)
   address: UserAddressDto;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  documents?: any;
-
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  referrer?: string;
+  @ValidateNested({ each: true })
+  @Type(() => BaseUserModel, {
+    discriminator: {
+      property: 'type',
+      subTypes: [
+        { value: ClientModel, name: UserType.CLIENT },
+        { value: WorkerModel, name: UserType.WORKER }
+      ]
+    },
+    keepDiscriminatorProperty: true
+  })
+  userData: ClientModel | WorkerModel;
 }

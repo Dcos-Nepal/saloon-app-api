@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query, Put, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query, Put, UploadedFile, Logger } from '@nestjs/common';
 
 import { UserDto } from './dto/user.dto';
 import { UsersService } from './users.service';
@@ -16,11 +16,13 @@ import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { IUser, User } from './interfaces/user.interface';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserPropertyDto } from './dto/create-user-property.dto';
+import { CreateUserPropertyDto } from './dto/create-property.dto';
 import { Property } from '../properties/interfaces/property.interface';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateUserDto } from './dto/create-user.dto';
+import { VerifyEmailService } from '../verify-email/verify-email.service';
 
 @ApiTags('users')
 @Controller({
@@ -30,7 +32,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class UsersController {
-  constructor(private readonly usersService: UsersService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+  private logger: Logger = new Logger('UsersController');
+
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly verifyEmailService: VerifyEmailService,
+    @InjectConnection() private readonly connection: mongoose.Connection
+  ) {}
 
   @Get()
   @Roles('ADMIN', 'CLIENT', 'WORKER')
@@ -42,7 +50,7 @@ export class UsersController {
     if (query.roles) filter.roles = { $in: query.roles.split(',') };
 
     if (query.nearBy && query.lat && query.lon) {
-      filter.location = {
+      filter.userData.location = {
         $near: {
           $maxDistance: +query.nearBy || 1000,
           $geometry: { type: 'Point', coordinates: [+query.lat, +query.lon] }
@@ -55,6 +63,36 @@ export class UsersController {
       return new ResponseSuccess('COMMON.SUCCESS', users);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Post('')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(RolesGuard)
+  async addNewUser(@Body() createUserDto: CreateUserDto): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let newUser: User = null;
+      let emailToken = false;
+
+      await session.withTransaction(async () => {
+        newUser = await this.usersService.create(createUserDto, session);
+        emailToken = await this.verifyEmailService.createEmailToken(newUser.email, session);
+      });
+      session.endSession();
+
+      if (newUser && emailToken) {
+        const sent = await this.verifyEmailService.sendEmailVerification(newUser.email);
+
+        if (sent) {
+          return new ResponseSuccess('CREATION.USER_CREATED_SUCCESSFULLY');
+        }
+
+        return new ResponseError('CREATION.ERROR.MAIL_NOT_SENT');
+      }
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError(error.message, error);
     }
   }
 

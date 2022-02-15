@@ -15,14 +15,10 @@ import { UserDto } from '../users/dto/user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 
 import { User } from '../users/interfaces/user.interface';
-import { IMailResponse } from 'src/common/interfaces/mail-interface';
 import { ForgotPassword } from './interfaces/forgot-password.interface';
 import { ConsentRegistry } from './interfaces/consent-registry.interface';
-import { EmailVerification } from './interfaces/email-verification.interface';
 
 import { JWTService } from './passport/jwt.service';
-import { ConfigService } from 'src/configs/config.service';
-import { MailService } from 'src/common/modules/mail/mail.service';
 import { UserDeviceService } from '../devices/devices.service';
 import { IUserDevice, UserDevice } from '../devices/interfaces/device.interface';
 import { UserLogoutDto } from './dto/user-logout.dto';
@@ -33,12 +29,9 @@ export class AuthService {
 
   constructor(
     @InjectModel('User') private readonly userModel: Model<User>,
-    @InjectModel('EmailVerification') private readonly emailVerificationModel: Model<EmailVerification>,
     @InjectModel('ForgotPassword') private readonly forgotPasswordModel: Model<ForgotPassword>,
     @InjectModel('ConsentRegistry') private readonly consentRegistryModel: Model<ConsentRegistry>,
     private readonly jwtService: JWTService,
-    private readonly mailService: MailService,
-    private readonly configService: ConfigService,
     private readonly userDeviceService: UserDeviceService
   ) {}
 
@@ -126,32 +119,6 @@ export class AuthService {
   }
 
   /**
-   * Creates email verification token
-   *
-   * @param email string
-   * @returns Promise<boolean>
-   */
-  async createEmailToken(email: string): Promise<boolean> {
-    const emailVerification = await this.emailVerificationModel.findOne({ email: email });
-
-    if (emailVerification && (new Date().getTime() - emailVerification.timestamp.getTime()) / 60000 < 15) {
-      throw new HttpException('LOGIN.EMAIL_SENDED_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    await this.emailVerificationModel.findOneAndUpdate(
-      { email: email },
-      {
-        email: email,
-        emailToken: (Math.floor(Math.random() * 9000000) + 1000000).toString(), //Generate 7 digits number
-        timestamp: new Date()
-      },
-      { upsert: true }
-    );
-
-    return true;
-  }
-
-  /**
    * Records User's Consent
    *
    * @param userId Types.ObjectId
@@ -228,31 +195,6 @@ export class AuthService {
   }
 
   /**
-   * Verifies the email
-   *
-   * @param token String
-   * @returns Promise<boolean>
-   */
-  async verifyEmail(token: string): Promise<boolean> {
-    const emailVerify = await this.emailVerificationModel.findOne({ emailToken: token });
-
-    if (emailVerify && emailVerify.email) {
-      const userFromDb = await this.userModel.findOne({ email: emailVerify.email });
-
-      if (userFromDb) {
-        userFromDb.auth.email.valid = true;
-        const savedUser = await userFromDb.save();
-
-        await emailVerify.remove();
-
-        return !!savedUser;
-      }
-    } else {
-      throw new HttpException('LOGIN.EMAIL_CODE_NOT_VALID', HttpStatus.FORBIDDEN);
-    }
-  }
-
-  /**
    * Gets Forget Password model
    *
    * @param newPasswordToken String
@@ -260,33 +202,6 @@ export class AuthService {
    */
   async getForgotPasswordModel(newPasswordToken: string): Promise<ForgotPassword> {
     return await this.forgotPasswordModel.findOne({ newPasswordToken: newPasswordToken });
-  }
-
-  /**
-   * Sends email verification mail
-   *
-   * @param email String
-   * @returns Promise<boolean>
-   */
-  async sendEmailVerification(email: string): Promise<boolean> {
-    const model = await this.emailVerificationModel.findOne({ email: email });
-
-    if (model && model.emailToken) {
-      try {
-        const mailResponse: IMailResponse = await this.mailService.sendEmail('Verify Email', 'Orange Cleaning', email, {
-          template: 'confirm-account',
-          context: {
-            receiverName: 'Example User',
-            linkToActivate: `${this.configService.get('WEB_APP_URL')}/verify-email/${model.emailToken}`
-          }
-        });
-        return mailResponse?.messageId ? true : false;
-      } catch (error) {
-        throw new HttpException('REGISTER.ERROR.SEND_MAIL', HttpStatus.FORBIDDEN);
-      }
-    } else {
-      throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
-    }
   }
 
   /**
