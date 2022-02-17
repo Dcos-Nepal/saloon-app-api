@@ -66,7 +66,15 @@ export class JobsController {
   @Roles('ADMIN', 'CLIENT')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const job = await this.jobsService.findById(param.jobId, { authUser });
+      const job = await this.jobsService.findById(param.jobId, {
+        authUser,
+        toPopulate: [
+          { path: 'jobFor', select: ['fullName', 'phoneNumber'] },
+          { path: 'team', select: ['fullName'] },
+          { path: 'property', select: [''] },
+          { path: 'primaryVisit', select: [''] }
+        ]
+      });
       return new ResponseSuccess('COMMON.SUCCESS', job);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
