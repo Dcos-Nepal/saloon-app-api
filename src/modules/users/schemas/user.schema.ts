@@ -18,7 +18,13 @@ export const SettingsSchema = new mongoose.Schema(
 
 export const StaffSchema = new mongoose.Schema({}, { _id: false });
 
-export const ClientSchema = new mongoose.Schema({}, { _id: false });
+export const ClientSchema = new mongoose.Schema(
+  {
+    company: { type: String },
+    preferredTime: [{ type: String }]
+  },
+  { _id: false }
+);
 
 export const WorkerSchema = new mongoose.Schema({
   location: {
@@ -43,7 +49,8 @@ export const WorkerSchema = new mongoose.Schema({
     }
   },
   workingDays: [{ type: String }],
-  workingHours: { type: String }
+  workingHours: { type: String },
+  services: [{ type: String }]
 });
 
 export const UserDataSchema = new mongoose.Schema(

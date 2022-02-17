@@ -29,9 +29,10 @@ export interface IUserDocument {
 
 export interface IClient {
   type?: string;
-  preferredTime?: [string];
   referredBy?: string;
   referralCode?: string;
+  preferredTime?: [string];
+  company?: string;
 }
 
 export interface IWorker {
