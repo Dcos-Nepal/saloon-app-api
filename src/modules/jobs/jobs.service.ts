@@ -18,7 +18,12 @@ export class JobsService extends BaseService<Job, IJob> {
 
   async create(data: CreateJobDto, session: ClientSession, { authUser }: IServiceOptions) {
     const job = await super.create({ ...data, createdBy: authUser._id }, session);
-    if (data.schedule) await this.createPrimaryVisit(job, data.schedule, session);
+    if (data.schedule) {
+      const primaryVisit = await this.createPrimaryVisit(job, data.schedule, session);
+      job.primaryVisit = primaryVisit._id;
+      job.startDate = primaryVisit.startDate;
+      await job.save({ session });
+    }
 
     return job;
   }
@@ -44,9 +49,6 @@ export class JobsService extends BaseService<Job, IJob> {
   private async createPrimaryVisit(job: Job, schedule: Schedule, session: ClientSession) {
     const visitObj: IVisit = { ...schedule, job: job._id, inheritJob: true, isPrimary: true };
     if (schedule.excRrule) visitObj.excRrule = schedule.excRrule;
-    const visit = await this.visitsService.create(visitObj, session);
-    job.primaryVisit = visit._id;
-    job.startDate = visit.startDate;
-    await job.save({ session });
+    return await this.visitsService.create(visitObj, session);
   }
 }
