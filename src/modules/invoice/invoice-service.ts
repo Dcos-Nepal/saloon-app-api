@@ -23,11 +23,11 @@ export class InvoiceService extends BaseService<Invoice, IInvoice> {
     if (invoice.dueDuration) invoice.due = DateTime.now().toUTC().toISODate();
     await invoice.save({ session });
 
-    this.mailService.sendEmail('Verify Email', 'Orange Cleaning', (<User>invoice.invoiceFor).email, {
-      template: 'confirm-account',
+    this.mailService.sendEmail('Invoice #12345', 'Orange Cleaning', (<User>invoice.invoiceFor).email, {
+      template: 'invoice-template',
       context: {
-        receiverName: (<User>invoice.invoiceFor).fullName,
-        linkToActivate: ``
+        receiver: (<User>invoice.invoiceFor).fullName,
+        invoice: invoice
       }
     });
 

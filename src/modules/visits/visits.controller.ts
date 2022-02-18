@@ -37,6 +37,10 @@ export class VisitsController {
       filter = { title: { $regex: query.q, $options: 'i' } };
     }
 
+    if (query.job) {
+      filter = { job: { $eq: query.job } };
+    }
+
     try {
       const visits = await this.visitsService.findAll(filter, { authUser, query });
       return new ResponseSuccess('COMMON.SUCCESS', visits);

@@ -26,7 +26,7 @@ export interface IServiceOptions {
 
 export interface IMailOption {
   template: string;
-  context: Record<string, string>;
+  context: Record<string, any>;
 }
 
 export interface ILineItemPricing {

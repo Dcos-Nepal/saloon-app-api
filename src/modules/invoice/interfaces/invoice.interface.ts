@@ -1,13 +1,17 @@
 import { Document } from 'mongoose';
+import { Job } from 'src/modules/jobs/interfaces/job.interface';
 import { ILineItem } from 'src/modules/line-items/interfaces/line-item.interface';
 import { User } from 'src/modules/users/interfaces/user.interface';
+import { Visit } from 'src/modules/visits/interfaces/visit.interface';
 
 export interface IInvoice {
   subject: string;
   clientMessage?: string;
   invoiceFor: string | User;
+  refJob?: string | Job;
+  refVisit?: string | Visit;
   lineItems: ILineItem[];
-  issued: boolean;
+  issued?: boolean;
   issuedDate?: string | Date;
   total: number;
   isPaid: boolean;

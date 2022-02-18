@@ -9,6 +9,8 @@ export const InvoiceSchema = new mongoose.Schema(
     isPaid: { type: Boolean, required: true, default: false },
     paidDate: { type: Date },
     total: { type: Number, required: true },
+    refJob: { type: mongoose.Types.ObjectId, required: false, ref: 'Job', default: null },
+    refVisit: { type: mongoose.Types.ObjectId, required: false, ref: 'Visit', default: null },
     invoiceFor: { type: mongoose.Types.ObjectId, ref: 'User' },
     dueOnReceipt: { type: Boolean, required: true, default: false },
     dueDuration: { type: Number },

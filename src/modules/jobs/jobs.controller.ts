@@ -36,6 +36,10 @@ export class JobsController {
         filter = { title: { $regex: query.q, $options: 'i' } };
       }
 
+      if (query.jobFor) {
+        filter = { jobFor: { $eq: query.jobFor } };
+      }
+
       const toPopulate = [
         { path: 'jobFor', select: ['fullName'] },
         { path: 'property', select: [''] },

@@ -13,9 +13,17 @@ export class CreateInvoiceDto implements IInvoice {
   @IsMongoId()
   invoiceFor: string;
 
+  @IsMongoId()
+  @IsOptional()
+  refJob?: string;
+
+  @IsMongoId()
+  @IsOptional()
+  refVisit?: string;
+
   @IsBoolean()
   @IsOptional()
-  issued: boolean;
+  issued?: boolean;
 
   @IsNumber()
   total: number;
