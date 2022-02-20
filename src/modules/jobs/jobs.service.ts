@@ -9,11 +9,46 @@ import { VisitsService } from '../visits/visits.service';
 import { IVisit } from '../visits/interfaces/visit.interface';
 import { Schedule } from './dto/schedule';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { CompleteJobDto } from './dto/complete-job.dto';
+import { JobFeedbackDto } from './dto/job-feedback.dto';
 
 @Injectable()
 export class JobsService extends BaseService<Job, IJob> {
   constructor(private readonly visitsService: VisitsService, @InjectModel('Jobs') private readonly jobModel: Model<Job>) {
     super(jobModel);
+  }
+
+  /**
+   * Marks job as complete
+   *
+   * @param jobId
+   * @param jobCompleteDto
+   * @param session
+   * @returns Job
+   */
+  async markJobAsComplete(jobId: string, jobCompleteDto: CompleteJobDto, session: ClientSession) {
+    const job: Job = await this.jobModel.findById(jobId, { session });
+    job.isCompleted = true;
+    job.completion = jobCompleteDto;
+    const updatedJob = await job.save({ session });
+
+    return updatedJob;
+  }
+
+  /**
+   * Update feedback for the job
+   *
+   * @param jobId
+   * @param jobFeedbackDto
+   * @param session
+   * @returns Job
+   */
+  async provideJobFeedback(jobId: string, jobFeedbackDto: JobFeedbackDto, session: ClientSession) {
+    const job: Job = await this.jobModel.findById(jobId, { session });
+    job.feedback = jobFeedbackDto;
+    const updatedJob = await job.save({ session });
+
+    return updatedJob;
   }
 
   async create(data: CreateJobDto, session: ClientSession, { authUser }: IServiceOptions) {

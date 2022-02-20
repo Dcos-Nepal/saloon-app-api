@@ -21,6 +21,22 @@ export const JobSchema = new mongoose.Schema(
         unitPrice: { type: Number, default: 0 }
       }
     ],
+    completion: {
+      note: { type: String },
+      docs: [
+        {
+          url: { type: String },
+          key: { type: String }
+        }
+      ],
+      date: { type: Date },
+      completedBy: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
+    },
+    feedback: {
+      note: { type: String },
+      rating: { type: Number },
+      date: { type: Date }
+    },
     type: { type: String, enum: Object.keys(JobType), required: true, default: JobType['ONE-OFF'] },
     createdBy: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
   },

@@ -15,6 +15,8 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
+import { CompleteJobDto } from './dto/complete-job.dto';
+import { JobFeedbackDto } from './dto/job-feedback.dto';
 
 @Controller({
   path: '/jobs',
@@ -115,6 +117,44 @@ export class JobsController {
       let updatedJob: IJob;
       await session.withTransaction(async () => {
         updatedJob = await this.jobsService.update(param.jobId, property, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Put('/:jobId/complete')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(SelfOrAdminGuard)
+  async markJobComplete(@Param() param, @Body() completeJobDto: CompleteJobDto): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let updatedJob: IJob;
+      await session.withTransaction(async () => {
+        updatedJob = await this.jobsService.markJobAsComplete(param.jobId, completeJobDto, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Put('/:jobId/feedback')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT')
+  @UseGuards(SelfOrAdminGuard)
+  async jobFeedback(@Param() param, @Body() jobFeedbackDto: JobFeedbackDto): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let updatedJob: IJob;
+      await session.withTransaction(async () => {
+        updatedJob = await this.jobsService.provideJobFeedback(param.jobId, jobFeedbackDto, session);
       });
       session.endSession();
 

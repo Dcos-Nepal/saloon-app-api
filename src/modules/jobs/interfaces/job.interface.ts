@@ -15,6 +15,17 @@ export interface IJob {
   team?: string[] | User[];
   createdBy: string | User;
   lineItems?: ILineItemPricing[];
+  completion?: {
+    note: string;
+    docs?: [{ key: string; url: string }];
+    date: Date;
+    completedBy: string | User;
+  };
+  feedback?: {
+    note?: string;
+    rating: number;
+    date?: Date;
+  };
   primaryVisit?: string | Visit;
   isCompleted?: boolean;
 }
