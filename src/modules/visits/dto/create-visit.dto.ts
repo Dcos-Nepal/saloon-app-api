@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import { JobLineItem } from '../../jobs/dto/job-line-items.dto';
 import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Schedule } from 'src/modules/jobs/dto/schedule';
+import { Status } from './status.dto';
 
 export class CreateVisitDto extends Schedule {
   @IsString()
@@ -29,4 +30,8 @@ export class CreateVisitDto extends Schedule {
   @ValidateNested()
   @Type(() => JobLineItem)
   lineItems?: JobLineItem[];
+
+  @ValidateNested()
+  @Type(() => Status)
+  status: Status;
 }

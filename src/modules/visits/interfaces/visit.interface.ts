@@ -14,7 +14,7 @@ export interface IVisit {
   startTime?: string;
   endTime?: string;
   rruleSet: string;
-  excRrule?: string;
+  excRrule?: string[];
   lineItems?: ILineItemPricing[];
   status?: IVisitStatus;
   statusRevision?: IVisitStatus[];
