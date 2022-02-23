@@ -16,13 +16,13 @@ export class UpdateVisitDto {
   @IsMongoId({ each: true })
   team?: string[];
 
-  @IsString()
+  @IsString({ each: true })
   @IsOptional()
-  rruleSet?: string;
+  excRrule?: string[];
 
   @IsString()
   @IsOptional()
-  excRrule?: string;
+  rruleSet?: string;
 
   @IsArray()
   @IsOptional()

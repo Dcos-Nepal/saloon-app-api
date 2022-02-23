@@ -30,7 +30,7 @@ export const JobSchema = new mongoose.Schema(
         }
       ],
       date: { type: Date },
-      completedBy: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
+      completedBy: { type: mongoose.Types.ObjectId, ref: 'User' }
     },
     feedback: {
       note: { type: String },

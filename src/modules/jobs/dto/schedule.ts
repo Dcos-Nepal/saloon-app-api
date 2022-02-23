@@ -19,7 +19,7 @@ export class Schedule {
   @IsString()
   rruleSet: string;
 
-  @IsString()
+  @IsString({ each: true })
   @IsOptional()
-  excRrule?: string;
+  excRrule?: string[];
 }

@@ -12,7 +12,7 @@ export const VisitSchema = new mongoose.Schema(
     startTime: { type: String },
     endTime: { type: String },
     rruleSet: { type: String, required: true },
-    excRrule: { type: String },
+    excRrule: [{ type: String }],
     job: { type: mongoose.Types.ObjectId, required: true, ref: 'Jobs' },
     team: { type: [mongoose.Types.ObjectId], ref: 'User' },
     lineItems: [
