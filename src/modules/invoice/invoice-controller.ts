@@ -25,8 +25,22 @@ export class InvoiceController {
   @UseGuards(RolesGuard)
   async find(@Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
     try {
-      const invoices = await this.invoiceService.findAll(query, { authUser, query });
+      const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'email', 'phoneNumber', 'address'] }];
+      const invoices = await this.invoiceService.findAll(query, { authUser, query, toPopulate });
       return new ResponseSuccess('COMMON.SUCCESS', invoices);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Get('/:id')
+  @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
+  async findOne(@Param() id: string, @Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
+    try {
+      const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'address'] }];
+      const invoice = await this.invoiceService.findById(new mongoose.Types.ObjectId(id).toString(), { authUser, query, toPopulate });
+      return new ResponseSuccess('COMMON.SUCCESS', invoice);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }

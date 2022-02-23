@@ -8,14 +8,22 @@ export class CreateInvoiceDto implements IInvoice {
   subject: string;
 
   @IsString()
-  clientMessage: string;
+  message: string;
 
   @IsMongoId()
   invoiceFor: string;
 
+  @IsMongoId()
+  @IsOptional()
+  refJob?: string;
+
+  @IsMongoId()
+  @IsOptional()
+  refVisit?: string;
+
   @IsBoolean()
   @IsOptional()
-  issued: boolean;
+  issued?: boolean;
 
   @IsNumber()
   total: number;
@@ -23,6 +31,8 @@ export class CreateInvoiceDto implements IInvoice {
   @IsBoolean()
   isPaid: boolean;
 
+  @IsDate()
+  @IsOptional()
   paidDate?: Date;
 
   @IsBoolean()

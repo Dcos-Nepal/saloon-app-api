@@ -9,6 +9,8 @@ import { VisitsService } from '../visits/visits.service';
 import { IVisit } from '../visits/interfaces/visit.interface';
 import { Schedule } from './dto/schedule';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { CompleteJobDto } from './dto/complete-job.dto';
+import { JobFeedbackDto } from './dto/job-feedback.dto';
 
 @Injectable()
 export class JobsService extends BaseService<Job, IJob> {
@@ -16,9 +18,47 @@ export class JobsService extends BaseService<Job, IJob> {
     super(jobModel);
   }
 
+  /**
+   * Marks job as complete
+   *
+   * @param jobId
+   * @param jobCompleteDto
+   * @param session
+   * @returns Job
+   */
+  async markJobAsComplete(jobId: string, jobCompleteDto: CompleteJobDto, session: ClientSession) {
+    const job: Job = await this.jobModel.findById(jobId, { session });
+    job.isCompleted = true;
+    job.completion = jobCompleteDto;
+    const updatedJob = await job.save({ session });
+
+    return updatedJob;
+  }
+
+  /**
+   * Update feedback for the job
+   *
+   * @param jobId
+   * @param jobFeedbackDto
+   * @param session
+   * @returns Job
+   */
+  async provideJobFeedback(jobId: string, jobFeedbackDto: JobFeedbackDto, session: ClientSession) {
+    const job: Job = await this.jobModel.findById(jobId, { session });
+    job.feedback = jobFeedbackDto;
+    const updatedJob = await job.save({ session });
+
+    return updatedJob;
+  }
+
   async create(data: CreateJobDto, session: ClientSession, { authUser }: IServiceOptions) {
     const job = await super.create({ ...data, createdBy: authUser._id }, session);
-    if (data.schedule) await this.createPrimaryVisit(job, data.schedule, session);
+    if (data.schedule) {
+      const primaryVisit = await this.createPrimaryVisit(job, data.schedule, session);
+      job.primaryVisit = primaryVisit._id;
+      job.startDate = primaryVisit.startDate;
+      await job.save({ session });
+    }
 
     return job;
   }
@@ -44,9 +84,6 @@ export class JobsService extends BaseService<Job, IJob> {
   private async createPrimaryVisit(job: Job, schedule: Schedule, session: ClientSession) {
     const visitObj: IVisit = { ...schedule, job: job._id, inheritJob: true, isPrimary: true };
     if (schedule.excRrule) visitObj.excRrule = schedule.excRrule;
-    const visit = await this.visitsService.create(visitObj, session);
-    job.primaryVisit = visit._id;
-    job.startDate = visit.startDate;
-    await job.save({ session });
+    return await this.visitsService.create(visitObj, session);
   }
 }

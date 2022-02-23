@@ -5,7 +5,6 @@ import { Controller, Post, HttpStatus, HttpCode, Get, Body, Param, Logger, Put, 
 import { IResponse } from '../../common/interfaces/response.interface';
 
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResponseSuccess, ResponseError } from '../../common/dto/response.dto';
@@ -17,6 +16,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { InjectConnection } from '@nestjs/mongoose';
 import { UserLogoutDto } from './dto/user-logout.dto';
+import { VerifyEmailService } from '../verify-email/verify-email.service';
+import { RegisterUserDto } from '../users/dto/register-user.dto';
 
 @ApiTags('Authentication')
 @Controller({
@@ -29,17 +30,24 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UsersService,
+    private readonly verifyEmailService: VerifyEmailService,
     @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
   @Post('/register')
   @HttpCode(HttpStatus.OK)
-  async register(@Body() createUserDto: CreateUserDto): Promise<IResponse> {
+  async register(@Body() registerUserDto: RegisterUserDto): Promise<IResponse> {
     try {
-      const newUser = await this.userService.createNewUser(createUserDto);
-      await this.authService.createEmailToken(newUser.email);
+      let sent = false;
+      const session = await this.connection.startSession();
 
-      const sent = await this.authService.sendEmailVerification(newUser.email);
+      await session.withTransaction(async () => {
+        const newUser = await this.userService.registerUser(registerUserDto);
+        await this.verifyEmailService.createEmailToken(newUser.email, session);
+
+        sent = await this.verifyEmailService.sendEmailVerification(newUser.email);
+      });
+      session.endSession();
 
       if (sent) {
         return new ResponseSuccess('REGISTRATION.USER_REGISTERED_SUCCESSFULLY');
@@ -55,9 +63,10 @@ export class AuthController {
   @Post('/login')
   @HttpCode(HttpStatus.OK)
   public async login(@Body() login: UserLoginDto): Promise<IResponse> {
-    const session = await this.connection.startSession();
     try {
       let response = null;
+      const session = await this.connection.startSession();
+
       await session.withTransaction(async () => {
         response = await this.authService.loginUser(login, session);
       });
@@ -74,9 +83,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'))
   public async logout(@CurrentUser() user, @Body() logout: UserLogoutDto): Promise<IResponse> {
-    const session = await this.connection.startSession();
     try {
       let response = null;
+      const session = await this.connection.startSession();
+
       await session.withTransaction(async () => {
         response = await this.authService.logoutUser(user?._id.toString(), logout, session);
       });
@@ -92,7 +102,7 @@ export class AuthController {
   @Get('/verify/:token')
   public async verifyEmail(@Param() params): Promise<IResponse> {
     try {
-      const isEmailVerified = await this.authService.verifyEmail(params.token);
+      const isEmailVerified = await this.verifyEmailService.verifyEmail(params.token);
       return new ResponseSuccess('LOGIN.EMAIL_VERIFIED', isEmailVerified);
     } catch (error) {
       this.logger.error('Error: ', error);
@@ -103,11 +113,17 @@ export class AuthController {
   @Post('/resend-verification')
   public async sendEmailVerification(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<IResponse> {
     try {
-      await this.authService.createEmailToken(forgotPasswordDto.email);
-      const isEmailSent = await this.authService.sendEmailVerification(forgotPasswordDto.email);
+      let isEmailSent = false;
+      const session = await this.connection.startSession();
+
+      await session.withTransaction(async () => {
+        await this.verifyEmailService.createEmailToken(forgotPasswordDto.email, session);
+        isEmailSent = await this.verifyEmailService.sendEmailVerification(forgotPasswordDto.email);
+      });
+      session.endSession();
 
       if (isEmailSent) {
-        return new ResponseSuccess('REGISTER.EMAIL_RESENT');
+        return new ResponseSuccess('REGISTER.EMAIL_SENT_SUCCESSFULLY');
       }
 
       return new ResponseError('REGISTER.ERROR.MAIL_NOT_SENT');

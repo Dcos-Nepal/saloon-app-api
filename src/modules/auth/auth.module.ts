@@ -8,7 +8,6 @@ import { UserSchema } from '../users/schemas/user.schema';
 import { PropertySchema } from '../properties/schemas/property.schema';
 import { ForgotPasswordSchema } from './schemas/forgot-password.schema';
 import { ConsentRegistrySchema } from './schemas/consent-registry.schema';
-import { EmailVerificationSchema } from './schemas/email-verification.schema';
 import { UserDevicesSchema } from '../devices/schemas/devices.schema';
 
 import { ConfigModule } from 'src/configs/config.module';
@@ -23,6 +22,7 @@ import { UserDeviceService } from '../devices/devices.service';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 
 import { AuthController } from './auth.controller';
+import { VerifyEmailModule } from '../verify-email/verify-email.module';
 
 @Module({
   imports: [
@@ -30,12 +30,12 @@ import { AuthController } from './auth.controller';
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'UserDevice', schema: UserDevicesSchema },
-      { name: 'EmailVerification', schema: EmailVerificationSchema },
       { name: 'ForgotPassword', schema: ForgotPasswordSchema },
       { name: 'ConsentRegistry', schema: ConsentRegistrySchema },
       { name: 'Property', schema: PropertySchema }
     ]),
-    MailModule
+    MailModule,
+    VerifyEmailModule
   ],
   controllers: [AuthController],
   providers: [AuthService, UsersService, PropertiesService, JWTService, JwtStrategy, MailService, PublicFilesService, UserDeviceService],

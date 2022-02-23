@@ -25,7 +25,7 @@ import { ConfigService } from 'src/configs/config.service';
           from: `"No Reply" <${config.get('MAIL_FROM')}>`
         },
         template: {
-          dir: join(__dirname, 'templates', 'emails'),
+          dir: join(__dirname, 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true

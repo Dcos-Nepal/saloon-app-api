@@ -1,16 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
-export class Client {
-  @ApiProperty()
-  @IsString()
-  fullName: string;
-
-  @ApiProperty()
-  @IsString()
-  emailAddress: string;
-
-  @ApiProperty()
+export class ClientModel {
+  @ApiPropertyOptional()
   @IsOptional()
-  phoneNumber?: string;
+  @IsString()
+  referredBy?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsArray()
+  preferredTime?: [string];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  company?: string;
 }
