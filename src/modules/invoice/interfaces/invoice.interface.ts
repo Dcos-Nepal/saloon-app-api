@@ -6,7 +6,7 @@ import { Visit } from 'src/modules/visits/interfaces/visit.interface';
 
 export interface IInvoice {
   subject: string;
-  clientMessage?: string;
+  message?: string;
   invoiceFor: string | User;
   refJob?: string | Job;
   refVisit?: string | Visit;
