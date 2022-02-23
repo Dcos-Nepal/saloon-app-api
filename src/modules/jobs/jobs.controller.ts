@@ -129,7 +129,6 @@ export class JobsController {
   @Put('/:jobId/complete')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(SelfOrAdminGuard)
   async markJobComplete(@Param() param, @Body() completeJobDto: CompleteJobDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -148,7 +147,6 @@ export class JobsController {
   @Put('/:jobId/feedback')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
   async jobFeedback(@Param() param, @Body() jobFeedbackDto: JobFeedbackDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();

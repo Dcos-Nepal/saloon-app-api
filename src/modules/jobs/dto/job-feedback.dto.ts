@@ -1,11 +1,11 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString,IsNumber } from 'class-validator';
 
 export class JobFeedbackDto {
   @IsString()
   @IsOptional()
   note?: string;
 
-  @IsString()
+  @IsNumber()
   rating: number;
 
   @IsOptional()
