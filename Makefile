@@ -39,7 +39,7 @@ docker-push: ## docker push
 	@docker push $(TARGET_IMAGE_LATEST)
 
 docker-login: ## Login to ECR registry
-	aws ecr get-login-password --region $(AWS_REGION) --profile recovvo | docker login --username AWS --password-stdin $(REGISTRY_URL)
+	aws ecr get-login-password --region $(AWS_REGION) --profile $(AWS_PROFILE) | docker login --username AWS --password-stdin $(REGISTRY_URL)
 
 clean: ## Remove log file.
 	@rm -rf logs/**.log logs/**.json build
