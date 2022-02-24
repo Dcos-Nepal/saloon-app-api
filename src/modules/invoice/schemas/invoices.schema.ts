@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 export const InvoiceSchema = new mongoose.Schema(
   {
     subject: { type: String, required: true },
-    clientMessage: { type: String },
+    message: { type: String },
     issued: { type: Boolean, required: true, default: false },
     issuedDate: { type: Date },
     isPaid: { type: Boolean, required: true, default: false },

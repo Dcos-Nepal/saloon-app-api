@@ -8,7 +8,7 @@ export class CreateInvoiceDto implements IInvoice {
   subject: string;
 
   @IsString()
-  clientMessage: string;
+  message: string;
 
   @IsMongoId()
   invoiceFor: string;
@@ -31,6 +31,8 @@ export class CreateInvoiceDto implements IInvoice {
   @IsBoolean()
   isPaid: boolean;
 
+  @IsDate()
+  @IsOptional()
   paidDate?: Date;
 
   @IsBoolean()

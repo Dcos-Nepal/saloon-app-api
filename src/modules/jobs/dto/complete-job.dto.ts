@@ -1,4 +1,4 @@
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString,IsDate } from 'class-validator';
 
 export class CompleteJobDto {
   @IsString()
@@ -17,6 +17,6 @@ export class CompleteJobDto {
   @IsString()
   completedBy: string;
 
-  @IsString()
+  @IsDate()
   date: Date;
 }

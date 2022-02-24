@@ -1,4 +1,4 @@
-.PHONY: help docker-tag docker-build docker-login docker-push clean show-env
+.PHONY: help docker-tag docker-build docker-login docker-push clean show-env tools lambda-update deploy
 .DEFAULT_GOAL := help
 
 define PRINT_HELP_PYSCRIPT
@@ -28,6 +28,28 @@ export TARGET_IMAGE ?= $(REGISTRY_URL)/$(ECR_REPO_NAME)
 export TARGET_IMAGE_LATEST ?= $(TARGET_IMAGE):$(SOURCE_IMAGE)-$(GIT_BRANCH)-$(GIT_COMMIT)
 
 -include $(ENVIRONMENT_OVERRIDE_PATH)
+# Base image for kubernetes deployment
+IMAGE_NAME ?= tools:latest
+
+# Alias command for docker's `make` executable
+DOCKER_RUN ?=  \
+		docker run \
+		--rm \
+		-w /app \
+		-v $(APP_ROOT)/tools:/app \
+		--entrypoint bash \
+		--env AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
+		--env AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
+		$(IMAGE_NAME) \
+
+
+
+tools:
+	@docker build $(DOCKER_BUILD_FLAGS) -t tools -f $(APP_ROOT)/tools/Dockerfile $(APP_ROOT)/tools
+
+lambda-update:
+	@$(DOCKER_RUN) ./deploy.sh $(LAMBDA_FUNCTION_NAME) $(TARGET_IMAGE_LATEST) $(AWS_REGION)
+
 
 docker-build: ## build docker file
 	@docker build $(DOCKER_BUILD_FLAGS) --target artifact --platform=linux/amd64 -t $(SOURCE_IMAGE) -f $(DOCKER_FILE) $(DOCKER_BUILD_PATH)
@@ -39,7 +61,9 @@ docker-push: ## docker push
 	@docker push $(TARGET_IMAGE_LATEST)
 
 docker-login: ## Login to ECR registry
-	aws ecr get-login-password --region $(AWS_REGION) --profile recovvo | docker login --username AWS --password-stdin $(REGISTRY_URL)
+	aws ecr get-login-password --region $(AWS_REGION) --profile $(AWS_PROFILE) | docker login --username AWS --password-stdin $(REGISTRY_URL)
+
+deploy: docker-build docker-tag docker-push lambda-update
 
 clean: ## Remove log file.
 	@rm -rf logs/**.log logs/**.json build

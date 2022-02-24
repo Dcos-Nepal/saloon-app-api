@@ -41,8 +41,34 @@ export class VisitsController {
       filter = { job: { $eq: query.job } };
     }
 
+    const toPopulate = [
+      {
+        path: 'job',
+        populate: [
+          {
+            path: 'jobFor',
+            select: ['fullName', 'address', 'email', 'phoneNumber']
+          },
+          {
+            path: 'property',
+            select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country']
+          },
+          {
+            path: 'team',
+            model: 'User',
+            select: ['fullName', 'address', 'email', 'phoneNumber']
+          }
+        ],
+        select: ['title', '']
+      },
+      {
+        path: 'team',
+        select: ['fullName', 'address', 'email', 'phoneNumber']
+      }
+    ];
+
     try {
-      const visits = await this.visitsService.findAll(filter, { authUser, query, toPopulate: [{ path: 'team', select: ['fullName'] }] });
+      const visits = await this.visitsService.findAll(filter, { authUser, query, toPopulate });
       return new ResponseSuccess('COMMON.SUCCESS', visits);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

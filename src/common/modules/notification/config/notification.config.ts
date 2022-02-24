@@ -10,7 +10,7 @@ const defaultValue = {
 };
 
 // Get Notification Configuration from json file
-const notificationConfig = ConfigFactory.getConfig(join(__dirname, '/json/', 'notification.config.json'), defaultValue);
+const notificationConfig = ConfigFactory.getConfig(join('/tmp', 'notification.config.json'), defaultValue);
 
 notificationConfig.initPrettify();
 

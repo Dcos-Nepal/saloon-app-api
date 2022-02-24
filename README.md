@@ -23,7 +23,7 @@ Once all is working, you can access the api in `http://localhost:4000` or in the
 
 Note: For api calls, make sure to include API Version in each request:
 Format: `https://<host>:<port>/api/<API Version>/resources?query=value`
-Example: 
+Example:
 - 1. `http:localhost:4000/api/v1.0.0/auth/login`
 - 2. `http:localhost:4000/api/v1.0.0/job-requests?clientId=8fue83n29rdks...`
 
@@ -92,6 +92,28 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+## Deployment to AWS lambda
+It is super simple to deploy your application. These are the following requirements:
+- Git
+- Docker
+
+Below are the steps:
+1. Create environment override file based on `env/Makefile.override.example`. For instance, if you want to deploy to dev environment, you will need to create a environment override file called `Makefile.override.dev`.
+
+2. Have all those variables in place.
+
+3. Initialize tools.
+```bash
+$ make tools
+```
+
+4. Deploy app to lambda. NOTE: You only need to run this everytime you have a new commit. Above steps are simply one time setup.
+```bash
+$ make deploy
+```
+
+NOTE: You only need to run `make tools` once to initialize toolings. Basically, it creates a docker image with required tools and you are good to go.
+
 
 ## Support
 
