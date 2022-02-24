@@ -27,7 +27,7 @@ export class JobsService extends BaseService<Job, IJob> {
    * @returns Job
    */
   async markJobAsComplete(jobId: string, jobCompleteDto: CompleteJobDto, session: ClientSession) {
-    const job: Job = await this.jobModel.findById(jobId,null, { session });
+    const job: Job = await this.jobModel.findById(jobId, null, { session });
     job.isCompleted = true;
     job.completion = jobCompleteDto;
     const updatedJob = await job.save({ session });
@@ -44,7 +44,7 @@ export class JobsService extends BaseService<Job, IJob> {
    * @returns Job
    */
   async provideJobFeedback(jobId: string, jobFeedbackDto: JobFeedbackDto, session: ClientSession) {
-    const job: Job = await this.jobModel.findById(jobId, null,{ session });
+    const job: Job = await this.jobModel.findById(jobId, null, { session });
     job.feedback = jobFeedbackDto;
     const updatedJob = await job.save({ session });
 

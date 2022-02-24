@@ -1,4 +1,4 @@
-import { IsArray, IsOptional, IsString,IsDate } from 'class-validator';
+import { IsArray, IsOptional, IsString, IsDate } from 'class-validator';
 
 export class CompleteJobDto {
   @IsString()
