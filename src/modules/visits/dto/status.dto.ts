@@ -3,6 +3,7 @@ import { VisitStatusType } from 'src/modules/visits/interfaces/visit.interface';
 
 export class Status {
   @IsMongoId()
+  @IsOptional()
   updatedBy: string;
 
   @IsOptional()
