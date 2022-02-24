@@ -42,7 +42,7 @@ export class VisitsController {
     }
 
     try {
-      const visits = await this.visitsService.findAll(filter, { authUser, query });
+      const visits = await this.visitsService.findAll(filter, { authUser, query, toPopulate: [{ path: 'team', select: ['fullName'] }] });
       return new ResponseSuccess('COMMON.SUCCESS', visits);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
