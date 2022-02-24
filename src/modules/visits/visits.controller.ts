@@ -60,6 +60,10 @@ export class VisitsController {
           }
         ],
         select: ['title', '']
+      },
+      {
+        path: 'team',
+        select: ['fullName', 'address', 'email', 'phoneNumber']
       }
     ];
 
