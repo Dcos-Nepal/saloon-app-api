@@ -6,6 +6,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { VisitsService } from '../visits/visits.service';
 import { VisitSchema } from '../visits/schemas/visits.schema';
 import { LoggerMiddleware } from 'src/common/middlewares/middleware';
+import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { LoggerMiddleware } from 'src/common/middlewares/middleware';
     ])
   ],
   controllers: [JobsController],
-  providers: [JobsService, VisitsService],
+  providers: [JobsService, VisitsService, PublicFilesService],
   exports: [JobsService, VisitsService]
 })
 export class JobsModule implements NestModule {

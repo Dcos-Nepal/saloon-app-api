@@ -1,18 +1,12 @@
-import { IsArray, IsOptional, IsString, IsDate } from 'class-validator';
+import { IsArray, IsOptional, IsDate, IsString } from 'class-validator';
 
 export class CompleteJobDto {
   @IsString()
   note: string;
 
-  @IsString()
   @IsOptional()
   @IsArray()
-  docs?: [
-    {
-      key: string;
-      url: string;
-    }
-  ];
+  docs?: any[];
 
   @IsString()
   completedBy: string;

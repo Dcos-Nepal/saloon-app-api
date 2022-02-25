@@ -14,9 +14,10 @@ import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CompleteJobDto } from './dto/complete-job.dto';
 import { JobFeedbackDto } from './dto/job-feedback.dto';
+import { FilesInterceptor } from '@nestjs/platform-express/multer/interceptors/files.interceptor';
 
 @Controller({
   path: '/jobs',
@@ -126,15 +127,34 @@ export class JobsController {
     }
   }
 
+  @Delete('/:jobId')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  async delete(@Param() param): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let deletedJob: Job;
+      await session.withTransaction(async () => {
+        deletedJob = await this.jobsService.softDelete(param.jobId, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
   @Put('/:jobId/complete')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
-  async markJobComplete(@Param() param, @Body() completeJobDto: CompleteJobDto): Promise<IResponse> {
+  @UseInterceptors(FilesInterceptor('docs'))
+  async markJobComplete(@Param('jobId') jobId, @Body() completeJobDto: CompleteJobDto, @UploadedFiles() files: Express.Multer.File[]): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedJob: IJob;
       await session.withTransaction(async () => {
-        updatedJob = await this.jobsService.markJobAsComplete(param.jobId, completeJobDto, session);
+        updatedJob = await this.jobsService.markJobAsComplete(jobId, completeJobDto, files || [], session);
       });
       session.endSession();
 
@@ -157,24 +177,6 @@ export class JobsController {
       session.endSession();
 
       return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
-    } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
-    }
-  }
-
-  @Delete('/:jobId')
-  @UseGuards(RolesGuard)
-  @Roles('ADMIN')
-  async delete(@Param() param): Promise<IResponse> {
-    try {
-      const session = await this.connection.startSession();
-      let deletedJob: Job;
-      await session.withTransaction(async () => {
-        deletedJob = await this.jobsService.softDelete(param.jobId, session);
-      });
-      session.endSession();
-
-      return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
