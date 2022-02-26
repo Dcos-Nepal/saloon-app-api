@@ -129,7 +129,7 @@ export class QuoteController {
       const session = await this.connection.startSession();
       let updatedQuote: Quote;
       await session.withTransaction(async () => {
-        updatedQuote = await this.quoteService.updateStatus(param.quoteId, quote.status, session, { authUser });
+        updatedQuote = await this.quoteService.updateStatus(param.quoteId, quote.status, quote.reason || '', session, { authUser });
       });
       session.endSession();
 
