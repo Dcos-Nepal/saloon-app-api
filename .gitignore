@@ -25,6 +25,9 @@ lerna-debug.log*
 
 # IDEs and editors
 .env
+.env.lambda
+
+env/Makefile.override.dev
 /.idea
 .project
 .classpath
