@@ -102,12 +102,14 @@ export class VisitsController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
-  async create(@Body() visit: CreateVisitDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async create(@Body() visit: CreateVisitDto, @Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let newJob: IVisit;
       await session.withTransaction(async () => {
-        newJob = await this.visitsService.create(visit, session, { authUser });
+        newJob = query.updateFollowing
+          ? await this.visitsService.updateSelfAndFollowing(visit, session)
+          : await this.visitsService.create(visit, session, { authUser });
       });
       session.endSession();
 
@@ -121,12 +123,14 @@ export class VisitsController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(SelfOrAdminGuard)
-  async update(@Param() param, @Body() property: UpdateVisitDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async update(@Param() param, @Body() visit: UpdateVisitDto, @Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedVisit: IVisit;
       await session.withTransaction(async () => {
-        updatedVisit = await this.visitsService.update(param.visitId, property, session, { authUser });
+        updatedVisit = query.updateFollowing
+          ? await this.visitsService.updateSelfAndFollowing(visit as IVisit, session)
+          : await this.visitsService.update(param.visitId, visit, session, { authUser });
       });
       session.endSession();
 

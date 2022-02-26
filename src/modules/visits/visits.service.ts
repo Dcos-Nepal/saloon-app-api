@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { DateTime } from 'luxon';
 import { ClientSession, Model } from 'mongoose';
-import { rrulestr } from 'rrule';
+import RRule, { Frequency, rrulestr } from 'rrule';
 
 import BaseService from 'src/base/base-service';
 import { IServiceOptions } from 'src/common/interfaces';
@@ -55,5 +56,43 @@ export class VisitsService extends BaseService<Visit, IVisit> {
       return acc;
     }, []);
     return visitSummaries;
+  }
+
+  async updateSelfAndFollowing(visit: IVisit, session: ClientSession) {
+    const selectedVisit = await this.findById(visit._id);
+
+    const until = DateTime.fromJSDate(visit.startDate).minus({ days: 1 }).toJSDate();
+    const primaryRruleSet = new RRule({
+      dtstart: selectedVisit.startDate,
+      interval: 1,
+      until: new Date(until),
+      freq: Frequency.DAILY
+    }).toString();
+
+    selectedVisit.rruleSet = primaryRruleSet;
+    await selectedVisit.save();
+
+    await this.model.deleteMany({ job: visit.job, isPrimary: false, startDate: { $gte: visit.startDate }, 'status.status': 'NOT-COMPLETED' });
+    const remainingVisits = await this.model.find({ isPrimary: false, startDate: { $gte: visit.startDate } });
+
+    const rruleSet = new RRule({
+      dtstart: visit.startDate,
+      interval: 1,
+      until: selectedVisit.endDate,
+      freq: Frequency.DAILY
+    }).toString();
+
+    const excRules = remainingVisits.map((visit) => {
+      return new RRule({
+        dtstart: visit.startDate,
+        interval: 1,
+        count: 1,
+        freq: Frequency.DAILY
+      }).toString();
+    });
+
+    delete visit._id;
+    const addVisits = await this.create({ ...visit, rruleSet, excRrule: excRules, isPrimary: false }, session);
+    return addVisits;
   }
 }
