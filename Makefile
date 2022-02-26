@@ -47,7 +47,7 @@ DOCKER_RUN ?=  \
 tools:
 	@docker build $(DOCKER_BUILD_FLAGS) -t tools -f $(APP_ROOT)/tools/Dockerfile $(APP_ROOT)/tools
 
-lambda-update:
+lambda-update: ## Update lambda with latest image
 	@$(DOCKER_RUN) ./deploy.sh $(LAMBDA_FUNCTION_NAME) $(TARGET_IMAGE_LATEST) $(AWS_REGION)
 
 
@@ -61,9 +61,9 @@ docker-push: ## docker push
 	@docker push $(TARGET_IMAGE_LATEST)
 
 docker-login: ## Login to ECR registry
-	aws ecr get-login-password --region $(AWS_REGION) --profile $(AWS_PROFILE) | docker login --username AWS --password-stdin $(REGISTRY_URL)
+	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(REGISTRY_URL)
 
-deploy: docker-build docker-tag docker-push lambda-update
+deploy: docker-build docker-tag docker-login docker-push lambda-update
 
 clean: ## Remove log file.
 	@rm -rf logs/**.log logs/**.json build

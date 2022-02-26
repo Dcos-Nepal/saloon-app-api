@@ -93,16 +93,19 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 ## Deployment to AWS lambda
+
 It is super simple to deploy your application. These are the following requirements:
 - Git
 - Docker
 
 Below are the steps:
+
 1. Create environment override file based on `env/Makefile.override.example`. For instance, if you want to deploy to dev environment, you will need to create a environment override file called `Makefile.override.dev`.
 
 2. Have all those variables in place.
 
 3. Initialize tools.
+
 ```bash
 $ make tools
 ```
