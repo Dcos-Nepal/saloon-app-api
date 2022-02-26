@@ -4,6 +4,7 @@ import { Job } from 'src/modules/jobs/interfaces/job.interface';
 import { ILineItemPricing } from 'src/common/interfaces';
 
 export interface IVisit {
+  _id?: any;
   title?: string;
   instruction?: string;
   team?: string[] | User[];
@@ -19,6 +20,7 @@ export interface IVisit {
   status?: IVisitStatus;
   statusRevision?: IVisitStatus[];
   isPrimary?: boolean;
+  hasMultiVisit: boolean;
 }
 
 export interface IVisitStatus {

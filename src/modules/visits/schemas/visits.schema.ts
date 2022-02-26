@@ -6,6 +6,7 @@ export const VisitSchema = new mongoose.Schema(
     title: { type: String },
     instruction: { type: String },
     inheritJob: { type: Boolean, required: true, default: false },
+    hasMultiVisit: { type: Boolean, required: true, default: true },
     isPrimary: { type: Boolean, default: false },
     startDate: { type: Date, required: true },
     endDate: { type: Date },
