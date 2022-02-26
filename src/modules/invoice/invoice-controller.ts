@@ -21,7 +21,7 @@ export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   async find(@Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
     try {

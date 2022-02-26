@@ -21,6 +21,7 @@ export interface IQuoteStatus {
   updatedAt: Date;
   status: IQuoteStatusType;
   updatedBy: string | User;
+  reason?: string;
 }
 
 export enum IQuoteStatusType {

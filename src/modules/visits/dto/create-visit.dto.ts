@@ -13,6 +13,10 @@ export class CreateVisitDto extends Schedule {
   @IsOptional()
   inheritJob: boolean;
 
+  @IsBoolean()
+  @IsOptional()
+  hasMultiVisit: boolean;
+
   @IsString()
   @IsOptional()
   instruction?: string;
