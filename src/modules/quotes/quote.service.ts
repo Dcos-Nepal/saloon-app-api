@@ -20,10 +20,10 @@ export class QuoteService extends BaseService<Quote, IQuote> {
    * @param param IServiceOptions
    * @returns Promise<Object>
    */
-  async updateStatus(quoteId: string, statusType: IQuoteStatusType, session: ClientSession, { authUser }: IServiceOptions) {
+  async updateStatus(quoteId: string, statusType: IQuoteStatusType, reason: string, session: ClientSession, { authUser }: IServiceOptions) {
     const quote = await this.findById(quoteId);
     quote.statusRevision.push(quote.status);
-    quote.status = { status: statusType, updatedBy: authUser._id, updatedAt: new Date() };
+    quote.status = { status: statusType, reason: reason, updatedBy: authUser._id, updatedAt: new Date() };
 
     return await this.update(quoteId, quote, session, { authUser });
   }
