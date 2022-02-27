@@ -82,7 +82,7 @@ export class VerifyEmailService {
 
     if (model && model.emailToken) {
       try {
-        const mailResponse: IMailResponse = await this.mailService.sendEmail('Verify Email', 'Orange Cleaning', email, {
+        const mailResponse: IMailResponse = await this.mailService.sendEmail('No-reply: Verify your email', 'Orange Cleaning', email, {
           template: 'confirm-account',
           context: {
             receiverName: 'Example User',

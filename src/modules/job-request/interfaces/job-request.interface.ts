@@ -7,6 +7,7 @@ export interface IJobRequest {
   type?: string;
   client: string;
   status: string;
+  isDeleted?: boolean;
 }
 
 export enum JobRequestStatus {

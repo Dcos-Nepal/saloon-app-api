@@ -30,8 +30,11 @@ export class JobRequestController {
     let filter: mongoose.FilterQuery<Type> = {};
 
     try {
+      // Defining filters
       if (query.q) {
-        filter = { name: { $regex: query.q, $options: 'i' } };
+        filter = { name: { $regex: query.q, $options: 'i' }, isDeleted: false };
+      } else {
+        filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
       }
 
       const options = { authUser, query, toPopulate: [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }] };

@@ -22,6 +22,9 @@ import { JWTService } from './passport/jwt.service';
 import { UserDeviceService } from '../devices/devices.service';
 import { IUserDevice, UserDevice } from '../devices/interfaces/device.interface';
 import { UserLogoutDto } from './dto/user-logout.dto';
+import { IMailResponse } from 'src/common/interfaces/mail-interface';
+import { MailService } from 'src/common/modules/mail/mail.service';
+import { ConfigService } from 'src/configs/config.service';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +34,9 @@ export class AuthService {
     @InjectModel('User') private readonly userModel: Model<User>,
     @InjectModel('ForgotPassword') private readonly forgotPasswordModel: Model<ForgotPassword>,
     @InjectModel('ConsentRegistry') private readonly consentRegistryModel: Model<ConsentRegistry>,
+    private readonly configService: ConfigService,
     private readonly jwtService: JWTService,
+    private readonly mailService: MailService,
     private readonly userDeviceService: UserDeviceService
   ) {}
 
@@ -230,17 +235,20 @@ export class AuthService {
 
     const tokenModel = await this.createForgotPasswordToken(email);
 
-    if (tokenModel && tokenModel.passwordToken) {
-      //const html = ForgotPasswordTemplate(tokenModel.newPasswordToken);
-
+    if (tokenModel && tokenModel.newPasswordToken) {
       try {
-        // await this.mailer.sendEmail(email, 'Forgotten Password', html);
-        return true;
+        const mailResponse: IMailResponse = await this.mailService.sendEmail('Password reset request', 'Orange Cleaning', email, {
+          template: 'forgot-password',
+          context: {
+            receiverName: userFromDb.fullName,
+            linkToPasswordReset: `${this.configService.get('WEB_APP_URL')}/change-password/${tokenModel.newPasswordToken}`
+          }
+        });
+        return mailResponse?.messageId ? true : false;
       } catch (error) {
-        return false;
+        this.logger.error('Error: ', JSON.stringify(error));
+        throw new HttpException('REQUEST_PWD.ERROR.SEND_MAIL', HttpStatus.FORBIDDEN);
       }
-    } else {
-      throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
     }
   }
 

@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { InvoiceService } from './invoice-service';
 import { InjectConnection } from '@nestjs/mongoose';
@@ -11,6 +11,8 @@ import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { User } from '../users/interfaces/user.interface';
 import { GetInvoiceQueryDto } from './dtos/get-invoice-query.dto';
+import { ItemResponse } from 'aws-sdk/clients/dynamodb';
+import { IResponse } from 'src/common/interfaces/response.interface';
 
 @Controller({
   path: '/invoices',
@@ -77,6 +79,24 @@ export class InvoiceController {
       session.endSession();
 
       return new ResponseSuccess('COMMON.SUCCESS', invoice);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Delete('/:invoiceId')
+  @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
+  async delete(@Param() param): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let isDeleted: boolean;
+      await session.withTransaction(async () => {
+        isDeleted = await this.invoiceService.remove(param.invoiceId, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', { isDeleted });
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
