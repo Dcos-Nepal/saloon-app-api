@@ -29,6 +29,9 @@ export class CreateVisitDto extends Schedule {
   @IsMongoId()
   job: string;
 
+  @IsMongoId()
+  visitFor: string;
+
   @IsArray()
   @IsOptional()
   @ValidateNested()

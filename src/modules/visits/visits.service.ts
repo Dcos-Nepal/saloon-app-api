@@ -14,6 +14,22 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     super(visitModel);
   }
 
+  async findAll(filter: any, options?: IServiceOptions) {
+    if (filter.startDate || filter.endDate) {
+      filter['$or'] = [];
+      if (filter.startDate) filter['$or'].push({ startDate: { $lte: filter.startDate }, endDate: { $gte: filter.startDate } });
+      if (filter.endDate) filter['$or'].push({ startDate: { $lte: filter.endDate }, endDate: { $gte: filter.endDate } });
+
+      if (filter.startDate && filter.endDate) {
+        filter['$or'].push({ startDate: { $gte: filter.startDate }, endDate: { $lte: filter.endDate } });
+      }
+      delete filter.startDate;
+      delete filter.endDate;
+    }
+
+    return super.findAll(filter, options);
+  }
+
   /**
    * Update Visit Info for given visit Id
    *
@@ -39,11 +55,15 @@ export class VisitsService extends BaseService<Visit, IVisit> {
    * @returns Visit[]
    */
   async getSummary(startDate: Date, endDate: Date) {
-    const visits = await this.visitModel.find({ startDate: { $gte: startDate, $lte: endDate } });
+    const cond: any = { $or: [{ startDate: { $gte: startDate }, endDate: { $lte: endDate } }] };
+    if (startDate) cond['$or'].push({ startDate: { $lte: startDate }, endDate: { $gte: startDate } });
+    if (endDate) cond['$or'].push({ startDate: { $lte: endDate }, endDate: { $gte: endDate } });
+
+    const visits = await this.visitModel.find(cond);
     const visitSummaries = visits.reduce((acc, visit) => {
       const totalPricePerVisit = visit.lineItems.reduce((acc, lineItem) => (acc += lineItem.quantity * lineItem.unitPrice), 0);
       const singleVisits = rrulestr(visit.rruleSet)
-        .between(endDate, startDate, true)
+        .between(startDate, endDate, true)
         .map((visitDate) => {
           return {
             status: visit.status,

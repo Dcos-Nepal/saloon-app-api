@@ -21,6 +21,7 @@ export interface IVisit {
   statusRevision?: IVisitStatus[];
   isPrimary?: boolean;
   hasMultiVisit: boolean;
+  visitFor: string | User;
 }
 
 export interface IVisitStatus {

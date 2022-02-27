@@ -15,6 +15,7 @@ export const VisitSchema = new mongoose.Schema(
     rruleSet: { type: String, required: true },
     excRrule: [{ type: String }],
     job: { type: mongoose.Types.ObjectId, required: true, ref: 'Jobs' },
+    visitFor: { type: mongoose.Types.ObjectId, required: true, ref: 'Users' },
     team: { type: [mongoose.Types.ObjectId], ref: 'User' },
     lineItems: [
       {
