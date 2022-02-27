@@ -29,7 +29,7 @@ export class VisitsController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     let filter: mongoose.FilterQuery<Visit> = { ...query };
 

@@ -11,7 +11,6 @@ import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { User } from '../users/interfaces/user.interface';
 import { GetInvoiceQueryDto } from './dtos/get-invoice-query.dto';
-import { ItemResponse } from 'aws-sdk/clients/dynamodb';
 import { IResponse } from 'src/common/interfaces/response.interface';
 
 @Controller({
