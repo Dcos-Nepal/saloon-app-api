@@ -133,7 +133,6 @@ export class UsersController {
   }
 
   @Put('/:id')
-  @UseGuards(SelfOrAdminGuard)
   async update(@Body() body: UpdateUserDto, @Param() params, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
