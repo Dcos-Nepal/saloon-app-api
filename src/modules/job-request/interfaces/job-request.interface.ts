@@ -6,6 +6,7 @@ export interface IJobRequest {
   description: string;
   type?: string;
   client: string;
+  property?: string;
   status: string;
   isDeleted?: boolean;
 }

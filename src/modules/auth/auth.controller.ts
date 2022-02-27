@@ -165,7 +165,12 @@ export class AuthController {
       } else if (resetPassword.passwordToken) {
         const forgottenPasswordModel = await this.authService.getForgotPasswordModel(resetPassword.passwordToken);
         isNewPasswordChanged = await this.userService.setPassword(forgottenPasswordModel.email, resetPassword.newPassword);
-        if (isNewPasswordChanged) await forgottenPasswordModel.remove();
+
+        if (isNewPasswordChanged) {
+          await forgottenPasswordModel.remove();
+          // TODO [Good to have]
+          // Send password reset successfully email
+        }
       } else {
         return new ResponseError('RESET_PASSWORD.CHANGE_PASSWORD_ERROR');
       }

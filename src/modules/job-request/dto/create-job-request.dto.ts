@@ -15,6 +15,11 @@ export class CreateJobRequestDto {
   client: string;
 
   @IsString()
+  @IsMongoId()
   @IsOptional()
-  status: string;
+  property?: string;
+
+  @IsString()
+  @IsOptional()
+  status?: string;
 }

@@ -7,7 +7,8 @@ export const JobRequestSchema = new mongoose.Schema(
     isDeleted: { type: Boolean, required: true, default: false },
     type: { type: String },
     status: { type: String, default: 'PENDING' },
-    client: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
+    client: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
+    property: { type: mongoose.Types.ObjectId, required: false, default: null, ref: 'Property' }
   },
   {
     timestamps: true,

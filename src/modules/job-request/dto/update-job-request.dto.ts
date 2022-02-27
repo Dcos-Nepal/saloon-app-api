@@ -1,33 +1,30 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdatePropertyDto {
-  name: string;
+  @IsString()
+  @IsOptional()
+  name?: string;
 
   @IsString()
   @IsOptional()
-  street1: string;
+  description?: string;
 
   @IsString()
   @IsOptional()
-  street2?: string;
+  type?: string;
+
+  @IsString()
+  @IsMongoId()
+  @IsOptional()
+  client?: string;
+
+  @IsString()
+  @IsMongoId()
+  @IsOptional()
+  property?: string;
 
   @IsString()
   @IsOptional()
-  city: string;
-
-  @IsString()
   @IsOptional()
-  state: string;
-
-  @IsNumber()
-  @IsOptional()
-  postalCode: number;
-
-  @IsString()
-  @IsOptional()
-  country: string;
-
-  @IsString()
-  @IsOptional()
-  user: string;
+  status?: string;
 }

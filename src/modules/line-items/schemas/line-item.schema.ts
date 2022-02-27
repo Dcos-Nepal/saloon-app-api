@@ -7,7 +7,7 @@ export const LineItemSchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: (v: string) => v.length >= 0,
-        message: "Line Item name can't be empty"
+        message: "Line item name can't be empty"
       }
     },
     description: { type: String },

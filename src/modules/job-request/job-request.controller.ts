@@ -30,7 +30,7 @@ export class JobRequestController {
     let filter: mongoose.FilterQuery<Type> = {};
 
     try {
-      // Defining filters
+      // Filters to listing Job Requests
       if (query.q) {
         filter = { name: { $regex: query.q, $options: 'i' }, isDeleted: false };
       } else {
