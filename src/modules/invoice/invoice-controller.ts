@@ -1,17 +1,18 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { InvoiceService } from './invoice-service';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Invoice } from './interfaces/invoice.interface';
+import { IInvoice, Invoice } from './interfaces/invoice.interface';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { User } from '../users/interfaces/user.interface';
 import { GetInvoiceQueryDto } from './dtos/get-invoice-query.dto';
 import { IResponse } from 'src/common/interfaces/response.interface';
+import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
 
 @Controller({
   path: '/invoices',
@@ -78,6 +79,24 @@ export class InvoiceController {
       session.endSession();
 
       return new ResponseSuccess('COMMON.SUCCESS', invoice);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Put('/:invoiceId')
+  @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
+  async update(@Param() param, @Body() invoiceUpdateDto: UpdateInvoiceDto): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let updatedInvoice: IInvoice;
+      await session.withTransaction(async () => {
+        updatedInvoice = await this.invoiceService.update(param.invoiceId, invoiceUpdateDto, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', updatedInvoice);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
