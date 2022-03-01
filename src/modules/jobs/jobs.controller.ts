@@ -30,7 +30,7 @@ export class JobsController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
@@ -70,7 +70,7 @@ export class JobsController {
 
   @Get('/:jobId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const job = await this.jobsService.findById(param.jobId, {
@@ -90,7 +90,7 @@ export class JobsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(SelfOrAdminGuard)
   @SelfKey('jobFor')
   async create(@Body() job: CreateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
@@ -110,7 +110,7 @@ export class JobsController {
 
   @Put('/:jobId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() property: UpdateJobDto): Promise<IResponse> {
     try {
