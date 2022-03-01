@@ -60,6 +60,16 @@ export class UsersService extends BaseService<User, IUser> {
   }
 
   /**
+   * Finds User using the referral code
+   *
+   * @param email string
+   * @returns Promise<User>
+   */
+  async findByReferralCode(referralCode: string): Promise<User> {
+    return await this.userModel.findOne({ 'userData.referralCode': referralCode }).exec();
+  }
+
+  /**
    * Registers New User in the System
    *
    * @param newUser RegisterUserDto
@@ -70,6 +80,19 @@ export class UsersService extends BaseService<User, IUser> {
       if (this.isValidEmail(newUser.email) && newUser.password) {
         const userRegistered = await this.findByEmail(newUser.email);
         if (!userRegistered) {
+          /**
+           * Check if the user is referred by some other user
+           */
+          if (newUser?.userData?.referredBy) {
+            const referrer = await this.findByReferralCode(newUser.userData.referredBy);
+            if (referrer) {
+              newUser.userData.referredBy = referrer._id;
+            }
+          }
+
+          /**
+           * Continue with registration
+           */
           newUser.password = await bcrypt.hash(newUser.password, saltRounds);
           const createdUser = new this.userModel(newUser);
           return await createdUser.save();

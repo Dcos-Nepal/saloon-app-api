@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { randomNumbers, randomStringCaps } from 'src/common/utils/random-string';
+import { randomNumbers } from 'src/common/utils/random-string';
 import { JobRequest } from '../interfaces/job-request.interface';
 
 export const JobRequestSchema = new mongoose.Schema(

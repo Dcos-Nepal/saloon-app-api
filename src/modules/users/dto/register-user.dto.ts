@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested } from 'class-validator';
 
 import { IUserRole } from '../interfaces/user.interface';
+import { BaseUserModel } from '../models/base-user.model';
+import { ClientModel } from '../models/client-user.model';
+import { WorkerModel } from '../models/worker-user.model';
+import { UserType } from '../schemas/user.schema';
 
 export class RegisterUserDto {
   @ApiProperty()
@@ -42,4 +47,20 @@ export class RegisterUserDto {
     message: 'Invalid phone number provided'
   })
   phoneNumber: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => BaseUserModel, {
+    discriminator: {
+      property: 'type',
+      subTypes: [
+        { value: ClientModel, name: UserType.CLIENT },
+        { value: WorkerModel, name: UserType.WORKER }
+      ]
+    },
+    keepDiscriminatorProperty: true
+  })
+  userData?: ClientModel | WorkerModel;
 }
