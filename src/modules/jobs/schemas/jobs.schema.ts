@@ -1,8 +1,10 @@
 import * as mongoose from 'mongoose';
-import { JobType } from '../interfaces/job.interface';
+import { randomNumbers } from 'src/common/utils/random-string';
+import { Job, JobType } from '../interfaces/job.interface';
 
 export const JobSchema = new mongoose.Schema(
   {
+    refCode: { type: String },
     title: { type: String, required: true },
     instruction: { type: String, required: true },
     jobFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
@@ -46,3 +48,11 @@ export const JobSchema = new mongoose.Schema(
     toObject: { getters: true }
   }
 );
+
+/**
+ * Before saving new Job
+ */
+JobSchema.pre('save', function (this: Job, next) {
+  this.refCode = `JOB:${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomNumbers()}`;
+  next();
+});

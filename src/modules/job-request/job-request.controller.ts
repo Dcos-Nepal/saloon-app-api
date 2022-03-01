@@ -62,7 +62,10 @@ export class JobRequestController {
   @Get('/:requestId')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const populate = [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }];
+      const populate = [
+        { path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] },
+        { path: 'property', select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country'] }
+      ];
       const property = await this.jobRequestService.findById(param.requestId, { authUser, toPopulate: populate });
 
       return new ResponseSuccess('COMMON.SUCCESS', property);

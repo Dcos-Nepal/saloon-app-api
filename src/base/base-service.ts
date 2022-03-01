@@ -90,8 +90,10 @@ class BaseService<EntityModel, Entity> {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async create(data: Entity, session: ClientSession, options?: IServiceOptions): Promise<EntityModel> {
-    const document = await this.model.create([data], { session });
-    return document[0];
+    const document = new this.model(data);
+    const newDoc = await document.save({ session });
+
+    return newDoc as EntityModel;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

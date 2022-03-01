@@ -2,6 +2,7 @@ import { Document } from 'mongoose';
 
 export interface IJobRequest {
   _id?: string;
+  reqCode?: string;
   name: string;
   description: string;
   type?: string;

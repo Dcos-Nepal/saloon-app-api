@@ -40,7 +40,7 @@ export class InvoiceController {
   @UseGuards(RolesGuard)
   async findOne(@Param() id: string, @Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
     try {
-      const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'address'] }];
+      const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'address', 'email', 'phoneNumber'] }];
       const invoice = await this.invoiceService.findById(new mongoose.Types.ObjectId(id).toString(), { authUser, query, toPopulate });
       return new ResponseSuccess('COMMON.SUCCESS', invoice);
     } catch (error) {
