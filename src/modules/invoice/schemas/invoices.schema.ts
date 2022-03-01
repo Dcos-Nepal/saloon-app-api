@@ -36,9 +36,17 @@ export const InvoiceSchema = new mongoose.Schema(
 );
 
 /**
+ * Validates Schema before saving document
+ */
+InvoiceSchema.pre('validate', function (this: Invoice, next) {
+  this.refCode = `INVOICE:${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomNumbers()}`;
+  next();
+});
+
+/**
  * Before saving new Invoice
  */
 InvoiceSchema.pre('save', function (this: Invoice, next) {
-  this.refCode = `INVOICE:${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomNumbers()}`;
+  // Write some functionality here
   next();
 });
