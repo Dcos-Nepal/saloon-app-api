@@ -77,7 +77,7 @@ export class VerifyEmailService {
    * @param email String
    * @returns Promise<boolean>
    */
-  async sendEmailVerification(email: string): Promise<boolean> {
+  async sendEmailVerification(email: string, autoPass = false): Promise<boolean> {
     const model = await this.emailVerificationModel.findOne({ email: email });
 
     if (model && model.emailToken) {
@@ -85,7 +85,8 @@ export class VerifyEmailService {
         const mailResponse: IMailResponse = await this.mailService.sendEmail('No-reply: Verify your email', 'Orange Cleaning', email, {
           template: 'confirm-account',
           context: {
-            receiverName: 'Example User',
+            autoPass,
+            receiverName: email,
             linkToActivate: `${this.configService.get('WEB_APP_URL')}/verify-email/${model.emailToken}`
           }
         });

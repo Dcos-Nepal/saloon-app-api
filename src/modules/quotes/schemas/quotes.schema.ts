@@ -42,11 +42,18 @@ export const QuotesSchema = new mongoose.Schema(
     toObject: { getters: true }
   }
 );
+/**
+ * Validates Schema before saving document
+ */
+QuotesSchema.pre('validate', function (this: Quote, next) {
+  this.refCode = `QUOTE:${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomNumbers()}`;
+  next();
+});
 
 /**
  * Before saving new Quote
  */
 QuotesSchema.pre('save', function (this: Quote, next) {
-  this.refCode = `QUOTE:${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomNumbers()}`;
+  // DO something cool here...
   next();
 });

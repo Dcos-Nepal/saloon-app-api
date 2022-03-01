@@ -69,20 +69,23 @@ export class UsersController {
   @Post('')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
-  async addNewUser(@Body() createUserDto: CreateUserDto): Promise<IResponse> {
+  async addNewUser(@CurrentUser() authUser, @Body() createUserDto: CreateUserDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let newUser: User = null;
       let emailToken = false;
 
       await session.withTransaction(async () => {
-        newUser = await this.usersService.create(createUserDto, session);
+        // Add createdBy user
+        createUserDto.createdBy = authUser?._id || null;
+        // Continue with registration
+        newUser = await this.usersService.registerUser(createUserDto, session);
         emailToken = await this.verifyEmailService.createEmailToken(newUser.email, session);
       });
       session.endSession();
 
       if (newUser && emailToken) {
-        const sent = await this.verifyEmailService.sendEmailVerification(newUser.email);
+        const sent = await this.verifyEmailService.sendEmailVerification(newUser.email, true);
 
         if (sent) {
           return new ResponseSuccess('CREATION.USER_CREATED_SUCCESSFULLY');

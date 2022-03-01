@@ -76,7 +76,7 @@ export class JobsController {
       const job = await this.jobsService.findById(param.jobId, {
         authUser,
         toPopulate: [
-          { path: 'jobFor', select: ['fullName', 'phoneNumber'] },
+          { path: 'jobFor', select: ['fullName', 'phoneNumber', 'email', 'address'] },
           { path: 'team', select: ['fullName'] },
           { path: 'property', select: [''] },
           { path: 'primaryVisit', select: [''] }

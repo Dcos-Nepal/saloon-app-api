@@ -44,8 +44,6 @@ export class UsersService extends BaseService<User, IUser> {
    */
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
-    // if (body.location) body.location.type = 'Point';
-
     return await this.userModel.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session }).select('-password -__v');
   }
 
@@ -75,7 +73,7 @@ export class UsersService extends BaseService<User, IUser> {
    * @param newUser RegisterUserDto
    * @returns Promise<User>
    */
-  async registerUser(newUser: RegisterUserDto): Promise<User> {
+  async registerUser(newUser: RegisterUserDto, session: ClientSession): Promise<User> {
     try {
       if (this.isValidEmail(newUser.email) && newUser.password) {
         const userRegistered = await this.findByEmail(newUser.email);
@@ -91,11 +89,17 @@ export class UsersService extends BaseService<User, IUser> {
           }
 
           /**
-           * Continue with registration
+           * Continue with registration process
            */
-          newUser.password = await bcrypt.hash(newUser.password, saltRounds);
+
+          // Generating New Password
+          newUser.password = await bcrypt.hash(newUser.password || newUser.phoneNumber, saltRounds);
+
+          // Creating User Model
           const createdUser = new this.userModel(newUser);
-          return await createdUser.save();
+
+          // Saving and returning the user
+          return await createdUser.save({ session });
         } else if (!userRegistered.auth.email.valid) {
           return userRegistered;
         } else {

@@ -108,7 +108,8 @@ export const UserSchema = new mongoose.Schema(
     roles: [{ type: String, required: true }],
     settings: { type: SettingsSchema, required: false },
     userData: UserDataSchema,
-    lastOnline: { type: Date }
+    lastOnline: { type: Date },
+    createdBy: { type: mongoose.Types.ObjectId, ref: 'User' }
   },
   {
     timestamps: true,

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested, IsMongoId } from 'class-validator';
 
 import { IUserRole } from '../interfaces/user.interface';
 import { BaseUserModel } from '../models/base-user.model';
@@ -63,4 +63,8 @@ export class RegisterUserDto {
     keepDiscriminatorProperty: true
   })
   userData?: ClientModel | WorkerModel;
+
+  @IsOptional()
+  @IsMongoId()
+  createdBy?: string;
 }
