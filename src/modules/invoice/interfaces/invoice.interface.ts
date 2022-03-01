@@ -5,6 +5,7 @@ import { User } from 'src/modules/users/interfaces/user.interface';
 import { Visit } from 'src/modules/visits/interfaces/visit.interface';
 
 export interface IInvoice {
+  refCode?: string;
   subject: string;
   message?: string;
   invoiceFor: string | User;
