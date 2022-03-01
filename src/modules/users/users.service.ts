@@ -93,7 +93,7 @@ export class UsersService extends BaseService<User, IUser> {
            */
 
           // Generating New Password
-          newUser.password = await bcrypt.hash(newUser.password || newUser.phoneNumber, saltRounds);
+          newUser.password = await bcrypt.hash(newUser.password, saltRounds);
 
           // Creating User Model
           const createdUser = new this.userModel(newUser);
