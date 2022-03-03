@@ -17,6 +17,7 @@ import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor'
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { VisitSummaryDto } from './dto/summary.dto';
+import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 
 @Controller({
   path: '/visits',
@@ -25,7 +26,11 @@ import { VisitSummaryDto } from './dto/summary.dto';
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class VisitsController {
-  constructor(private readonly visitsService: VisitsService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+  constructor(
+    @InjectConnection() private readonly connection: mongoose.Connection,
+    private readonly deviceService: UserDeviceService,
+    private readonly visitsService: VisitsService
+  ) {}
 
   @Get()
   @UseGuards(RolesGuard)
@@ -151,6 +156,21 @@ export class VisitsController {
         updatedVisit = await this.visitsService.updateStatus(param.visitId, job.status, session, { authUser });
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Visit Status Updated!',
+          body: `A visit status changed to ${updatedVisit.status.status}.`
+        },
+        mobileData: {
+          type: 'VISIT_UPDATED',
+          routeName: '/visits',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof updatedVisit.visitFor === 'string' ? updatedVisit.visitFor : updatedVisit.visitFor?._id, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', updatedVisit);
     } catch (error) {

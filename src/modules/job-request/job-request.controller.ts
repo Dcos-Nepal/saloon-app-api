@@ -15,6 +15,7 @@ import { JobRequest } from './interfaces/job-request.interface';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 import { UpdatePropertyDto } from './dto/update-job-request.dto';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
+import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 
 @Controller({
   path: '/job-requests',
@@ -23,7 +24,11 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class JobRequestController {
-  constructor(private readonly jobRequestService: JobRequestService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+  constructor(
+    @InjectConnection() private readonly connection: mongoose.Connection,
+    private readonly deviceService: UserDeviceService,
+    private readonly jobRequestService: JobRequestService
+  ) {}
 
   @Get()
   @Roles('ADMIN', 'CLIENT')
@@ -87,12 +92,27 @@ export class JobRequestController {
       let newJobReq: JobRequest;
       await session.withTransaction(async () => {
         // Add createdBy user
-        !!jobReq.createdBy ? (jobReq.createdBy = authUser?._id) : null;
+        !jobReq.createdBy ? (jobReq.createdBy = authUser?._id) : null;
 
         // Continue job creation
         newJobReq = await this.jobRequestService.create(jobReq, session, { authUser });
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Request Created!',
+          body: `A job request of ref. #${newJobReq.reqCode} created for you.`
+        },
+        mobileData: {
+          type: 'JOB_REQUEST_CREATED',
+          routeName: '/job-requests',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(jobReq.client, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', newJobReq.toObject());
     } catch (error) {
@@ -114,6 +134,21 @@ export class JobRequestController {
       });
       session.endSession();
 
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Request Updated!',
+          body: `A job request of ref. #${updatedJobReq.reqCode} updated recently.`
+        },
+        mobileData: {
+          type: 'JOB_REQUEST_UPDATED',
+          routeName: '/job-requests',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(updatedJobReq.client, notificationPayload);
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedJobReq);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -131,6 +166,21 @@ export class JobRequestController {
         deletedJobReq = await this.jobRequestService.softDelete(param.propertyId, session);
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Request Deleted!',
+          body: `A job request of ref. #${deletedJobReq.reqCode} deleted recently.`
+        },
+        mobileData: {
+          type: 'JOB_REQUEST_DELETED',
+          routeName: '/job-requests',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(deletedJobReq.client, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', deletedJobReq);
     } catch (error) {

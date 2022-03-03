@@ -18,6 +18,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UploadedF
 import { CompleteJobDto } from './dto/complete-job.dto';
 import { JobFeedbackDto } from './dto/job-feedback.dto';
 import { FilesInterceptor } from '@nestjs/platform-express/multer/interceptors/files.interceptor';
+import { UserDeviceService, NotificationPayload } from '../devices/devices.service';
 
 @Controller({
   path: '/jobs',
@@ -26,7 +27,11 @@ import { FilesInterceptor } from '@nestjs/platform-express/multer/interceptors/f
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class JobsController {
-  constructor(private readonly jobsService: JobsService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+  constructor(
+    @InjectConnection() private readonly connection: mongoose.Connection,
+    private readonly deviceService: UserDeviceService,
+    private readonly jobsService: JobsService
+  ) {}
 
   @Get()
   @UseGuards(RolesGuard)
@@ -107,12 +112,44 @@ export class JobsController {
       let newJob: IJob;
       await session.withTransaction(async () => {
         // Add createdBy user
-        !!job.createdBy ? (job.createdBy = authUser?._id) : null;
+        !job.createdBy ? (job.createdBy = authUser?._id) : null;
 
         // Continue job creation
         newJob = await this.jobsService.create(job, session, { authUser });
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Created!',
+          body: `A job of ref. #${newJob.refCode} created for you.`
+        },
+        mobileData: {
+          type: 'JOB_CREATED',
+          routeName: '/jobs',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof newJob.jobFor === 'string' ? newJob.jobFor : newJob.jobFor?._id, notificationPayload);
+
+      // Notify Teams via Push Notification:
+      newJob.team.forEach((mem: string | User) => {
+        const notificationPayload: NotificationPayload = {
+          notification: {
+            title: 'Job Assigned to you!',
+            body: `A job of ref. #${newJob.refCode} has been assigned to you.`
+          },
+          mobileData: {
+            type: 'JOB_ASSIGNED',
+            routeName: '/jobs',
+            metaData: '',
+            click_action: 'APP_NOTIFICATION_CLICK'
+          }
+        };
+        this.deviceService.sendNotification(typeof mem === 'string' ? mem : mem?._id, notificationPayload);
+      });
 
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
     } catch (error) {
@@ -133,6 +170,37 @@ export class JobsController {
       });
       session.endSession();
 
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Updated!',
+          body: `A job of ref. #${updatedJob.refCode} updated recently.`
+        },
+        mobileData: {
+          type: 'JOB_UPDATED',
+          routeName: '/jobs',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof updatedJob.jobFor === 'string' ? updatedJob.jobFor : updatedJob.jobFor?._id, notificationPayload);
+
+      // Notify Teams via Push Notification:
+      updatedJob.team.forEach((mem: string | User) => {
+        const notificationPayload: NotificationPayload = {
+          notification: {
+            title: 'Job Assigned to you!',
+            body: `A job of ref. #${updatedJob.refCode} has been assigned to you.`
+          },
+          mobileData: {
+            type: 'JOB_ASSIGNED',
+            routeName: '/jobs',
+            metaData: '',
+            click_action: 'APP_NOTIFICATION_CLICK'
+          }
+        };
+        this.deviceService.sendNotification(typeof mem === 'string' ? mem : mem?._id, notificationPayload);
+      });
       return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -150,6 +218,21 @@ export class JobsController {
         deletedJob = await this.jobsService.softDelete(param.jobId, session);
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Deleted!',
+          body: `A job of ref. #${deletedJob.refCode} deleted recently.`
+        },
+        mobileData: {
+          type: 'JOB_DELETED',
+          routeName: '/jobs',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof deletedJob.jobFor === 'string' ? deletedJob.jobFor : deletedJob.jobFor?._id, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', deletedJob);
     } catch (error) {
@@ -169,6 +252,21 @@ export class JobsController {
         updatedJob = await this.jobsService.markJobAsComplete(jobId, completeJobDto, files || [], session);
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Marked as Complete!',
+          body: `A job of ref. #${updatedJob.refCode} marked as complete.`
+        },
+        mobileData: {
+          type: 'JOB_COMPLETED',
+          routeName: '/jobs',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof updatedJob.jobFor === 'string' ? updatedJob.jobFor : updatedJob.jobFor?._id, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', updatedJob);
     } catch (error) {

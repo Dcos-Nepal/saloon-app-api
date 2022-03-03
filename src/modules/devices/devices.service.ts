@@ -7,25 +7,20 @@ import { IUserDevice, UserDevice } from './interfaces/device.interface';
 import { messaging } from 'firebase-admin';
 import { Dictionary } from 'code-config/dist/types';
 import { DeviceType } from './schemas/devices.schema';
-import { WebNotificationService } from 'src/common/modules/notification/service/web-notification.service';
 import { MobileNotificationService } from 'src/common/modules/notification/service/mobile-notification.service';
 import { IFindAll } from 'src/common/interfaces';
 
 export interface NotificationPayload {
   notification: messaging.NotificationMessagePayload;
-  webData: Dictionary;
-  mobileData: Dictionary;
+  webData?: Dictionary;
+  mobileData?: Dictionary;
 }
 
 @Injectable()
 export class UserDeviceService extends BaseService<UserDevice, IUserDevice> {
   private logger: Logger = new Logger('UserDeviceService');
 
-  constructor(
-    @InjectModel('UserDevice') private readonly userDevice: Model<UserDevice>,
-    private webNotificationService: WebNotificationService,
-    private mobileNotificationService: MobileNotificationService
-  ) {
+  constructor(@InjectModel('UserDevice') private readonly userDevice: Model<UserDevice>, private mobileNotificationService: MobileNotificationService) {
     super(userDevice);
   }
 
@@ -36,20 +31,11 @@ export class UserDeviceService extends BaseService<UserDevice, IUserDevice> {
    * @param payload Partial<NotificationPayload>
    * @returns Void
    */
-  async sendNotification(userId: string, payload: Partial<NotificationPayload>) {
-    const subscriptions: IFindAll<UserDevice> = await this.findAll({ id: userId });
+  async sendNotification(userId: string, payload: NotificationPayload) {
+    const userDevices: IFindAll<UserDevice> = await this.findAll({ user: userId });
 
-    for (const subscription of subscriptions.rows) {
+    for (const subscription of userDevices.rows) {
       switch (subscription.deviceType) {
-        case DeviceType.WEB:
-          this.webNotificationService
-            .sendNotification(subscription.subscription, {
-              notification: payload.notification,
-              data: payload.webData
-            })
-            .catch((e) => this.logger.debug(`${subscription.deviceType} ${e}`));
-          break;
-
         case DeviceType.IOS:
         case DeviceType.ANDROID:
           this.mobileNotificationService

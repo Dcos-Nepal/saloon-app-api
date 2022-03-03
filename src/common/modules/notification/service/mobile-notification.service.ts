@@ -12,12 +12,6 @@ export class MobileNotificationService {
    * @returns void
    */
   async sendNotification(token: string | string[], payload: messaging.MessagingPayload) {
-    return fcm.sendToDevice(token, {
-      ...payload,
-      data: {
-        ...payload.data,
-        click_action: 'APP_NOTIFICATION_CLICK'
-      }
-    });
+    return fcm.sendToDevice(token, payload);
   }
 }
