@@ -26,6 +26,8 @@ export class JobRequestController {
   constructor(private readonly jobRequestService: JobRequestService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
+  @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
   async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
     let filter: mongoose.FilterQuery<Type> = {};
 
@@ -47,7 +49,7 @@ export class JobRequestController {
   }
 
   @Get('/summary')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   async getSummary(): Promise<IResponse> {
     try {

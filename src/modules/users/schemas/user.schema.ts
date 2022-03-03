@@ -3,8 +3,10 @@ import { randomStringCaps } from 'src/common/utils/random-string';
 import { User } from '../interfaces/user.interface';
 
 export enum UserType {
+  ADMIN = 'ADMIN',
   CLIENT = 'CLIENT',
-  WORKER = 'WORKER'
+  WORKER = 'WORKER',
+  MANAGER = 'MANAGER'
 }
 
 export const SettingsSchema = new mongoose.Schema(

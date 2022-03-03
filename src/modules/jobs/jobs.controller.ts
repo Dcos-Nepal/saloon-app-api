@@ -43,6 +43,14 @@ export class JobsController {
         filter = { jobFor: { $eq: query.jobFor } };
       }
 
+      if (query.team) {
+        filter = { team: { $eq: query.team } };
+      }
+
+      if (query.createdBy) {
+        filter = { createdBy: { $eq: query.createdBy } };
+      }
+
       const toPopulate = [
         { path: 'jobFor', select: ['fullName'] },
         { path: 'property', select: [''] },
@@ -57,7 +65,7 @@ export class JobsController {
   }
 
   @Get('/summary')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async getSummary(): Promise<IResponse> {
     try {

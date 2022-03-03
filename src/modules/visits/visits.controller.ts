@@ -77,7 +77,7 @@ export class VisitsController {
 
   @Get('/summary')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async getSummary(@Query() query: VisitSummaryDto): Promise<IResponse> {
     try {
       const visits = await this.visitsService.getSummary(query.startDate, query.endDate);

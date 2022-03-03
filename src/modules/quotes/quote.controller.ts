@@ -50,7 +50,7 @@ export class QuoteController {
   }
 
   @Get('/summary')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   async getSummary(): Promise<IResponse> {
     try {

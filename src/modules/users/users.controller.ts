@@ -112,7 +112,7 @@ export class UsersController {
   }
 
   @Get('/:id')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async findById(@Param() params): Promise<IResponse> {
     try {
@@ -136,6 +136,8 @@ export class UsersController {
   }
 
   @Put('/:id')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(RolesGuard)
   async update(@Body() body: UpdateUserDto, @Param() params, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -152,7 +154,7 @@ export class UsersController {
   }
 
   @Get('/:email')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async findByEmail(@Param() params): Promise<IResponse> {
     try {
@@ -175,6 +177,7 @@ export class UsersController {
   }
 
   @Post('settings/update')
+  @UseGuards(SelfOrAdminGuard)
   async updateSettings(@Body() settingsDto: SettingsDto): Promise<IResponse> {
     try {
       const user = await this.usersService.updateSettings(settingsDto);
@@ -185,7 +188,8 @@ export class UsersController {
   }
 
   @Post('profile/avatar')
-  @UseGuards(SelfOrAdminGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(RolesGuard)
   @UseInterceptors(FileInterceptor('file'))
   async addAvatar(@CurrentUser() authUser, @UploadedFile() file: Express.Multer.File) {
     const session = await this.connection.startSession();
@@ -199,7 +203,8 @@ export class UsersController {
   }
 
   @Post('/:userId/properties')
-  @UseGuards(SelfOrAdminGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(RolesGuard)
   async createProperty(@Param() params, @Body() property: CreateUserPropertyDto, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
