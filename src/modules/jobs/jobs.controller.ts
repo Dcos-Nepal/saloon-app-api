@@ -106,6 +106,10 @@ export class JobsController {
       const session = await this.connection.startSession();
       let newJob: IJob;
       await session.withTransaction(async () => {
+        // Add createdBy user
+        !!job.createdBy ? (job.createdBy = authUser?._id) : null;
+
+        // Continue job creation
         newJob = await this.jobsService.create(job, session, { authUser });
       });
       session.endSession();

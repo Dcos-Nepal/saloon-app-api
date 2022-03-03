@@ -11,7 +11,8 @@ export const JobRequestSchema = new mongoose.Schema(
     type: { type: String },
     status: { type: String, default: 'PENDING' },
     client: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
-    property: { type: mongoose.Types.ObjectId, required: false, default: null, ref: 'Property' }
+    property: { type: mongoose.Types.ObjectId, required: false, default: null, ref: 'Property' },
+    createdBy: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
   },
   {
     timestamps: true,

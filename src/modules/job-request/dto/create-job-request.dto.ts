@@ -22,4 +22,8 @@ export class CreateJobRequestDto {
   @IsString()
   @IsOptional()
   status?: string;
+
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
 }

@@ -10,6 +10,7 @@ export interface IJobRequest {
   property?: string;
   status?: string;
   isDeleted?: boolean;
+  createdBy?: string;
 }
 
 export enum JobRequestStatus {

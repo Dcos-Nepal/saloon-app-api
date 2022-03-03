@@ -81,16 +81,20 @@ export class JobRequestController {
   @UseGuards(RolesGuard)
   @UseGuards(SelfOrAdminGuard)
   @SelfKey('client')
-  async create(@Body() property: CreateJobRequestDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async create(@Body() jobReq: CreateJobRequestDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let newProperty: JobRequest;
+      let newJobReq: JobRequest;
       await session.withTransaction(async () => {
-        newProperty = await this.jobRequestService.create(property, session, { authUser });
+        // Add createdBy user
+        !!jobReq.createdBy ? (jobReq.createdBy = authUser?._id) : null;
+
+        // Continue job creation
+        newJobReq = await this.jobRequestService.create(jobReq, session, { authUser });
       });
       session.endSession();
 
-      return new ResponseSuccess('COMMON.SUCCESS', newProperty.toObject());
+      return new ResponseSuccess('COMMON.SUCCESS', newJobReq.toObject());
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
