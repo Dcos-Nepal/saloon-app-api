@@ -257,4 +257,13 @@ export class UsersService extends BaseService<User, IUser> {
 
     return false;
   }
+
+  async getSummary() {
+    const [workerCount, clientCount] = await Promise.all([this.model.countDocuments({ type: 'WORKER' }), this.model.countDocuments({ type: 'CLIENT' })]);
+    return {
+      workerCount,
+      clientCount,
+      total: workerCount + clientCount
+    };
+  }
 }

@@ -96,6 +96,18 @@ export class UsersController {
     }
   }
 
+  @Get('/summary')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(RolesGuard)
+  async summary(): Promise<IResponse> {
+    try {
+      const summary = await this.usersService.getSummary();
+      return new ResponseSuccess('COMMON.SUCCESS', summary);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
   @Get('/me')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
