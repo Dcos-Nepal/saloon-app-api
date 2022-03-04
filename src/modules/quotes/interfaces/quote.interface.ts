@@ -5,6 +5,7 @@ import { ILineItemPricing } from 'src/common/interfaces';
 import { Property } from 'src/modules/properties/interfaces/property.interface';
 
 export interface IQuote {
+  refCode?: string;
   title: string;
   description: string;
   status?: IQuoteStatus;

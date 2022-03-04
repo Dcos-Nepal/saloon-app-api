@@ -1,8 +1,10 @@
 import * as mongoose from 'mongoose';
-import { IQuoteStatusType } from '../interfaces/quote.interface';
+import { randomNumbers } from 'src/common/utils/random-string';
+import { IQuoteStatusType, Quote } from '../interfaces/quote.interface';
 
 export const QuotesSchema = new mongoose.Schema(
   {
+    refCode: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
     quoteFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
@@ -40,3 +42,18 @@ export const QuotesSchema = new mongoose.Schema(
     toObject: { getters: true }
   }
 );
+/**
+ * Validates Schema before saving document
+ */
+QuotesSchema.pre('validate', function (this: Quote, next) {
+  this.refCode = `QUOTE:${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomNumbers()}`;
+  next();
+});
+
+/**
+ * Before saving new Quote
+ */
+QuotesSchema.pre('save', function (this: Quote, next) {
+  // DO something cool here...
+  next();
+});

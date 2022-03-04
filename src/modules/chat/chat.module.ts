@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppService } from 'src/app.service';
 import { AppSocketGateway } from 'src/app.socket';
 import { ConfigService } from 'src/configs/config.service';
+import { UserDevicesModule } from '../devices/devices.module';
 import { UsersModule } from '../users/users.module';
 
 import { ChatMessageService } from './chat-message.service';
@@ -22,7 +23,8 @@ import { ChatRoomSchema } from './schemas/chat-room.schema';
       { name: 'C_Room', schema: ChatRoomSchema },
       { name: 'C_Message', schema: ChatMessageSchema }
     ]),
-    UsersModule
+    UsersModule,
+    UserDevicesModule
   ],
   controllers: [ChatController],
   providers: [ConfigService, AppSocketGateway, ChatSocketGateway, AppService, ChatRequestService, ChatRoomService, ChatMessageService]

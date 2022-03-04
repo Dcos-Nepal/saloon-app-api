@@ -44,4 +44,9 @@ export class CreateJobDto {
   @ValidateNested()
   @Type(() => Schedule)
   schedule?: Schedule;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  notifyTeam?: boolean;
 }

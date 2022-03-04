@@ -3,8 +3,10 @@ import { randomStringCaps } from 'src/common/utils/random-string';
 import { User } from '../interfaces/user.interface';
 
 export enum UserType {
+  ADMIN = 'ADMIN',
   CLIENT = 'CLIENT',
-  WORKER = 'WORKER'
+  WORKER = 'WORKER',
+  MANAGER = 'MANAGER'
 }
 
 export const SettingsSchema = new mongoose.Schema(
@@ -108,7 +110,8 @@ export const UserSchema = new mongoose.Schema(
     roles: [{ type: String, required: true }],
     settings: { type: SettingsSchema, required: false },
     userData: UserDataSchema,
-    lastOnline: { type: Date }
+    lastOnline: { type: Date },
+    createdBy: { type: mongoose.Types.ObjectId, ref: 'User' }
   },
   {
     timestamps: true,
@@ -118,13 +121,13 @@ export const UserSchema = new mongoose.Schema(
 );
 
 // Indexing
-UserSchema.index({ location: '2dsphere' });
+WorkerSchema.index({ location: '2dsphere' });
 
 /**
  * Before saving new User
  */
 UserSchema.pre('save', function (this: User, next) {
-  this.userCode = `OCU-${randomStringCaps()}`;
+  this.userCode = `OCU-${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomStringCaps()}`;
   this.fullName = `${this.firstName} ${this.lastName}`;
 
   if (this.roles.includes('CLIENT') || this.roles.includes('WORKER')) {

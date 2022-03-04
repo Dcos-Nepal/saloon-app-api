@@ -16,6 +16,7 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
+import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 
 @Controller({
   path: '/quotes',
@@ -24,7 +25,11 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class QuoteController {
-  constructor(private readonly quoteService: QuoteService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+  constructor(
+    @InjectConnection() private readonly connection: mongoose.Connection,
+    private readonly deviceService: UserDeviceService,
+    private readonly quoteService: QuoteService
+  ) {}
 
   @Get()
   @UseGuards(RolesGuard)
@@ -50,7 +55,7 @@ export class QuoteController {
   }
 
   @Get('/summary')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   async getSummary(): Promise<IResponse> {
     try {
@@ -94,6 +99,21 @@ export class QuoteController {
       });
       session.endSession();
 
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Quote Created!',
+          body: `A job quote of ref. #${newQuote.refCode} created for you.`
+        },
+        mobileData: {
+          type: 'JOB_QUOTE_CREATED',
+          routeName: '/quotes',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof newQuote.quoteFor === 'string' ? newQuote.quoteFor : newQuote.quoteFor?._id, notificationPayload);
+
       return new ResponseSuccess('COMMON.SUCCESS', newQuote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -112,6 +132,21 @@ export class QuoteController {
         updatedQuote = await this.quoteService.update(param.quoteId, updatedQuoteDto, session, { authUser });
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Quote Updated!',
+          body: `A job quote of ref. #${updatedQuote.refCode} recently.`
+        },
+        mobileData: {
+          type: 'JOB_QUOTE_UPDATED',
+          routeName: '/quotes',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof updatedQuote.quoteFor === 'string' ? updatedQuote.quoteFor : updatedQuote.quoteFor?._id, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', updatedQuote);
     } catch (error) {
@@ -133,6 +168,21 @@ export class QuoteController {
       });
       session.endSession();
 
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Quote Status Changed!',
+          body: `A job quote of ref. #${updatedQuote.refCode}'s status changed.`
+        },
+        mobileData: {
+          type: 'JOB_QUOTE_STATUS_CHANGED',
+          routeName: '/quotes',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof updatedQuote.quoteFor === 'string' ? updatedQuote.quoteFor : updatedQuote.quoteFor?._id, notificationPayload);
+
       return new ResponseSuccess('COMMON.SUCCESS', updatedQuote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -150,6 +200,21 @@ export class QuoteController {
         deletedQuote = await this.quoteService.softDelete(param.quoteId, session);
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Job Quote Deleted!',
+          body: `A job quote of ref. #${deletedQuote.refCode} deleted recently.`
+        },
+        mobileData: {
+          type: 'JOB_QUOTE_DELETED',
+          routeName: '/quotes',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof deletedQuote.quoteFor === 'string' ? deletedQuote.quoteFor : deletedQuote.quoteFor?._id, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', deletedQuote);
     } catch (error) {

@@ -18,7 +18,8 @@ export class ResetPasswordDto {
   @MaxLength(60)
   newPassword: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  passwordToken: string;
+  passwordToken?: string;
 }

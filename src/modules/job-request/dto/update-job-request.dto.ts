@@ -27,4 +27,8 @@ export class UpdatePropertyDto {
   @IsOptional()
   @IsOptional()
   status?: string;
+
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
 }

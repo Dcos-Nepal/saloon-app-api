@@ -1,12 +1,14 @@
 import { MongooseModule } from '@nestjs/mongoose';
-import { VisitsService } from './visits.service';
-import { VisitSchema } from './schemas/visits.schema';
-import { VisitsController } from './visits.controller';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { LoggerMiddleware } from 'src/common/middlewares/middleware';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+
+import { VisitSchema } from './schemas/visits.schema';
+import { VisitsService } from './visits.service';
+import { VisitsController } from './visits.controller';
+import { UserDevicesModule } from '../devices/devices.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Visits', schema: VisitSchema }])],
+  imports: [MongooseModule.forFeature([{ name: 'Visits', schema: VisitSchema }]), UserDevicesModule],
   controllers: [VisitsController],
   providers: [VisitsService],
   exports: [VisitsService]

@@ -5,6 +5,8 @@ import { Visit } from 'src/modules/visits/interfaces/visit.interface';
 import { Property } from 'src/modules/properties/interfaces/property.interface';
 
 export interface IJob {
+  _id?: string;
+  refCode?: string;
   title: string;
   instruction: string;
   jobFor: string | User;

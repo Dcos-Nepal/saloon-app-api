@@ -2,6 +2,7 @@ import { Document } from 'mongoose';
 
 export interface IJobRequest {
   _id?: string;
+  reqCode?: string;
   name: string;
   description: string;
   type?: string;
@@ -9,6 +10,7 @@ export interface IJobRequest {
   property?: string;
   status?: string;
   isDeleted?: boolean;
+  createdBy?: string;
 }
 
 export enum JobRequestStatus {

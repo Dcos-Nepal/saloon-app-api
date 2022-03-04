@@ -13,6 +13,7 @@ import { User } from '../users/interfaces/user.interface';
 import { GetInvoiceQueryDto } from './dtos/get-invoice-query.dto';
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
+import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 
 @Controller({
   path: '/invoices',
@@ -20,7 +21,11 @@ import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
 })
 @UseGuards(AuthGuard('jwt'))
 export class InvoiceController {
-  constructor(private readonly invoiceService: InvoiceService, @InjectConnection() private readonly connection: mongoose.Connection) {}
+  constructor(
+    @InjectConnection() private readonly connection: mongoose.Connection,
+    private readonly deviceService: UserDeviceService,
+    private readonly invoiceService: InvoiceService
+  ) {}
 
   @Get()
   @Roles('ADMIN', 'CLIENT')
@@ -40,7 +45,7 @@ export class InvoiceController {
   @UseGuards(RolesGuard)
   async findOne(@Param() id: string, @Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
     try {
-      const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'address'] }];
+      const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'address', 'email', 'phoneNumber'] }];
       const invoice = await this.invoiceService.findById(new mongoose.Types.ObjectId(id).toString(), { authUser, query, toPopulate });
       return new ResponseSuccess('COMMON.SUCCESS', invoice);
     } catch (error) {
@@ -60,6 +65,21 @@ export class InvoiceController {
       });
       session.endSession();
 
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'An Invoice Created!',
+          body: `An invoice of ref. #${newInvoice.refCode} created for you.`
+        },
+        mobileData: {
+          type: 'INVOICE_CREATED',
+          routeName: '/invoices',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof newInvoice.invoiceFor === 'string' ? newInvoice.invoiceFor : newInvoice?.invoiceFor?._id, notificationPayload);
+
       return new ResponseSuccess('COMMON.SUCCESS', newInvoice.toJSON());
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -78,6 +98,21 @@ export class InvoiceController {
       });
       session.endSession();
 
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Invoice Received!',
+          body: `An invoice of ref. #${invoice.refCode} received for payment.`
+        },
+        mobileData: {
+          type: 'INVOICE_RECEIVED',
+          routeName: '/invoices',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof invoice.invoiceFor === 'string' ? invoice.invoiceFor : invoice?.invoiceFor?._id, notificationPayload);
+
       return new ResponseSuccess('COMMON.SUCCESS', invoice);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -95,6 +130,24 @@ export class InvoiceController {
         updatedInvoice = await this.invoiceService.update(param.invoiceId, invoiceUpdateDto, session);
       });
       session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Invoice Updated!',
+          body: `An invoice of ref. #${updatedInvoice.refCode} updated recently.`
+        },
+        mobileData: {
+          type: 'INVOICE_UPDATED',
+          routeName: '/invoices',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(
+        typeof updatedInvoice.invoiceFor === 'string' ? updatedInvoice.invoiceFor : updatedInvoice?.invoiceFor?._id,
+        notificationPayload
+      );
 
       return new ResponseSuccess('COMMON.SUCCESS', updatedInvoice);
     } catch (error) {

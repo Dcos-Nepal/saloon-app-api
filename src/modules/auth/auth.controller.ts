@@ -42,7 +42,7 @@ export class AuthController {
       const session = await this.connection.startSession();
 
       await session.withTransaction(async () => {
-        const newUser = await this.userService.registerUser(registerUserDto);
+        const newUser = await this.userService.registerUser(registerUserDto, session);
         await this.verifyEmailService.createEmailToken(newUser.email, session);
 
         sent = await this.verifyEmailService.sendEmailVerification(newUser.email);

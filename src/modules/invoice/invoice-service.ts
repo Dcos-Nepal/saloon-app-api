@@ -6,10 +6,15 @@ import { User } from '../users/interfaces/user.interface';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IInvoice, Invoice } from './interfaces/invoice.interface';
 import { MailService } from 'src/common/modules/mail/mail.service';
+import { ConfigService } from 'src/configs/config.service';
 
 @Injectable()
 export class InvoiceService extends BaseService<Invoice, IInvoice> {
-  constructor(@InjectModel('Invoice') private readonly invoiceModel: Model<Invoice>, private readonly mailService: MailService) {
+  constructor(
+    @InjectModel('Invoice') private readonly invoiceModel: Model<Invoice>,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService
+  ) {
     super(invoiceModel);
   }
 
@@ -23,14 +28,19 @@ export class InvoiceService extends BaseService<Invoice, IInvoice> {
     if (invoice.dueDuration) invoice.due = DateTime.now().toUTC().toISODate();
     await invoice.save({ session });
 
-    this.mailService.sendEmail('Invoice #12345', 'Orange Cleaning', (<User>invoice.invoiceFor).email, {
-      template: 'invoice-template',
+    const mailResponse = await this.mailService.sendEmail(`Invoice #${invoice.refCode} - Orange Cleaning`, 'Orange Cleaning', 'bmnepali980@gmail.com', {
+      template: 'invoice',
       context: {
-        receiver: (<User>invoice.invoiceFor).fullName,
-        invoice: invoice
+        receiverName: (<User>invoice.invoiceFor).fullName,
+        refCode: invoice.refCode,
+        invoiceLink: `${this.configService.get('WEB_APP_URL')}/dashboard/invoices/${invoice._id}`
       }
     });
 
-    return invoice;
+    if (mailResponse?.messageId) {
+      return invoice;
+    }
+
+    return null;
   }
 }

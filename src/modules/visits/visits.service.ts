@@ -14,15 +14,24 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     super(visitModel);
   }
 
+  /**
+   * Get Visits based on the provided filters
+   *
+   * @param filter
+   * @param options
+   * @returns
+   */
   async findAll(filter: any, options?: IServiceOptions) {
     if (filter.startDate || filter.endDate) {
       filter['$or'] = [];
+
       if (filter.startDate) filter['$or'].push({ startDate: { $lte: filter.startDate }, endDate: { $gte: filter.startDate } });
       if (filter.endDate) filter['$or'].push({ startDate: { $lte: filter.endDate }, endDate: { $gte: filter.endDate } });
 
       if (filter.startDate && filter.endDate) {
         filter['$or'].push({ startDate: { $gte: filter.startDate }, endDate: { $lte: filter.endDate } });
       }
+
       delete filter.startDate;
       delete filter.endDate;
     }
@@ -78,6 +87,12 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     return visitSummaries;
   }
 
+  /**
+   * Update Visits
+   * @param visit
+   * @param session
+   * @returns
+   */
   async updateSelfAndFollowing(visit: IVisit, session: ClientSession) {
     const selectedVisit = await this.findById(visit._id);
 

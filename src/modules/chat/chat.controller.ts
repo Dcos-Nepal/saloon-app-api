@@ -5,6 +5,7 @@ import { CurrentUser } from 'src/common/decorators/current-user';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 import { User } from '../users/interfaces/user.interface';
 import { ChatMessageService } from './chat-message.service';
 import { ChatRequestService } from './chat-request.service';
@@ -22,6 +23,7 @@ export class ChatController {
   private logger: Logger;
 
   constructor(
+    private readonly deviceService: UserDeviceService,
     private readonly chatRoomService: ChatRoomService,
     private readonly chatRequestService: ChatRequestService,
     private readonly chatMessageService: ChatMessageService
@@ -37,6 +39,21 @@ export class ChatController {
       const chatRequest = await this.chatRequestService.createChatRequest(authUser, chatReqDto);
 
       if (chatRequest) {
+        // Notify Worker via Push Notification:
+        const notificationPayload: NotificationPayload = {
+          notification: {
+            title: 'Chat Request Received!',
+            body: `You've received a chat request from a client`
+          },
+          mobileData: {
+            type: 'CHAT_REQUEST_RECEIVED',
+            routeName: '/chat-requests',
+            metaData: '',
+            click_action: 'APP_NOTIFICATION_CLICK'
+          }
+        };
+        this.deviceService.sendNotification(chatRequest.invitee as string, notificationPayload);
+
         return new ResponseSuccess('CHAT.REQUEST', chatRequest);
       } else {
         return new ResponseError('CHAT.ERROR.CREATE_REQUEST_FAILED');
@@ -70,10 +87,25 @@ export class ChatController {
   @UseGuards(RolesGuard)
   async acceptChatRequest(@CurrentUser() authUser: User, @Param('requestId') requestId: string) {
     try {
-      const isAccepted = await this.chatRequestService.acceptChatRequest(authUser, requestId);
+      const chatRequest = await this.chatRequestService.acceptChatRequest(authUser, requestId);
 
-      if (isAccepted) {
-        return new ResponseSuccess('CHAT.REQUESTS', { isAccepted: isAccepted });
+      if (chatRequest) {
+        // Notify Worker via Push Notification:
+        const notificationPayload: NotificationPayload = {
+          notification: {
+            title: 'Chat Request Accepted!',
+            body: `Your Chat request is accepted by a Worker.`
+          },
+          mobileData: {
+            type: 'CHAT_REQUEST_ACCEPTED',
+            routeName: '/chat-requests',
+            metaData: '',
+            click_action: 'APP_NOTIFICATION_CLICK'
+          }
+        };
+        this.deviceService.sendNotification(chatRequest.inviter as string, notificationPayload);
+
+        return new ResponseSuccess('CHAT.REQUESTS', { isAccepted: chatRequest });
       } else {
         return new ResponseError('CHAT.ERROR.FETCH_REQUESTS_FAILED');
       }
