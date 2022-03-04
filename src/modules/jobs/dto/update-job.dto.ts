@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { JobLineItem } from './job-line-items.dto';
 import { Schedule } from './schedule';
 
@@ -32,4 +32,9 @@ export class UpdateJobDto {
   @ValidateNested()
   @Type(() => Schedule)
   schedule?: Schedule;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  notifyTeam?: boolean;
 }

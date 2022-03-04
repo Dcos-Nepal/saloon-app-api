@@ -106,50 +106,47 @@ export class JobsController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(SelfOrAdminGuard)
   @SelfKey('jobFor')
-  async create(@Body() job: CreateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async create(@Body() jobCreateDto: CreateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
+    // Check if we need to notify team
+    const notifyTeam = jobCreateDto.notifyTeam;
+
     try {
       const session = await this.connection.startSession();
       let newJob: IJob;
       await session.withTransaction(async () => {
+        // Delete notifyTeam flag
+        delete jobCreateDto.notifyTeam;
+
         // Add createdBy user
-        !job.createdBy ? (job.createdBy = authUser?._id) : null;
+        !jobCreateDto.createdBy ? (jobCreateDto.createdBy = authUser?._id) : null;
 
         // Continue job creation
-        newJob = await this.jobsService.create(job, session, { authUser });
+        newJob = await this.jobsService.create(jobCreateDto, session, { authUser });
       });
       session.endSession();
 
-      // Notify Client via Push Notification:
-      const notificationPayload: NotificationPayload = {
-        notification: {
-          title: 'Job Created!',
-          body: `A job of ref. #${newJob.refCode} created for you.`
-        },
-        mobileData: {
-          type: 'JOB_CREATED',
-          routeName: '/jobs',
-          metaData: '',
-          click_action: 'APP_NOTIFICATION_CLICK'
-        }
-      };
-      this.deviceService.sendNotification(typeof newJob.jobFor === 'string' ? newJob.jobFor : newJob.jobFor?._id, notificationPayload);
+      // Notifying the team members
+      if (notifyTeam) {
+        for (const memberId in newJob.team) {
+          // Notify Teams via Push Notification:
+          const notificationPayload: NotificationPayload = {
+            notification: {
+              title: 'Job Assigned to you!',
+              body: `A job of ref. #${newJob.refCode} has been assigned to you.`
+            },
+            mobileData: {
+              type: 'JOB_ASSIGNED',
+              routeName: '/jobs',
+              metaData: '',
+              click_action: 'APP_NOTIFICATION_CLICK'
+            }
+          };
+          this.deviceService.sendNotification(memberId, notificationPayload);
 
-      // Notify Teams via Push Notification:
-      newJob.team.forEach((mem: string | User) => {
-        const notificationPayload: NotificationPayload = {
-          notification: {
-            title: 'Job Assigned to you!',
-            body: `A job of ref. #${newJob.refCode} has been assigned to you.`
-          },
-          mobileData: {
-            type: 'JOB_ASSIGNED',
-            routeName: '/jobs',
-            metaData: '',
-            click_action: 'APP_NOTIFICATION_CLICK'
-          }
-        };
-        this.deviceService.sendNotification(typeof mem === 'string' ? mem : mem?._id, notificationPayload);
-      });
+          // Send email notification of assignments
+          this.jobsService.sendJobAssignmentEmail(memberId, newJob._id);
+        }
+      }
 
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
     } catch (error) {

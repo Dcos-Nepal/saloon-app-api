@@ -1,24 +1,36 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
-import BaseService from 'src/base/base-service';
-import { CreateJobDto } from './dto/create-job.dto';
-import { Job, IJob } from './interfaces/job.interface';
+
 import { IServiceOptions } from 'src/common/interfaces';
-import { VisitsService } from '../visits/visits.service';
+import { User } from '../users/interfaces/user.interface';
+import { Job, IJob } from './interfaces/job.interface';
 import { IVisit } from '../visits/interfaces/visit.interface';
+import { IMailResponse } from 'src/common/interfaces/mail-interface';
+
 import { Schedule } from './dto/schedule';
+import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { CompleteJobDto } from './dto/complete-job.dto';
 import { JobFeedbackDto } from './dto/job-feedback.dto';
+
+import { ConfigService } from 'src/configs/config.service';
+import BaseService from 'src/base/base-service';
+import { VisitsService } from '../visits/visits.service';
+import { MailService } from 'src/common/modules/mail/mail.service';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 
 @Injectable()
 export class JobsService extends BaseService<Job, IJob> {
+  private logger: Logger = new Logger('JobsService');
+
   constructor(
-    private readonly visitsService: VisitsService,
     @InjectModel('Jobs') private readonly jobModel: Model<Job>,
-    private readonly fileService: PublicFilesService
+    @InjectModel('User') private readonly userModel: Model<User>,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
+    private readonly fileService: PublicFilesService,
+    private readonly visitsService: VisitsService
   ) {
     super(jobModel);
   }
@@ -75,9 +87,9 @@ export class JobsService extends BaseService<Job, IJob> {
   /**
    * Creates Job
    *
-   * @param data
-   * @param session
-   * @param param2
+   * @param data CreateJobDto
+   * @param session ClientSession
+   * @param param IServiceOptions
    * @returns
    */
   async create(data: CreateJobDto, session: ClientSession, { authUser }: IServiceOptions) {
@@ -115,11 +127,6 @@ export class JobsService extends BaseService<Job, IJob> {
         else await this.createPrimaryVisit(job, data.schedule, session);
       }
 
-      // TODO
-      // send notification here
-      // for client
-      // for Workers
-
       return job;
     }
     // throw not found exception
@@ -136,6 +143,31 @@ export class JobsService extends BaseService<Job, IJob> {
       this.jobModel.countDocuments({ isCompleted: true })
     ]);
     return { activeJobsCount, isCompleted };
+  }
+
+  /**
+   * Sends job assignment email
+   *
+   * @param userId String
+   * @param jobId String
+   * @returns Promise<boolean>
+   */
+  async sendJobAssignmentEmail(userId: string, jobId: string): Promise<boolean> {
+    const assignee: User = await this.userModel.findById(userId).select(['fullName', 'email']);
+
+    try {
+      const mailResponse: IMailResponse = await this.mailService.sendEmail('Job Assignment Email', 'Orange Cleaning', assignee.email, {
+        template: 'job-assigned',
+        context: {
+          receiverName: assignee.fullName,
+          linkToPasswordReset: `${this.configService.get('WEB_APP_URL')}/dashboard/jobs/${jobId}`
+        }
+      });
+      return mailResponse?.messageId ? true : false;
+    } catch (error) {
+      this.logger.error('Error: ', JSON.stringify(error));
+      throw new HttpException('JOB_ASSIGNMENT.ERROR.SEND_MAIL', HttpStatus.FORBIDDEN);
+    }
   }
 
   /**
