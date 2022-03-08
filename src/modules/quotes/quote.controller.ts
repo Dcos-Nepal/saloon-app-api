@@ -85,8 +85,8 @@ export class QuoteController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'WORKER')
-  @UseGuards(SelfOrAdminGuard)
-  @SelfKey('quoteFor')
+  // @UseGuards(SelfOrAdminGuard)
+  // @SelfKey('quoteFor')
   async create(@Body() quote: CreateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     // Add Created by Id
     quote.createdBy = authUser._id;
@@ -121,9 +121,9 @@ export class QuoteController {
   }
 
   @Put('/:quoteId')
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
+  @UseGuards(RolesGuard)
+  // @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() updatedQuoteDto: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -155,10 +155,10 @@ export class QuoteController {
   }
 
   @Put('/:quoteId/update-status')
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
-  @SelfKey('quoteFor')
+  @UseGuards(RolesGuard)
+  // @UseGuards(SelfOrAdminGuard)
+  // @SelfKey('quoteFor')
   async updateStatus(@CurrentUser() authUser: User, @Param() param, @Body() quote: UpdateQuoteStatusDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
