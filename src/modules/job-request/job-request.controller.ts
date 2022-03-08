@@ -84,8 +84,8 @@ export class JobRequestController {
   @Post()
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  @UseGuards(SelfOrAdminGuard)
-  @SelfKey('client')
+  // @UseGuards(SelfOrAdminGuard)
+  // @SelfKey('client')
   async create(@Body() jobReq: CreateJobRequestDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -123,8 +123,8 @@ export class JobRequestController {
   @Put('/:jobReqId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  @SelfKey('client')
-  @UseGuards(SelfOrAdminGuard)
+  // @SelfKey('client')
+  // @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() jobRequest: UpdateJobReqDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();

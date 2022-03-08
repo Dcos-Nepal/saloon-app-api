@@ -25,7 +25,6 @@ export class UpdateJobReqDto {
 
   @IsString()
   @IsOptional()
-  @IsOptional()
   status?: string;
 
   @IsString()
