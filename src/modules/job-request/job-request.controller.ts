@@ -120,17 +120,17 @@ export class JobRequestController {
     }
   }
 
-  @Put('/:propertyId')
+  @Put('/:jobReqId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   @SelfKey('client')
   @UseGuards(SelfOrAdminGuard)
-  async update(@Param() param, @Body() property: UpdateJobReqDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async update(@Param() param, @Body() jobRequest: UpdateJobReqDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedJobReq: JobRequest;
       await session.withTransaction(async () => {
-        updatedJobReq = await this.jobRequestService.update(param.propertyId, property, session, { authUser });
+        updatedJobReq = await this.jobRequestService.update(param.jobReqId, jobRequest, session, { authUser });
       });
       session.endSession();
 
@@ -155,7 +155,7 @@ export class JobRequestController {
     }
   }
 
-  @Delete('/:propertyId')
+  @Delete('/:jobReqId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   async delete(@Param() param): Promise<IResponse> {
@@ -163,7 +163,7 @@ export class JobRequestController {
       const session = await this.connection.startSession();
       let deletedJobReq: JobRequest;
       await session.withTransaction(async () => {
-        deletedJobReq = await this.jobRequestService.softDelete(param.propertyId, session);
+        deletedJobReq = await this.jobRequestService.softDelete(param.jobReqId, session);
       });
       session.endSession();
 
