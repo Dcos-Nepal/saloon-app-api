@@ -15,9 +15,8 @@ export interface IJobRequest {
 
 export enum JobRequestStatus {
   PENDING = 'PENDING',
-  'IN-PROGRESS' = 'IN-PROGRESS',
-  ACTIVE = 'ACTIVE',
-  'IN-ACTIVE' = 'IN-ACTIVE'
+  CANCELED = 'CANCELED',
+  ACCEPTED = 'ACCEPTED'
 }
 
 export interface JobRequest extends IJobRequest, Document {

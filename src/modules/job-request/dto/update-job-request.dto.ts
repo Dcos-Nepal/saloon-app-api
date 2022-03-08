@@ -1,6 +1,6 @@
 import { IsMongoId, IsOptional, IsString } from 'class-validator';
 
-export class UpdatePropertyDto {
+export class UpdateJobReqDto {
   @IsString()
   @IsOptional()
   name?: string;

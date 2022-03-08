@@ -13,7 +13,7 @@ import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
 import { CreateJobRequestDto } from './dto/create-job-request.dto';
 import { JobRequest } from './interfaces/job-request.interface';
 import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
-import { UpdatePropertyDto } from './dto/update-job-request.dto';
+import { UpdateJobReqDto } from './dto/update-job-request.dto';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
 import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 
@@ -125,7 +125,7 @@ export class JobRequestController {
   @UseGuards(RolesGuard)
   @SelfKey('client')
   @UseGuards(SelfOrAdminGuard)
-  async update(@Param() param, @Body() property: UpdatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async update(@Param() param, @Body() property: UpdateJobReqDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedJobReq: JobRequest;
