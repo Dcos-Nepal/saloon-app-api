@@ -3,19 +3,23 @@ import { IsBoolean, IsDate, IsMongoId, IsNumber, IsOptional } from 'class-valida
 export class GetInvoiceQueryDto {
   @IsMongoId()
   @IsOptional()
-  invoiceFor: string;
+  q?: string;
+
+  @IsMongoId()
+  @IsOptional()
+  invoiceFor?: string;
 
   @IsBoolean()
   @IsOptional()
-  issued: boolean;
+  issued?: boolean;
 
   @IsNumber()
   @IsOptional()
-  total: number;
+  total?: number;
 
   @IsBoolean()
   @IsOptional()
-  isPaid: boolean;
+  isPaid?: boolean;
 
   @IsDate()
   @IsOptional()

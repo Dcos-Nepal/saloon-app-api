@@ -75,7 +75,7 @@ export class ChatRequestService extends BaseService<ChatRequest, IChatRequest> {
    * @returns ChatRequest[]
    */
   async fetchChatRequests(query: ChatRequestQueryDto) {
-    this.logger.log(`FindAll: fetch chat request, set query payload `);
+    this.logger.log(`FindAll: fetch chat request, set query payload`);
 
     const sortQuery = {};
     const dataQuery = {};

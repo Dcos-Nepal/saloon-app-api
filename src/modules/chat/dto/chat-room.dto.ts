@@ -1,5 +1,5 @@
-import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
+import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
 
 export class ChatRoomDto {
