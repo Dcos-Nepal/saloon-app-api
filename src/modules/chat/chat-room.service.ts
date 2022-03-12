@@ -58,7 +58,7 @@ export class ChatRoomService extends BaseService<ChatRoom, IChatRoom> {
       .limit(+limit)
       .exec();
 
-    this.logger.log(`FindAll: fetched chat request successfully`);
+    this.logger.log(`FindAll: fetched chat rooms successfully`);
     return chatRooms;
   }
 }

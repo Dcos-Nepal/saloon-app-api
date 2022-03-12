@@ -12,7 +12,7 @@ import { ChatRequestService } from './chat-request.service';
 import { ChatRoomService } from './chat-room.service';
 import { ChatMessageDto, ChatMessageQueryDto } from './dto/chat-message.dto';
 import { ChatRequestDto, ChatRequestQueryDto } from './dto/chat-request.dto';
-import { ChatRoomDto } from './dto/chat-room.dto';
+import { ChatRoomDto, ChatRoomQueryDto } from './dto/chat-room.dto';
 
 @Controller({
   path: '/chat',
@@ -43,7 +43,7 @@ export class ChatController {
         const notificationPayload: NotificationPayload = {
           notification: {
             title: 'Chat Request Received!',
-            body: `You've received a chat request from a client`
+            body: `You're invited for a chat request by a client`
           },
           mobileData: {
             type: 'CHAT_REQUEST_RECEIVED',
@@ -125,7 +125,7 @@ export class ChatController {
   @Get('/rooms')
   @Roles('ADMIN', 'WORKER', 'CLIENT')
   @UseGuards(RolesGuard)
-  async getUserChatRooms(@Query() query: ChatRequestQueryDto) {
+  async getUserChatRooms(@Query() query: ChatRoomQueryDto) {
     try {
       const chatRooms = await this.chatRoomService.fetchChatRooms(query);
 
