@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { InvoiceService } from './invoice-service';
 import { InjectConnection } from '@nestjs/mongoose';
@@ -31,9 +31,19 @@ export class InvoiceController {
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   async find(@Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
+    let filter: mongoose.FilterQuery<Type> = {};
+
     try {
+      // Filters to listing Job Requests
+      if (query.q) {
+        filter = { subject: { $regex: query.q, $options: 'i' }, isDeleted: false };
+      } else {
+        filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
+      }
+
       const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'email', 'phoneNumber', 'address'] }];
-      const invoices = await this.invoiceService.findAll(query, { authUser, query, toPopulate });
+      const options = { authUser, query, toPopulate };
+      const invoices = await this.invoiceService.findAll(filter, options);
       return new ResponseSuccess('COMMON.SUCCESS', invoices);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
