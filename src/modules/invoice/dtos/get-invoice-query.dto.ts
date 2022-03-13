@@ -1,7 +1,7 @@
-import { IsBoolean, IsDate, IsMongoId, IsNumber, IsOptional } from 'class-validator';
+import { IsBoolean, IsDate, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class GetInvoiceQueryDto {
-  @IsMongoId()
+  @IsString()
   @IsOptional()
   q?: string;
 
