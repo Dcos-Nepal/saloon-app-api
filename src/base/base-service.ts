@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ClientSession, FilterQuery, Model, ObjectId } from 'mongoose';
 import { IServiceOptions } from 'src/common/interfaces';
 
@@ -31,7 +30,7 @@ class BaseService<EntityModel, Entity> {
     const findOnePromise = this.model.findOne(query, options?.fields || '');
 
     if (options?.toPopulate) {
-      return await findOnePromise.populate([options.toPopulate]);
+      return await findOnePromise.populate(options.toPopulate);
     }
 
     return await findOnePromise;
@@ -97,6 +96,15 @@ class BaseService<EntityModel, Entity> {
     return newDoc as EntityModel;
   }
 
+  /**
+   * Updates the document
+   *
+   * @param id
+   * @param body
+   * @param session
+   * @param options
+   * @returns
+   */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async update(id: string, body: Partial<Entity>, session: ClientSession, options?: IServiceOptions): Promise<EntityModel> {
     return await this.model.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session });

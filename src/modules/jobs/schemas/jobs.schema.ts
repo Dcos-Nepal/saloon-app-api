@@ -13,6 +13,7 @@ export const JobSchema = new mongoose.Schema(
     remindInvoicing: { type: Boolean, required: true, default: false },
     startDate: { type: Date },
     isCompleted: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
     primaryVisit: { type: mongoose.Types.ObjectId, ref: 'Visits' },
     lineItems: [
       {

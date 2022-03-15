@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query, Put, UploadedFile, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query, Put, UploadedFile, Logger, Delete } from '@nestjs/common';
 
 import { UserDto } from './dto/user.dto';
 import { UsersService } from './users.service';
@@ -44,9 +44,15 @@ export class UsersController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async findAll(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<User> = { _id: { $ne: authUser._id }, ...query };
+    let filter: mongoose.FilterQuery<User> = { _id: { $ne: authUser._id }, ...query };
 
-    if (query.q) filter.fullName = { $regex: query.q, $options: 'i' };
+    // Filters to listing Users
+    if (query.q) {
+      filter = { fullName: { $regex: query.q, $options: 'i' }, isDeleted: false };
+    } else {
+      filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
+    }
+
     if (query.roles) filter.roles = { $in: query.roles.split(',') };
 
     if (query.nearBy && query.lat && query.lon) {
@@ -227,6 +233,23 @@ export class UsersController {
       return new ResponseSuccess('PROPERTY_CREATED', newProperty);
     } catch (error) {
       return new ResponseError('PROPERTY_CREATE_ERROR', error);
+    }
+  }
+
+  @Delete('/:userId')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  async delete(@Param() param): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let deletedUser: User;
+      await session.withTransaction(async () => {
+        deletedUser = await this.usersService.softDelete(param.userId, session);
+      });
+      session.endSession();
+      return new ResponseSuccess('COMMON.SUCCESS', deletedUser);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 }

@@ -111,6 +111,7 @@ export const UserSchema = new mongoose.Schema(
     settings: { type: SettingsSchema, required: false },
     userData: UserDataSchema,
     lastOnline: { type: Date },
+    isDeleted: { type: Boolean, default: false },
     createdBy: { type: mongoose.Types.ObjectId, ref: 'User' }
   },
   {

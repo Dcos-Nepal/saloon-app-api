@@ -65,6 +65,7 @@ export interface IUser {
       valid: boolean;
     };
   };
+  isDeleted?: boolean;
   userData: IClient | IWorker;
   settings?: ISetting;
   lastOnline?: Date;

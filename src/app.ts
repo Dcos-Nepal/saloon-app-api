@@ -9,6 +9,7 @@ import { AppModule } from './app.module';
 import { RedisIoAdapter } from './common/redis-adapter';
 import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { CustomValidationPipe } from './common/pipes/validation-pipe';
 
 export async function createApp(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -23,6 +24,7 @@ export async function createApp(): Promise<NestExpressApplication> {
   app.enableShutdownHooks();
 
   // Uses Validation Pipes
+  app.useGlobalPipes(new CustomValidationPipe());
   app.useGlobalPipes(
     new ValidationPipe({
       // whitelist: true,

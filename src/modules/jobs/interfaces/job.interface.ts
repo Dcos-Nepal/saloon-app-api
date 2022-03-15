@@ -30,6 +30,7 @@ export interface IJob {
   };
   primaryVisit?: string | Visit;
   isCompleted?: boolean;
+  isDeleted?: boolean;
 }
 
 export enum JobType {

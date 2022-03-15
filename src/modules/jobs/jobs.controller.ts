@@ -41,7 +41,9 @@ export class JobsController {
 
     try {
       if (query.q) {
-        filter = { title: { $regex: query.q, $options: 'i' } };
+        filter = { title: { $regex: query.q, $options: 'i' }, isDeleted: false };
+      } else {
+        filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
       }
 
       if (query.jobFor) {
