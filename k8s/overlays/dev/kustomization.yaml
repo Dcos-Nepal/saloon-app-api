@@ -10,4 +10,4 @@ resources:
 images:
 - name: saas-orange-api
   newName: 028373442672.dkr.ecr.ap-southeast-2.amazonaws.com/demo-dev
-  newTag: stride-learning-api-server-develop-cd22d43f8c49fd42cb65799049f9b390b13cde97
+  newTag: stride-learning-api-server-develop-aae9423cf67cef5fc65e110cf923aed07683fb5b

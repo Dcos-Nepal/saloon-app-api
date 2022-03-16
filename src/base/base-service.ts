@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { ClientSession, FilterQuery, Model, ObjectId } from 'mongoose';
 import { IServiceOptions } from 'src/common/interfaces';
 
