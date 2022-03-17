@@ -74,43 +74,38 @@ export class UsersService extends BaseService<User, IUser> {
    * @returns Promise<User>
    */
   async registerUser(newUser: RegisterUserDto, session: ClientSession): Promise<User> {
-    try {
-      if (this.isValidEmail(newUser.email) && newUser.password) {
-        const userRegistered = await this.findByEmail(newUser.email);
-        if (!userRegistered) {
-          /**
-           * Check if the user is referred by some other user
-           */
-          if (newUser?.userData?.referredBy) {
-            const referrer = await this.findByReferralCode(newUser.userData.referredBy);
-            if (referrer) {
-              newUser.userData.referredBy = referrer._id;
-            }
+    if (this.isValidEmail(newUser.email) && newUser.password) {
+      const userRegistered = await this.findByEmail(newUser.email);
+      if (!userRegistered) {
+        /**
+         * Check if the user is referred by some other user
+         */
+        if (newUser?.userData?.referredBy) {
+          const referrer = await this.findByReferralCode(newUser.userData.referredBy);
+          if (referrer) {
+            newUser.userData.referredBy = referrer._id;
           }
-
-          /**
-           * Continue with registration process
-           */
-
-          // Generating New Password
-          newUser.password = await bcrypt.hash(newUser.password, saltRounds);
-
-          // Creating User Model
-          const createdUser = new this.userModel(newUser);
-
-          // Saving and returning the user
-          return await createdUser.save({ session });
-        } else if (!userRegistered.auth.email.valid) {
-          return userRegistered;
-        } else {
-          throw new HttpException('REGISTRATION.USER_ALREADY_REGISTERED', HttpStatus.FORBIDDEN);
         }
+
+        /**
+         * Continue with registration process
+         */
+
+        // Generating New Password
+        newUser.password = await bcrypt.hash(newUser.password, saltRounds);
+
+        // Creating User Model
+        const createdUser = new this.userModel(newUser);
+
+        // Saving and returning the user
+        return await createdUser.save({ session });
+      } else if (!userRegistered.auth.email.valid) {
+        return userRegistered;
       } else {
-        throw new HttpException('REGISTRATION.MISSING_MANDATORY_PARAMETERS', HttpStatus.FORBIDDEN);
+        throw new HttpException('REGISTRATION.USER_ALREADY_REGISTERED', HttpStatus.FORBIDDEN);
       }
-    } catch (error) {
-      this.logger.error('Error', JSON.stringify(error));
-      throw new HttpException('REGISTRATION.ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
+    } else {
+      throw new HttpException('REGISTRATION.MISSING_MANDATORY_PARAMETERS', HttpStatus.FORBIDDEN);
     }
   }
 
