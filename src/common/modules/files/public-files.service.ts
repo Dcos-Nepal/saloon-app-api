@@ -13,20 +13,21 @@ export class PublicFilesService {
   constructor(@InjectAWS() private readonly aws: AWSLib, private readonly configService: ConfigService) {}
 
   /**
-   * Uploads file to the AWS S3 Public Bucket
+   * Uploads file to the AWS S3 Bucket
    *
    * @param dataBuffer Buffer
    * @param filename string
+   * @param isPrivate boolean
    * @returns Object
    */
-  async uploadPublicFile(dataBuffer: Buffer, filename: string) {
+  async uploadFileToS3(dataBuffer: Buffer, filename: string, isPrivate: false) {
     let uploadResult = null;
 
     try {
       this.logger.log('Uploading file to the AWS S3 public bucket');
       uploadResult = await this.aws.s3
         .upload({
-          Bucket: this.configService.getAWSConfig().AWS_PUBLIC_BUCKET,
+          Bucket: isPrivate ? this.configService.getAWSConfig().AWS_PRIVATE_BUCKET : this.configService.getAWSConfig().AWS_PUBLIC_BUCKET,
           Body: dataBuffer,
           Key: `${uuid()}-${filename}`
         })
@@ -40,19 +41,35 @@ export class PublicFilesService {
   }
 
   /**
+   * Generated presigned URL for the given object in private s3 bucket
+   *
+   * @param key String
+   * @returns String
+   */
+  public generatePresignedUrl(key: string) {
+    const s3 = this.aws.s3;
+
+    return s3.getSignedUrlPromise('getObject', {
+      Bucket: this.configService.getAWSConfig().AWS_PRIVATE_BUCKET,
+      Key: key
+    });
+  }
+
+  /**
    * Deletes File from AWS S3 Bucket using the given key
    *
    * @param key String
+   * @param isPrivate String
    * @returns Boolean
    */
-  async deletePublicFile(key: string) {
+  async deleteFileFromS3(key: string, isPrivate = false) {
     let isDeleted: PromiseResult<DeleteObjectOutput, AWSError>;
 
     try {
       this.logger.log('Deleting file from the AWS S3 public bucket');
       isDeleted = await this.aws.s3
         .deleteObject({
-          Bucket: this.configService.getAWSConfig().AWS_PUBLIC_BUCKET,
+          Bucket: isPrivate ? this.configService.getAWSConfig().AWS_PRIVATE_BUCKET : this.configService.getAWSConfig().AWS_PUBLIC_BUCKET,
           Key: key
         })
         .promise();

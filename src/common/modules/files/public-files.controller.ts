@@ -28,7 +28,7 @@ export class FilesController {
     }
 
     this.logger.log('Uploading public file to AWS S3');
-    const uploadedFile = await this.publicFilesService.uploadPublicFile(file.buffer, file.originalname);
+    const uploadedFile = await this.publicFilesService.uploadFileToS3(file.buffer, file.originalname, false);
 
     if (!uploadedFile) {
       return new ResponseError('Error uploading the public file to AWS S3');
@@ -53,7 +53,7 @@ export class FilesController {
     }
 
     this.logger.log('Deleting public file from AWS S3');
-    const isDeleted = await this.publicFilesService.deletePublicFile(key);
+    const isDeleted = await this.publicFilesService.deleteFileFromS3(key, false);
 
     if (!isDeleted) {
       return new ResponseError('Error deleting the public file from AWS S3');
