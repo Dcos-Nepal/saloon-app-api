@@ -8,6 +8,7 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsPositive()
   @IsNumber()
+  @Type(() => Number)
   limit?: number;
 
   @IsOptional()
