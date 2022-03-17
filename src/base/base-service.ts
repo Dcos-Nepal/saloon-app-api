@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { ClientSession, FilterQuery, Model, ObjectId } from 'mongoose';
 import { IServiceOptions } from 'src/common/interfaces';
 
@@ -12,13 +11,17 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<EntityModel>
    */
   async findById(id: ObjectId | string, options?: IServiceOptions): Promise<EntityModel> {
+    let response = null;
     const findByIdPromise = this.model.findById(id, options?.fields || '');
 
     if (options?.toPopulate) {
-      return await findByIdPromise.populate(options.toPopulate);
+      response = await findByIdPromise.populate(options.toPopulate);
+    } else {
+      response = await findByIdPromise;
     }
 
-    return await findByIdPromise;
+    // Return the response
+    return response;
   }
 
   /**
@@ -28,13 +31,17 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<EntityModel[]>
    */
   async findOne(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<EntityModel> {
+    let response = null;
     const findOnePromise = this.model.findOne(query, options?.fields || '');
 
     if (options?.toPopulate) {
-      return await findOnePromise.populate(options.toPopulate);
+      response = await findOnePromise.populate(options.toPopulate);
+    } else {
+      response = await findOnePromise;
     }
 
-    return await findOnePromise;
+    // Return the response
+    return response;
   }
 
   /**
