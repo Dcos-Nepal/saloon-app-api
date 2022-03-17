@@ -84,8 +84,15 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<{ rows: EntityModel[] }
    */
   async find(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<{ rows: EntityModel[] }> {
-    const findPromise = options?.toPopulate ? this.model.find(query).populate([options.toPopulate]) : this.model.find(query);
-    const rows = await findPromise.select(options?.fields ? options.fields : '');
+    let responsePromise = null;
+
+    if (options?.toPopulate) {
+      responsePromise = this.model.find(query).populate(options.toPopulate);
+    } else {
+      responsePromise = this.model.find(query);
+    }
+
+    const rows = await responsePromise.select(options?.fields ? options.fields : '');
 
     return { rows };
   }
