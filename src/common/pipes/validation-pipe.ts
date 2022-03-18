@@ -35,9 +35,14 @@ export class CustomValidationPipe implements PipeTransform<any> {
 
     errors.forEach((el) => {
       const prop = el.property;
-      Object.entries(el.constraints).forEach((constraint) => {
-        result[prop] = constraint[1];
-      });
+
+      if (el?.children) {
+        this.buildError(el?.children);
+      } else {
+        Object.entries(el?.constraints).forEach((constraint) => {
+          result[prop] = constraint[1];
+        });
+      }
     });
 
     return result;
