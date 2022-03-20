@@ -47,9 +47,9 @@ export class LineItemsController {
     try {
       if (query.q) {
         filter = { name: { $regex: query.q, $options: 'i' } };
-      } else {
-        filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
       }
+
+      filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
       const lineItemsResponse = await this.lineItemsService.findAll(filter, { query });
 

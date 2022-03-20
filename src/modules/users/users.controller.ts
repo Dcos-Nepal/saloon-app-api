@@ -48,10 +48,10 @@ export class UsersController {
 
     // Filters to listing Users
     if (query.q) {
-      filter = { fullName: { $regex: query.q, $options: 'i' }, isDeleted: false };
-    } else {
-      filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
+      filter = { fullName: { $regex: query.q, $options: 'i' } };
     }
+
+    filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
     if (query.roles) filter.roles = { $in: query.roles.split(',') };
 

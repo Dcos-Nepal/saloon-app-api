@@ -39,9 +39,9 @@ export class JobRequestController {
       // Filters to listing Job Requests
       if (query.q) {
         filter = { name: { $regex: query.q, $options: 'i' }, isDeleted: false };
-      } else {
-        filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
       }
+
+      filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
       const options = { authUser, query, toPopulate: [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }] };
       const properties = await this.jobRequestService.findAll(filter, options);

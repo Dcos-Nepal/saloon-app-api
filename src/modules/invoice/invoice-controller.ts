@@ -37,9 +37,9 @@ export class InvoiceController {
       // Filters to listing Job Requests
       if (query.q) {
         filter = { subject: { $regex: query.q, $options: 'i' }, isDeleted: false };
-      } else {
-        filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
       }
+
+      filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
       const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'email', 'phoneNumber', 'address'] }];
       const options = { authUser, query, toPopulate };

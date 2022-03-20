@@ -1,7 +1,8 @@
-import { IsDate, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
+import { Type } from 'class-transformer';
+import { IsDate, IsMongoId, IsOptional, IsString } from 'class-validator';
+
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
-import {Type} from 'class-transformer';
 
 export class ChatMessageDto {
   @IsString()
@@ -20,7 +21,7 @@ export class ChatMessageDto {
 
   @IsOptional()
   @IsDate()
-  @Type(()=>Date)
+  @Type(() => Date)
   date?: Date;
 }
 

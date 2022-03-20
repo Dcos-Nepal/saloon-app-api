@@ -38,9 +38,9 @@ export class QuoteController {
 
     if (query.q) {
       filter = { title: { $regex: query.q, $options: 'i' }, isDeleted: false };
-    } else {
-      filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
     }
+
+    filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
     try {
       const populate = [

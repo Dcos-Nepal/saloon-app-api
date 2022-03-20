@@ -1,11 +1,14 @@
+import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString } from 'class-validator';
 
 export class Schedule {
   @IsDate()
+  @Type(() => Date)
   startDate: Date;
 
-  @IsDate()
   @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   endDate?: Date;
 
   @IsString()
