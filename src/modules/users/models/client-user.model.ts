@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class ClientModel {
   @ApiPropertyOptional()
@@ -21,4 +21,9 @@ export class ClientModel {
   @IsOptional()
   @IsString()
   company?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isCompanyNamePrimary?: boolean;
 }

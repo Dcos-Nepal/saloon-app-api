@@ -39,7 +39,14 @@ export class InvoiceController {
         filter = { subject: { $regex: query.q, $options: 'i' }, isDeleted: false };
       }
 
+      if (query.invoiceFor) {
+        filter = { invoiceFor: { $eq: query.invoiceFor } };
+      }
+
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
+
+      // Merging filter and query params
+      // filter = { ...filter, query };
 
       const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'email', 'phoneNumber', 'address'] }];
       const options = { authUser, query, toPopulate };

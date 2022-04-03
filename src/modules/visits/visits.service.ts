@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DateTime } from 'luxon';
 import { ClientSession, Model } from 'mongoose';
@@ -6,11 +6,14 @@ import RRule, { Frequency, rrulestr } from 'rrule';
 
 import BaseService from 'src/base/base-service';
 import { IServiceOptions } from 'src/common/interfaces';
+import { PublicFilesService } from 'src/common/modules/files/public-files.service';
+import { CompleteVisitDto } from './dto/complete-visit.dto';
+import { VisitFeedbackDto } from './dto/visit-feedback.dto';
 import { Visit, IVisit, VisitStatusType } from './interfaces/visit.interface';
 
 @Injectable()
 export class VisitsService extends BaseService<Visit, IVisit> {
-  constructor(@InjectModel('Visits') private readonly visitModel: Model<Visit>) {
+  constructor(private readonly fileService: PublicFilesService, @InjectModel('Visits') private readonly visitModel: Model<Visit>) {
     super(visitModel);
   }
 
@@ -65,6 +68,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
    */
   async getSummary(startDate: Date, endDate: Date) {
     const cond: any = { $or: [{ startDate: { $gte: startDate }, endDate: { $lte: endDate } }] };
+
     if (startDate) cond['$or'].push({ startDate: { $lte: startDate }, endDate: { $gte: startDate } });
     if (endDate) cond['$or'].push({ startDate: { $lte: endDate }, endDate: { $gte: endDate } });
 
@@ -107,7 +111,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     selectedVisit.rruleSet = primaryRruleSet;
     await selectedVisit.save();
 
-    await this.model.deleteMany({ job: visit.job, isPrimary: false, startDate: { $gte: visit.startDate }, 'status.status': 'NOT-COMPLETED' });
+    await this.model.deleteMany({ visit: visit.job, isPrimary: false, startDate: { $gte: visit.startDate }, 'status.status': 'NOT-COMPLETED' });
     const remainingVisits = await this.model.find({ isPrimary: false, startDate: { $gte: visit.startDate } });
 
     const rruleSet = new RRule({
@@ -129,5 +133,54 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     delete visit._id;
     const addVisits = await this.create({ ...visit, rruleSet, excRrule: excRules, isPrimary: false }, session);
     return addVisits;
+  }
+
+  /**
+   * Marks visit as complete
+   *
+   * @param visitId
+   * @param visitCompleteDto
+   * @param files
+   * @param session
+   * @returns Visit
+   */
+  async markVisitAsComplete(visitId: string, visitCompleteDto: CompleteVisitDto, files: Express.Multer.File[], session: ClientSession) {
+    // Finding the visit
+    const docs = [];
+    const visit: any = await this.visitModel.findById(visitId, null, { session });
+
+    if (visit && !visit.isCompleted) {
+      // Uploading each files to AWS S3 and save their links to the visit
+      for (const file of files) {
+        const uploadedFile = await this.fileService.uploadFileToS3(file.buffer, file.originalname, false);
+        docs.push({ key: uploadedFile.Key, url: uploadedFile.Location });
+      }
+
+      visit.isCompleted = true;
+      visit.completion = visitCompleteDto;
+      visit.completion.docs = docs || [];
+
+      // Updating Job completion details
+      const updatedJob = await visit.save({ session });
+      return updatedJob;
+    }
+
+    throw new NotFoundException('Error finding visit and marking it as complete');
+  }
+
+  /**
+   * Update feedback for the visit
+   *
+   * @param visitId
+   * @param visitFeedbackDto
+   * @param session
+   * @returns Visit
+   */
+  async provideVisitFeedback(visitId: string, visitFeedbackDto: VisitFeedbackDto, session: ClientSession) {
+    const visit: Visit = await this.visitModel.findById(visitId, null, { session });
+    visit.feedback = visitFeedbackDto;
+    const updatedJob = await visit.save({ session });
+
+    return updatedJob;
   }
 }

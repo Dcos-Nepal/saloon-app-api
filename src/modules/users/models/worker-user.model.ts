@@ -36,8 +36,10 @@ export class WorkerModel {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  workingHours: string;
+  workingHours: {
+    start: string;
+    end: string;
+  };
 
   @ApiPropertyOptional()
   @IsOptional()

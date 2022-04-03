@@ -8,16 +8,18 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { UpdateVisitDto } from './dto/update-visit.dto';
 import { User } from '../users/interfaces/user.interface';
 import { CurrentUser } from 'src/common/decorators/current-user';
-import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 import { UpdateJobStatusDto } from './dto/update-visit-status-dto';
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { VisitSummaryDto } from './dto/summary.dto';
 import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
+import { VisitFeedbackDto } from './dto/visit-feedback.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { CompleteVisitDto } from './dto/complete-visit.dto';
 
 @Controller({
   path: '/visits',
@@ -94,7 +96,7 @@ export class VisitsController {
 
   @Get('/:visitId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const visit = await this.visitsService.findById(param.visitId, { authUser });
@@ -106,7 +108,7 @@ export class VisitsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async create(@Body() visit: CreateVisitDto, @Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -126,8 +128,7 @@ export class VisitsController {
 
   @Put('/:visitId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async update(@Param() param, @Body() visit: UpdateVisitDto, @Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -147,7 +148,7 @@ export class VisitsController {
 
   @Put('/:visitId/update-status')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async updateStatus(@Param() param, @Body() job: UpdateJobStatusDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -180,7 +181,7 @@ export class VisitsController {
 
   @Delete('/:visitId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -191,6 +192,62 @@ export class VisitsController {
       session.endSession();
 
       return new ResponseSuccess('COMMON.SUCCESS', isVisitDeleted);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Put('/:visitId/complete')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseInterceptors(FilesInterceptor('docs'))
+  async markVisitComplete(
+    @Param('visitId') visitId,
+    @Body() completeJobDto: CompleteVisitDto,
+    @UploadedFiles() files: Express.Multer.File[]
+  ): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let updatedVisit: IVisit;
+      await session.withTransaction(async () => {
+        updatedVisit = await this.visitsService.markVisitAsComplete(visitId, completeJobDto, files || [], session);
+      });
+      session.endSession();
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Visit Marked as Complete!',
+          body: `A visit of id #${updatedVisit?._id} marked as complete.`
+        },
+        mobileData: {
+          type: 'VISIT_COMPLETED',
+          routeName: `/visits/${updatedVisit._id}/complete`,
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(typeof updatedVisit.visitFor === 'string' ? updatedVisit.visitFor : updatedVisit.visitFor?._id, notificationPayload);
+
+      return new ResponseSuccess('COMMON.SUCCESS', updatedVisit);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
+  @Put('/:visitId/feedback')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
+  async visitFeedback(@Param('visitId') visitId, @Body() jobFeedbackDto: VisitFeedbackDto): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let updatedVisit: IVisit;
+      await session.withTransaction(async () => {
+        updatedVisit = await this.visitsService.provideVisitFeedback(visitId, jobFeedbackDto, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', updatedVisit);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }

@@ -28,14 +28,19 @@ export class InvoiceService extends BaseService<Invoice, IInvoice> {
     if (invoice.dueDuration) invoice.due = DateTime.now().toUTC().toISODate();
     await invoice.save({ session });
 
-    const mailResponse = await this.mailService.sendEmail(`Invoice #${invoice.refCode} - Orange Cleaning`, 'Orange Cleaning', 'bmnepali980@gmail.com', {
-      template: 'invoice',
-      context: {
-        receiverName: (<User>invoice.invoiceFor).fullName,
-        refCode: invoice.refCode,
-        invoiceLink: `${this.configService.get('WEB_APP_URL')}/dashboard/invoices/${invoice._id}`
+    const mailResponse = await this.mailService.sendEmail(
+      `Invoice #${invoice.refCode} - Orange Cleaning`,
+      'Orange Cleaning',
+      (<User>invoice.invoiceFor).email,
+      {
+        template: 'invoice',
+        context: {
+          receiverName: (<User>invoice.invoiceFor).fullName,
+          refCode: invoice.refCode,
+          invoiceLink: `${this.configService.get('WEB_APP_URL')}/dashboard/invoices/${invoice._id}`
+        }
       }
-    });
+    );
 
     if (mailResponse?.messageId) {
       return invoice;

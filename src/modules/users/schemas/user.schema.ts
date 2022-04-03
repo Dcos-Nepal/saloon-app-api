@@ -23,7 +23,8 @@ export const StaffSchema = new mongoose.Schema({}, { _id: false });
 export const ClientSchema = new mongoose.Schema(
   {
     company: { type: String },
-    preferredTime: [{ type: String }]
+    preferredTime: [{ type: String }],
+    isCompanyNamePrimary: { type: Boolean, default: false }
   },
   { _id: false }
 );
@@ -50,9 +51,12 @@ export const WorkerSchema = new mongoose.Schema({
       type: { type: String, enum: ['POLICE_CERTIFICATE'] }
     }
   },
+  services: [{ type: String }],
   workingDays: [{ type: String }],
-  workingHours: { type: String },
-  services: [{ type: String }]
+  workingHours: {
+    start: { type: String },
+    end: { type: String }
+  }
 });
 
 export const UserDataSchema = new mongoose.Schema(

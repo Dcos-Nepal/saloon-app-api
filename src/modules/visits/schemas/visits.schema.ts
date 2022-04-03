@@ -17,6 +17,22 @@ export const VisitSchema = new mongoose.Schema(
     job: { type: mongoose.Types.ObjectId, required: true, ref: 'Jobs' },
     visitFor: { type: mongoose.Types.ObjectId, required: true, ref: 'Users' },
     team: { type: [mongoose.Types.ObjectId], ref: 'User' },
+    completion: {
+      note: { type: String },
+      docs: [
+        {
+          url: { type: String },
+          key: { type: String }
+        }
+      ],
+      date: { type: Date },
+      completedBy: { type: mongoose.Types.ObjectId, ref: 'User' }
+    },
+    feedback: {
+      note: { type: String },
+      rating: { type: Number },
+      date: { type: Date }
+    },
     lineItems: [
       {
         ref: { type: String, required: false },

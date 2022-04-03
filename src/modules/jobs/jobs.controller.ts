@@ -8,9 +8,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { User } from '../users/interfaces/user.interface';
 import { CurrentUser } from 'src/common/decorators/current-user';
-import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 import { IResponse } from 'src/common/interfaces/response.interface';
-import { Roles, SelfKey } from 'src/common/decorators/roles.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
@@ -37,25 +36,26 @@ export class JobsController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
-    let filter: mongoose.FilterQuery<Type> = { ...query };
+    const filter: mongoose.FilterQuery<Job> = { ...query };
 
     try {
       if (query.q) {
-        filter = { title: { $regex: query.q, $options: 'i' }, isDeleted: false };
+        filter.title = { $regex: query.q, $options: 'i' };
+        filter.isDeleted = false;
       } else {
-        filter = { $or: [{ isDeleted: false }, { isDeleted: null }] };
+        filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
       }
 
       if (query.jobFor) {
-        filter = { jobFor: { $eq: query.jobFor } };
+        filter.jobFor = { $eq: query.jobFor };
       }
 
       if (query.team) {
-        filter = { team: { $eq: query.team } };
+        filter.team = { $eq: query.team };
       }
 
       if (query.createdBy) {
-        filter = { createdBy: { $eq: query.createdBy } };
+        filter.createdBy = { $eq: query.createdBy };
       }
 
       const toPopulate = [
@@ -106,8 +106,6 @@ export class JobsController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(SelfOrAdminGuard)
-  @SelfKey('jobFor')
   async create(@Body() jobCreateDto: CreateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
     // Check if we need to notify team
     const notifyTeam = jobCreateDto.notifyTeam;
@@ -159,7 +157,6 @@ export class JobsController {
   @Put('/:jobId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() property: UpdateJobDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -208,7 +205,7 @@ export class JobsController {
 
   @Delete('/:jobId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'WORKER')
   async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();

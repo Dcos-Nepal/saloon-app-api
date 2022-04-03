@@ -41,6 +41,10 @@ export class JobRequestController {
         filter = { name: { $regex: query.q, $options: 'i' }, isDeleted: false };
       }
 
+      if (query.client) {
+        filter = { client: { $eq: query.client } };
+      }
+
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
       const options = { authUser, query, toPopulate: [{ path: 'client', select: ['firstName', 'lastName', 'email', 'phoneNumber'] }] };
@@ -83,8 +87,6 @@ export class JobRequestController {
   @Post()
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  // @UseGuards(SelfOrAdminGuard)
-  // @SelfKey('client')
   async create(@Body() jobReq: CreateJobRequestDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -122,8 +124,6 @@ export class JobRequestController {
   @Put('/:jobReqId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  // @SelfKey('client')
-  // @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() jobRequest: UpdateJobReqDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();

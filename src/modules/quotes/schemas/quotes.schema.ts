@@ -42,6 +42,7 @@ export const QuotesSchema = new mongoose.Schema(
     toObject: { getters: true }
   }
 );
+
 /**
  * Validates Schema before saving document
  */

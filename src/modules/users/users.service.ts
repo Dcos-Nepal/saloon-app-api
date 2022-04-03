@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcryptjs';
+import * as mongoose from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyObject, ClientSession, Model, ObjectId } from 'mongoose';
 import { Injectable, HttpStatus, HttpException, NotFoundException, Logger } from '@nestjs/common';
@@ -281,7 +282,13 @@ export class UsersService extends BaseService<User, IUser> {
   }
 
   async getSummary() {
-    const [workerCount, clientCount] = await Promise.all([this.model.countDocuments({ type: 'WORKER' }), this.model.countDocuments({ type: 'CLIENT' })]);
+    const filter: mongoose.FilterQuery<any> = {};
+    filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
+
+    const [workerCount, clientCount] = await Promise.all([
+      this.model.countDocuments({ ...filter, type: 'WORKER' }),
+      this.model.countDocuments({ ...filter, type: 'CLIENT' })
+    ]);
     return {
       workerCount,
       clientCount,

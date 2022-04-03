@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
+import { ILineItemPricing } from 'src/common/interfaces';
 import { User } from 'src/modules/users/interfaces/user.interface';
 import { Job } from 'src/modules/jobs/interfaces/job.interface';
-import { ILineItemPricing } from 'src/common/interfaces';
 
 export interface IVisit {
   _id?: any;
@@ -22,6 +22,17 @@ export interface IVisit {
   isPrimary?: boolean;
   hasMultiVisit: boolean;
   visitFor: string | User;
+  completion?: {
+    note: string;
+    docs?: [{ key: string; url: string }];
+    date: Date;
+    completedBy: string | User;
+  };
+  feedback?: {
+    note?: string;
+    rating: number;
+    date?: Date;
+  };
 }
 
 export interface IVisitStatus {

@@ -42,6 +42,9 @@ export class QuoteController {
 
     filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
+    // Merging filter and query params
+    filter = { ...filter, query };
+
     try {
       const populate = [
         { path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] },
@@ -86,8 +89,6 @@ export class QuoteController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'WORKER')
-  // @UseGuards(SelfOrAdminGuard)
-  // @SelfKey('quoteFor')
   async create(@Body() quote: CreateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     // Add Created by Id
     quote.createdBy = authUser._id;
@@ -124,7 +125,6 @@ export class QuoteController {
   @Put('/:quoteId')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  // @UseGuards(SelfOrAdminGuard)
   async update(@Param() param, @Body() updatedQuoteDto: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -158,8 +158,6 @@ export class QuoteController {
   @Put('/:quoteId/update-status')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  // @UseGuards(SelfOrAdminGuard)
-  // @SelfKey('quoteFor')
   async updateStatus(@CurrentUser() authUser: User, @Param() param, @Body() quote: UpdateQuoteStatusDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
