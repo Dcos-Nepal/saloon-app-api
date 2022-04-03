@@ -45,6 +45,12 @@ export class UsersService extends BaseService<User, IUser> {
    */
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
+
+    // Encrypt the password
+    if (body.password) {
+      body.password = await bcrypt.hash(body.password, 10);
+    }
+
     return await this.userModel.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session }).select('-password -__v');
   }
 
