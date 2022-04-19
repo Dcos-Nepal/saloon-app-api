@@ -13,7 +13,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CompleteJobDto } from './dto/complete-job.dto';
 import { JobFeedbackDto } from './dto/job-feedback.dto';
 import { FilesInterceptor } from '@nestjs/platform-express/multer/interceptors/files.interceptor';

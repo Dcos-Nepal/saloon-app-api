@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AppService } from './app.service';
@@ -27,11 +28,16 @@ import { VerifyEmailModule } from './modules/verify-email/verify-email.module';
 @Module({
   imports: [
     ConfigModule,
+
+    // Schedule Modules
+    ScheduleModule.forRoot(),
+
     // MongoDB Connection Config
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => configService.getMongoConfig()
     }),
+
     // Common Modules
     AWSModule,
     FilesModule,
