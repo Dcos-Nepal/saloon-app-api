@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DateTime } from 'luxon';
+import { Cron } from '@nestjs/schedule';
 import { ClientSession, Model } from 'mongoose';
 import RRule, { Frequency, rrulestr } from 'rrule';
 
 import BaseService from 'src/base/base-service';
 import { IServiceOptions } from 'src/common/interfaces';
+import { MailService } from 'src/common/modules/mail/mail.service';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 import { CompleteVisitDto } from './dto/complete-visit.dto';
 import { VisitFeedbackDto } from './dto/visit-feedback.dto';
@@ -13,7 +15,11 @@ import { Visit, IVisit, VisitStatusType } from './interfaces/visit.interface';
 
 @Injectable()
 export class VisitsService extends BaseService<Visit, IVisit> {
-  constructor(private readonly fileService: PublicFilesService, @InjectModel('Visits') private readonly visitModel: Model<Visit>) {
+  constructor(
+    private readonly mailService: MailService,
+    private readonly fileService: PublicFilesService,
+    @InjectModel('Visits') private readonly visitModel: Model<Visit>
+  ) {
     super(visitModel);
   }
 
@@ -182,5 +188,67 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     const updatedJob = await visit.save({ session });
 
     return updatedJob;
+  }
+
+  async getTodayVisits() {
+    const todayStart = new Date().setHours(0, 0, 0, 0);
+    const todayEnd = new Date().setHours(23, 59, 59, 999);
+
+    return await this.model
+      .find({
+        'status.status': VisitStatusType['NOT-COMPLETED'],
+        startDate: { $gte: todayStart },
+        endDate: { $lte: todayEnd }
+      })
+      .populate([
+        {
+          path: 'job',
+          populate: [
+            {
+              path: 'jobFor',
+              select: ['fullName', 'address', 'email', 'phoneNumber']
+            },
+            {
+              path: 'property',
+              select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country']
+            },
+            {
+              path: 'team',
+              model: 'User',
+              select: ['fullName', 'address', 'email', 'phoneNumber']
+            }
+          ],
+          select: ['title', '']
+        }
+      ])
+      .exec();
+  }
+
+  async sendVisitReminder() {
+    const visitsOfToday: any[] = await this.getTodayVisits();
+
+    visitsOfToday.forEach((visit) => {
+      visit.job?.team.forEach((user) => {
+        this.mailService.sendEmail('Visit Reminder', 'Orange Cleaning', user.email, {
+          template: 'visit-reminder',
+          context: {
+            startTime: visit.startTime,
+            instruction: visit.instruction,
+            visitFor: `${visit.job?.jobFor.fullName}(${visit.job?.jobFor.phoneNumber || visit.job?.jobFor.email})`,
+            receiverName: user.fullName.trim(),
+            visitTitle: visit.title || visit.job.title,
+            address: `${visit.job?.property.name}, ${visit.job?.property.street1}, ${visit.job?.property.street1}, ${visit.job?.property.city} ${visit.job?.property.postalCode}, ${visit.job?.property.state}`
+          }
+        });
+      });
+    });
+  }
+
+  @Cron('* * 4 * * *', {
+    name: 'Visit reminder',
+    timeZone: 'Australia/Adelaide'
+  })
+  visitReminderScheduler() {
+    this.sendVisitReminder();
   }
 }
