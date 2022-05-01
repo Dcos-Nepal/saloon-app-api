@@ -79,4 +79,14 @@ export class ConfigService {
       clientEmail: this.get('FIREBASE_CLIENT_EMAIL')
     };
   }
+
+  /**
+   * Gets Geo Coordinates Configuration
+   * @returns GeoConfig
+   */
+  public getGeoCoordinatesConfig() {
+    return {
+      apiKey: this.get('GEO_COORDINATES_API_KEY')
+    };
+  }
 }

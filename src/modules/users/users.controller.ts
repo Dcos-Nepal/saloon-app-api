@@ -117,6 +117,18 @@ export class UsersController {
     }
   }
 
+  @Get('/recommendations')
+  @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
+  async recommendation(@Query() query): Promise<IResponse> {
+    try {
+      const recommendations = await this.usersService.getRecommendedWorkers(query);
+      return new ResponseSuccess('COMMON.SUCCESS', recommendations);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
   @Get('/me')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)

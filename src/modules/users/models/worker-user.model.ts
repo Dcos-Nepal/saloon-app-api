@@ -9,6 +9,10 @@ export class WorkerModel {
     coordinates: number[];
   };
 
+  @IsString()
+  @IsOptional()
+  jobType: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   documents?: {

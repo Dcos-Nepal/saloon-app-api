@@ -4,6 +4,13 @@ import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 export class ClientModel {
   @ApiPropertyOptional()
   @IsOptional()
+  location?: {
+    type: string;
+    coordinates: number[];
+  };
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   referredBy?: string;
 

@@ -31,6 +31,7 @@ export interface IClient {
   type?: string;
   referredBy?: string;
   referralCode?: string;
+  location?: IUserLocation;
   preferredTime?: [string];
   company?: string;
   isCompanyNamePrimary?: boolean;
@@ -39,6 +40,7 @@ export interface IClient {
 export interface IWorker {
   type?: string;
   location?: IUserLocation;
+  jobType?: string;
   documents?: IUserDocument;
   workingDays?: [string];
   workingHours?: {

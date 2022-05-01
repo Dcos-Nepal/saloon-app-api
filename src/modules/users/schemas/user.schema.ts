@@ -51,6 +51,7 @@ export const WorkerSchema = new mongoose.Schema({
       type: { type: String, enum: ['POLICE_CERTIFICATE'] }
     }
   },
+  jobType: { type: String },
   services: [{ type: String }],
   workingDays: [{ type: String }],
   workingHours: {

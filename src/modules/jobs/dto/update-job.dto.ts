@@ -13,6 +13,10 @@ export class UpdateJobDto {
   instruction: string;
 
   @IsString()
+  @IsOptional()
+  jobType: string;
+
+  @IsString()
   @IsMongoId()
   @IsOptional()
   quoteFor: string;
