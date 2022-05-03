@@ -62,7 +62,7 @@ export class UsersService extends BaseService<User, IUser> {
     }
 
     if (body.address) {
-      body.userData = { ...user.userData, ...body.userData };
+      body.userData = { ...user.toJSON().userData, ...body.userData };
       const coordinates = await await this.getCoordinates(`${body.address.street1}, ${body.address.city}, ${body.address.state}, ${body.address.country}`);
       body.userData.location = {
         coordinates,
@@ -70,13 +70,7 @@ export class UsersService extends BaseService<User, IUser> {
       };
     }
 
-    Object.keys(body).forEach((key) => {
-      user[key] = body[key];
-    });
-
-    await user.save();
-
-    return user;
+    return await this.userModel.findOneAndUpdate({ _id: id }, { ...body }, { new: true, lean: true, session }).select('-password -__v');
   }
 
   /**
