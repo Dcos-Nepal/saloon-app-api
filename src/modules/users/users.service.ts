@@ -10,7 +10,7 @@ import { SettingsDto } from './dto/settings.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 
 import { IServiceOptions } from 'src/common/interfaces';
-import { IUser, User } from './interfaces/user.interface';
+import { IUser, User, IWorker } from './interfaces/user.interface';
 
 import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
 
@@ -321,6 +321,11 @@ export class UsersService extends BaseService<User, IUser> {
     };
   }
 
+  /**
+   * Get coordinates of location
+   * @param location
+   * @returns coordinates
+   */
   async getCoordinates(location: string) {
     try {
       const address = encodeURI(location);
@@ -337,24 +342,61 @@ export class UsersService extends BaseService<User, IUser> {
     }
   }
 
+  /**
+   * Provide workers recommendation
+   * @param query
+   * @returns workers
+   */
   async getRecommendedWorkers(query: AnyObject) {
-    const recommendations = await this.model
-      .find({
-        'userData.jobType': query.jobType,
-        'userData.location': {
-          $near: {
-            $maxDistance: 500,
-            $geometry: {
-              type: 'Point',
-              coordinates: query.lat && query.lon ? [+query.lat, +query.lon] : await this.getCoordinates(query.address)
-            }
-          }
-        },
-        $or: [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }],
-        roles: { $in: ['WORKER'] }
-      })
-      .limit(5);
+    const filters = {
+      roles: { $in: ['WORKER'] },
+      $or: [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }]
+    };
 
-    return recommendations;
+    if (query.jobType) {
+      filters['userData.jobType'] = query.jobType;
+    }
+
+    if ((query.lat && query.lon) || query.address) {
+      filters['userData.location'] = {
+        $near: {
+          $maxDistance: 500,
+          $geometry: {
+            type: 'Point',
+            coordinates: query.lat && query.lon ? [+query.lat, +query.lon] : await this.getCoordinates(query.address)
+          }
+        }
+      };
+    }
+
+    const recommendations = await this.model.find(filters);
+
+    if (!query.startTime && !query.endTime) {
+      return recommendations;
+    }
+
+    const date = new Date();
+    const dateWithStartTime =
+      query.startTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.startTime.split(':')[0]), parseInt(query.startTime.split(':')[1])) : null;
+    const dateWithEndTime =
+      query.endTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.endTime.split(':')[0]), parseInt(query.endTime.split(':')[1])) : null;
+
+    const availableRecommendations = recommendations.filter((recommendation) => {
+      const userData: IWorker = recommendation.userData;
+
+      const startTimes = userData.workingHours?.start?.split(':');
+      if (dateWithStartTime && (!startTimes || startTimes.length < 2 || dateWithStartTime < date.setHours(parseInt(startTimes[0]), parseInt(startTimes[1])))) {
+        return false;
+      }
+
+      const endTimes = userData.workingHours?.end?.split(':');
+      if (dateWithEndTime && (!endTimes || endTimes.length < 2 || dateWithStartTime > date.setHours(parseInt(endTimes[0]), parseInt(endTimes[1])))) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return availableRecommendations;
   }
 }
