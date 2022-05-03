@@ -50,7 +50,7 @@ export class UsersService extends BaseService<User, IUser> {
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
 
-    const user: User = await this.userModel.findById(id);
+    const user: User = await this.userModel.findById(id).select('-password -__v');
 
     if (!user?._id) {
       throw new NotFoundException('User not found!');
@@ -70,7 +70,13 @@ export class UsersService extends BaseService<User, IUser> {
       };
     }
 
-    return await this.userModel.findOneAndUpdate({ _id: id }, { ...body }, { new: true, lean: true, session }).select('-password -__v');
+    Object.keys(body).forEach((key) => {
+      user[key] = body[key];
+    });
+
+    await user.save();
+
+    return user;
   }
 
   /**
