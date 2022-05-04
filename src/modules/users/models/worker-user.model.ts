@@ -11,7 +11,7 @@ export class WorkerModel {
 
   @IsString()
   @IsOptional()
-  jobType: string;
+  jobType?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

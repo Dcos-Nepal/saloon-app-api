@@ -343,6 +343,38 @@ export class UsersService extends BaseService<User, IUser> {
   }
 
   /**
+   * Gets recommendations by filtering by availability and jobType
+   * @param recommendations
+   * @param jobType
+   * @param dateWithStartTime
+   * @param dateWithEndTime
+   * @returns workers
+   */
+  getRelevantRecommendedWorkers = (recommendations, jobType, dateWithStartTime, dateWithEndTime) => {
+    const date = new Date();
+
+    return recommendations.filter((recommendation) => {
+      const userData: IWorker = recommendation.userData;
+
+      if (userData?.jobType !== jobType) {
+        return false;
+      }
+
+      const startTimes = userData.workingHours?.start?.split(':');
+      if (dateWithStartTime && (!startTimes || startTimes.length < 2 || dateWithStartTime < date.setHours(parseInt(startTimes[0]), parseInt(startTimes[1])))) {
+        return false;
+      }
+
+      const endTimes = userData.workingHours?.end?.split(':');
+      if (dateWithEndTime && (!endTimes || endTimes.length < 2 || dateWithEndTime > date.setHours(parseInt(endTimes[0]), parseInt(endTimes[1])))) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  /**
    * Provide workers recommendation
    * @param query
    * @returns workers
@@ -354,7 +386,7 @@ export class UsersService extends BaseService<User, IUser> {
     };
 
     if (query.jobType) {
-      filters['userData.jobType'] = query.jobType;
+      filters['userData.jobType'] = { $eq: query.jobType };
     }
 
     if ((query.lat && query.lon) || query.address) {
@@ -371,7 +403,7 @@ export class UsersService extends BaseService<User, IUser> {
 
     const recommendations = await this.model.find(filters);
 
-    if (!query.startTime && !query.endTime) {
+    if (!query.startTime && !query.endTime && !query.jobType) {
       return recommendations;
     }
 
@@ -381,22 +413,6 @@ export class UsersService extends BaseService<User, IUser> {
     const dateWithEndTime =
       query.endTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.endTime.split(':')[0]), parseInt(query.endTime.split(':')[1])) : null;
 
-    const availableRecommendations = recommendations.filter((recommendation) => {
-      const userData: IWorker = recommendation.userData;
-
-      const startTimes = userData.workingHours?.start?.split(':');
-      if (dateWithStartTime && (!startTimes || startTimes.length < 2 || dateWithStartTime < date.setHours(parseInt(startTimes[0]), parseInt(startTimes[1])))) {
-        return false;
-      }
-
-      const endTimes = userData.workingHours?.end?.split(':');
-      if (dateWithEndTime && (!endTimes || endTimes.length < 2 || dateWithStartTime > date.setHours(parseInt(endTimes[0]), parseInt(endTimes[1])))) {
-        return false;
-      }
-
-      return true;
-    });
-
-    return availableRecommendations;
+    return this.getRelevantRecommendedWorkers(recommendations, query.jobType, dateWithStartTime, dateWithEndTime);
   }
 }
