@@ -13,6 +13,10 @@ export class CreateJobDto {
   instruction: string;
 
   @IsString()
+  @IsOptional()
+  jobType: string;
+
+  @IsString()
   @IsMongoId()
   jobFor: string;
 

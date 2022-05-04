@@ -20,8 +20,24 @@ export const SettingsSchema = new mongoose.Schema(
 
 export const StaffSchema = new mongoose.Schema({}, { _id: false });
 
+const PointSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ['Point'],
+    default: 'Point'
+  },
+  coordinates: {
+    type: [Number],
+    default: [0.0, 0.0]
+  }
+});
+
 export const ClientSchema = new mongoose.Schema(
   {
+    location: {
+      index: '2dsphere',
+      type: PointSchema
+    },
     company: { type: String },
     preferredTime: [{ type: String }],
     isCompanyNamePrimary: { type: Boolean, default: false }
@@ -31,8 +47,8 @@ export const ClientSchema = new mongoose.Schema(
 
 export const WorkerSchema = new mongoose.Schema({
   location: {
-    type: { type: String, default: 'Point' },
-    coordinates: { type: [Number], default: [0.0, 0.0] }
+    index: '2dsphere',
+    type: PointSchema
   },
   documents: {
     idCard: {
@@ -51,6 +67,7 @@ export const WorkerSchema = new mongoose.Schema({
       type: { type: String, enum: ['POLICE_CERTIFICATE'] }
     }
   },
+  jobType: { type: String, index: true },
   services: [{ type: String }],
   workingDays: [{ type: String }],
   workingHours: {
@@ -127,6 +144,7 @@ export const UserSchema = new mongoose.Schema(
 
 // Indexing
 WorkerSchema.index({ location: '2dsphere' });
+ClientSchema.index({ location: '2dsphere' });
 
 /**
  * Before saving new User

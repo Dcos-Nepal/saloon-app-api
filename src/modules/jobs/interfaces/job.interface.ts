@@ -7,6 +7,7 @@ import { Property } from 'src/modules/properties/interfaces/property.interface';
 export interface IJob {
   _id?: string;
   refCode?: string;
+  jobType?: string;
   title: string;
   instruction: string;
   jobFor: string | User;

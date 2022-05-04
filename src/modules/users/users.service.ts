@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcryptjs';
 import * as mongoose from 'mongoose';
+import { HttpService } from '@nestjs/axios';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyObject, ClientSession, Model, ObjectId } from 'mongoose';
 import { Injectable, HttpStatus, HttpException, NotFoundException, Logger } from '@nestjs/common';
@@ -9,11 +10,12 @@ import { SettingsDto } from './dto/settings.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 
 import { IServiceOptions } from 'src/common/interfaces';
-import { IUser, User } from './interfaces/user.interface';
+import { IUser, User, IWorker } from './interfaces/user.interface';
 
 import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
 
 import BaseService from 'src/base/base-service';
+import { ConfigService } from 'src/configs/config.service';
 import { PropertiesService } from '../properties/properties.service';
 import { IProperty, Property } from '../properties/interfaces/property.interface';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
@@ -27,6 +29,8 @@ export class UsersService extends BaseService<User, IUser> {
 
   constructor(
     @InjectModel('User') private readonly userModel: Model<User>,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
     private readonly publicFilesService: PublicFilesService,
     private readonly propertiesService: PropertiesService
   ) {
@@ -46,12 +50,27 @@ export class UsersService extends BaseService<User, IUser> {
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
 
+    const user: User = await this.userModel.findById(id).select('-password -__v');
+
+    if (!user?._id) {
+      throw new NotFoundException('User not found!');
+    }
+
     // Encrypt the password
     if (body.password) {
       body.password = await bcrypt.hash(body.password, 10);
     }
 
-    return await this.userModel.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session }).select('-password -__v');
+    if (body.address) {
+      body.userData = { ...user.toJSON().userData, ...body.userData };
+      const coordinates = await await this.getCoordinates(`${body.address.street1}, ${body.address.city}, ${body.address.state}, ${body.address.country}`);
+      body.userData.location = {
+        coordinates,
+        type: 'Point'
+      };
+    }
+
+    return await this.userModel.findOneAndUpdate({ _id: id }, { ...body }, { new: true, lean: true, session }).select('-password -__v');
   }
 
   /**
@@ -300,5 +319,100 @@ export class UsersService extends BaseService<User, IUser> {
       clientCount,
       total: workerCount + clientCount
     };
+  }
+
+  /**
+   * Get coordinates of location
+   * @param location
+   * @returns coordinates
+   */
+  async getCoordinates(location: string) {
+    try {
+      const address = encodeURI(location);
+      const apiKey = this.configService.getGeoCoordinatesConfig().apiKey;
+      const locations: AnyObject = await this.httpService.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`).toPromise();
+
+      return locations?.data?.results?.length
+        ? [+locations?.data?.results[0]?.geometry?.location?.lng, +locations?.data?.results[0]?.geometry?.location?.lat]
+        : [0, 0];
+    } catch (ex) {
+      this.logger.error(ex);
+
+      return [0, 0];
+    }
+  }
+
+  /**
+   * Gets recommendations by filtering by availability and jobType
+   * @param recommendations
+   * @param jobType
+   * @param dateWithStartTime
+   * @param dateWithEndTime
+   * @returns workers
+   */
+  getRelevantRecommendedWorkers = (recommendations, jobType, dateWithStartTime, dateWithEndTime) => {
+    const date = new Date();
+
+    return recommendations.filter((recommendation) => {
+      const userData: IWorker = recommendation.userData;
+
+      if (userData?.jobType !== jobType) {
+        return false;
+      }
+
+      const startTimes = userData.workingHours?.start?.split(':');
+      if (dateWithStartTime && (!startTimes || startTimes.length < 2 || dateWithStartTime < date.setHours(parseInt(startTimes[0]), parseInt(startTimes[1])))) {
+        return false;
+      }
+
+      const endTimes = userData.workingHours?.end?.split(':');
+      if (dateWithEndTime && (!endTimes || endTimes.length < 2 || dateWithEndTime > date.setHours(parseInt(endTimes[0]), parseInt(endTimes[1])))) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  /**
+   * Provide workers recommendation
+   * @param query
+   * @returns workers
+   */
+  async getRecommendedWorkers(query: AnyObject) {
+    const filters = {
+      roles: { $in: ['WORKER'] },
+      $or: [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }]
+    };
+
+    if (query.jobType) {
+      filters['userData.jobType'] = { $eq: query.jobType };
+    }
+
+    if ((query.lat && query.lon) || query.address) {
+      filters['userData.location'] = {
+        $near: {
+          $maxDistance: 500,
+          $geometry: {
+            type: 'Point',
+            coordinates: query.lat && query.lon ? [+query.lat, +query.lon] : await this.getCoordinates(query.address)
+          }
+        }
+      };
+    }
+
+    const recommendations = await this.model.find(filters);
+
+    if (!query.startTime && !query.endTime && !query.jobType) {
+      return recommendations;
+    }
+
+    const date = new Date();
+    const dateWithStartTime =
+      query.startTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.startTime.split(':')[0]), parseInt(query.startTime.split(':')[1])) : null;
+    const dateWithEndTime =
+      query.endTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.endTime.split(':')[0]), parseInt(query.endTime.split(':')[1])) : null;
+
+    return this.getRelevantRecommendedWorkers(recommendations, query.jobType, dateWithStartTime, dateWithEndTime);
   }
 }

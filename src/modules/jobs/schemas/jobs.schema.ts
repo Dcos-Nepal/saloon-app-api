@@ -7,6 +7,7 @@ export const JobSchema = new mongoose.Schema(
     refCode: { type: String },
     title: { type: String, required: true },
     instruction: { type: String, required: true },
+    jobType: { type: String, required: false },
     jobFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
     property: { type: mongoose.Types.ObjectId, required: false, default: null, ref: 'Property' },
     team: [{ type: mongoose.Types.ObjectId, required: true, ref: 'User' }],

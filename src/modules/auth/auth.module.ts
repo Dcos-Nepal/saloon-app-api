@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { LoggerMiddleware } from '../../common/middlewares/middleware';
@@ -34,6 +35,7 @@ import { VerifyEmailModule } from '../verify-email/verify-email.module';
       { name: 'ConsentRegistry', schema: ConsentRegistrySchema },
       { name: 'Property', schema: PropertySchema }
     ]),
+    HttpModule,
     MailModule,
     VerifyEmailModule
   ],
