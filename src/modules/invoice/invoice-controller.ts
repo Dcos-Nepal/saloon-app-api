@@ -17,7 +17,7 @@ import { NotificationPayload, UserDeviceService } from '../devices/devices.servi
 
 @Controller({
   path: '/invoices',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 export class InvoiceController {

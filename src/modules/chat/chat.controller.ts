@@ -16,7 +16,7 @@ import { ChatRoomDto, ChatRoomQueryDto } from './dto/chat-room.dto';
 
 @Controller({
   path: '/chat',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 export class ChatController {

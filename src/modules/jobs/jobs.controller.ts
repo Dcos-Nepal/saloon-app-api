@@ -21,7 +21,7 @@ import { UserDeviceService, NotificationPayload } from '../devices/devices.servi
 
 @Controller({
   path: '/jobs',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
@@ -127,7 +127,7 @@ export class JobsController {
 
       // Notifying the team members
       if (notifyTeam) {
-        for (const memberId in newJob.team) {
+        newJob.team.forEach((member) => {
           // Notify Teams via Push Notification:
           const notificationPayload: NotificationPayload = {
             notification: {
@@ -141,11 +141,14 @@ export class JobsController {
               click_action: 'APP_NOTIFICATION_CLICK'
             }
           };
-          this.deviceService.sendNotification(memberId, notificationPayload);
 
-          // Send email notification of assignments
-          this.jobsService.sendJobAssignmentEmail(memberId, newJob._id);
-        }
+          if (member) {
+            // Send Push Notification
+            this.deviceService.sendNotification(member.toString(), notificationPayload);
+            // Send email notification of assignments
+            this.jobsService.sendJobAssignmentEmail(member.toString(), newJob._id);
+          }
+        });
       }
 
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
