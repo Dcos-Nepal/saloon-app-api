@@ -44,7 +44,7 @@ export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @Matches(/[0-9]{10}/, {
+  @Matches(/^\+(?:[0-9] ?){6,14}[0-9]$/, {
     message: 'Invalid phone number provided'
   })
   phoneNumber: string;

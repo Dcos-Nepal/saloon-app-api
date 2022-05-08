@@ -52,7 +52,7 @@ export class JobsService extends BaseService<Job, IJob> {
     if (job && !job.isCompleted) {
       // Uploading each files to AWS S3 and save their links to the job
       for (const file of files) {
-        const uploadedFile = await this.fileService.uploadFileToS3(file.buffer, file.originalname, false);
+        const uploadedFile = await this.fileService.uploadFileToS3(file.buffer, file.originalname, file.mimetype, false);
         docs.push({ key: uploadedFile.Key, url: uploadedFile.Location });
       }
 

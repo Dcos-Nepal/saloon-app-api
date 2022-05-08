@@ -95,14 +95,7 @@ export const UserSchema = new mongoose.Schema(
     lastName: { type: String, required: true },
     fullName: { type: String },
     email: { type: String, required: true },
-    phoneNumber: {
-      type: String,
-      required: true,
-      validate: {
-        validator: (v: string) => v.length === 10,
-        message: 'Phone number must be exactly of 10 digits.'
-      }
-    },
+    phoneNumber: { type: String, required: true },
     address: {
       type: {
         street1: { type: String, required: true },
