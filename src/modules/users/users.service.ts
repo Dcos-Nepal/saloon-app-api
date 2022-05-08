@@ -356,7 +356,7 @@ export class UsersService extends BaseService<User, IUser> {
     return recommendations.filter((recommendation) => {
       const userData: IWorker = recommendation.userData;
 
-      if (userData?.jobType !== jobType) {
+      if (jobType && !userData?.services?.includes(jobType)) {
         return false;
       }
 
@@ -404,7 +404,7 @@ export class UsersService extends BaseService<User, IUser> {
     const recommendations = await this.model.find(filters);
 
     if (!query.startTime && !query.endTime && !query.jobType) {
-      return recommendations;
+      return recommendations.slice(0, query.limit || 5);
     }
 
     const date = new Date();
@@ -413,6 +413,6 @@ export class UsersService extends BaseService<User, IUser> {
     const dateWithEndTime =
       query.endTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.endTime.split(':')[0]), parseInt(query.endTime.split(':')[1])) : null;
 
-    return this.getRelevantRecommendedWorkers(recommendations, query.jobType, dateWithStartTime, dateWithEndTime);
+    return this.getRelevantRecommendedWorkers(recommendations, query.jobType, dateWithStartTime, dateWithEndTime).slice(0, query.limit || 5);
   }
 }

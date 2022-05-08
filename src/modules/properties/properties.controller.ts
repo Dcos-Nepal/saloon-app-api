@@ -18,7 +18,7 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 
 @Controller({
   path: '/properties',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)

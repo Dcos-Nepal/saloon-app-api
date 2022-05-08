@@ -19,7 +19,7 @@ import { NotificationPayload, UserDeviceService } from '../devices/devices.servi
 
 @Controller({
   path: '/quotes',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)

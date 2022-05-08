@@ -21,7 +21,7 @@ import { UserDeviceService, NotificationPayload } from '../devices/devices.servi
 
 @Controller({
   path: '/jobs',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)

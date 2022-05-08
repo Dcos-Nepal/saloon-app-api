@@ -40,7 +40,7 @@ export interface IClient {
 export interface IWorker {
   type?: string;
   location?: IUserLocation;
-  jobType?: string;
+  services?: [string];
   documents?: IUserDocument;
   workingDays?: [string];
   workingHours?: {

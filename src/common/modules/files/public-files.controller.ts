@@ -8,7 +8,7 @@ import { PublicFilesService } from './public-files.service';
 
 @Controller({
   path: '/files',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 export class FilesController {

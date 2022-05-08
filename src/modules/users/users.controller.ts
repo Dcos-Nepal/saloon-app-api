@@ -27,7 +27,7 @@ import { VerifyEmailService } from '../verify-email/verify-email.service';
 @ApiTags('users')
 @Controller({
   path: '/users',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)

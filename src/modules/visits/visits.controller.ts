@@ -23,7 +23,7 @@ import { CompleteVisitDto } from './dto/complete-visit.dto';
 
 @Controller({
   path: '/visits',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
