@@ -76,6 +76,7 @@ export class PublicFilesService {
         })
         .promise();
     } catch (error) {
+      this.logger.error('Error while deleting object fro AWS S3', error);
       throw new InternalServerErrorException('Error while deleting the file to public AWS S3 Bucket');
     }
 

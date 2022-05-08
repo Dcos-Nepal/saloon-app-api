@@ -43,7 +43,7 @@ export class FilesController {
 
   @Delete('/public/:key')
   @UseInterceptors(FileInterceptor('file'))
-  async deletePublicFile(@CurrentUser() authUser, @Param() key: string) {
+  async deletePublicFile(@CurrentUser() authUser, @Param('key') key: string) {
     if (!authUser?._id) {
       return new ResponseError('Unauthorized access denied.');
     }
