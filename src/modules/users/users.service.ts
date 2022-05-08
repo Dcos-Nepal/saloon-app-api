@@ -270,7 +270,7 @@ export class UsersService extends BaseService<User, IUser> {
     }
 
     this.logger.log('Uploading profile picture to AWS S3 bucket.');
-    const avatar = await this.publicFilesService.uploadFileToS3(fileBuffer, filename, false);
+    const avatar = await this.publicFilesService.uploadFileToS3(fileBuffer, filename, 'image/png', false);
 
     this.logger.log('Updating profile picture.');
     user.avatar = {
