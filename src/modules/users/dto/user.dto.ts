@@ -9,6 +9,7 @@ export class UserDto {
     this.firstName = object.firstName;
     this.lastName = object.lastName;
     this.email = object.email;
+    this.auth = object.auth;
     this.phoneNumber = object.phoneNumber;
     this.address = object.address;
     this.settings = new SettingsDto(object.settings);
@@ -22,6 +23,7 @@ export class UserDto {
   firstName: string;
   lastName: string;
   email: string;
+  auth?: any;
   phoneNumber: string;
   settings?: SettingsDto;
   address?: UserAddressDto;
