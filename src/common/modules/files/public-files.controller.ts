@@ -28,7 +28,7 @@ export class FilesController {
     }
 
     this.logger.log('Uploading public file to AWS S3');
-    const uploadedFile = await this.publicFilesService.uploadFileToS3(file.buffer, file.originalname, false);
+    const uploadedFile = await this.publicFilesService.uploadFileToS3(file.buffer, file.originalname, file.mimetype, false);
 
     if (!uploadedFile) {
       return new ResponseError('Error uploading the public file to AWS S3');

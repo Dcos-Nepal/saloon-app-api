@@ -17,10 +17,11 @@ export class PublicFilesService {
    *
    * @param dataBuffer Buffer
    * @param filename string
+   * @param memeType string
    * @param isPrivate boolean
    * @returns Object
    */
-  async uploadFileToS3(dataBuffer: Buffer, filename: string, isPrivate: false) {
+  async uploadFileToS3(dataBuffer: Buffer, filename: string, memeType: string, isPrivate: false) {
     let uploadResult = null;
 
     try {
@@ -29,7 +30,8 @@ export class PublicFilesService {
         .upload({
           Bucket: isPrivate ? this.configService.getAWSConfig().AWS_PRIVATE_BUCKET : this.configService.getAWSConfig().AWS_PUBLIC_BUCKET,
           Body: dataBuffer,
-          Key: `${uuid()}-${filename}`
+          Key: `${uuid()}-${filename}`,
+          ContentType: memeType
         })
         .promise();
     } catch (error) {
