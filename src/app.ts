@@ -80,7 +80,7 @@ export async function createApp(): Promise<NestExpressApplication> {
   const options = new DocumentBuilder()
     .setTitle('Orange Cleaning (AU) API')
     .setDescription('Orange Cleaning for workers, clients and admin.')
-    .setVersion('1.0.0')
+    .setVersion('1')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'Token' }, 'Authorization')
     .build();
   const document = SwaggerModule.createDocument(app, options);

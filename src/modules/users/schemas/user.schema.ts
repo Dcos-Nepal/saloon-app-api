@@ -125,7 +125,10 @@ export const UserSchema = new mongoose.Schema(
     },
     auth: {
       email: {
-        valid: { type: Boolean, default: false }
+        verified: { type: Boolean, default: false }
+      },
+      phoneNumber: {
+        verified: { type: Boolean, default: false }
       }
     },
     roles: [{ type: String, required: true }],

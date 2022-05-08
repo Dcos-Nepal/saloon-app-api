@@ -11,6 +11,7 @@ import { PropertiesService } from '../properties/properties.service';
 import { PropertySchema } from '../properties/schemas/property.schema';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 import { VerifyEmailModule } from '../verify-email/verify-email.module';
+import { SmsModule } from 'src/common/modules/sms/sms.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { VerifyEmailModule } from '../verify-email/verify-email.module';
       maxRedirects: 5
     }),
     ConfigModule,
+    SmsModule,
     VerifyEmailModule
   ],
   controllers: [UsersController],

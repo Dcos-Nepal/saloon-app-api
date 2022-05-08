@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DateTime } from 'luxon';
 import { Cron } from '@nestjs/schedule';
@@ -12,15 +12,20 @@ import { PublicFilesService } from 'src/common/modules/files/public-files.servic
 import { CompleteVisitDto } from './dto/complete-visit.dto';
 import { VisitFeedbackDto } from './dto/visit-feedback.dto';
 import { Visit, IVisit, VisitStatusType } from './interfaces/visit.interface';
+import SmsService from 'src/common/modules/sms/sms.service';
 
 @Injectable()
 export class VisitsService extends BaseService<Visit, IVisit> {
+  logger: Logger;
+
   constructor(
+    private readonly smsService: SmsService,
     private readonly mailService: MailService,
     private readonly fileService: PublicFilesService,
     @InjectModel('Visits') private readonly visitModel: Model<Visit>
   ) {
     super(visitModel);
+    this.logger = new Logger(VisitsService.name);
   }
 
   /**
@@ -190,6 +195,10 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     return updatedJob;
   }
 
+  /**
+   * Gets Todays Appointments
+   * @returns Promise<Visit>
+   */
   async getTodayVisits() {
     const todayStart = new Date().setHours(0, 0, 0, 0);
     const todayEnd = new Date().setHours(23, 59, 59, 999);
@@ -224,11 +233,18 @@ export class VisitsService extends BaseService<Visit, IVisit> {
       .exec();
   }
 
+  /**
+   * Sends reminder of upcoming Appointments
+   */
   async sendVisitReminder() {
     const visitsOfToday: any[] = await this.getTodayVisits();
 
     visitsOfToday.forEach((visit) => {
-      visit.job?.team.forEach((user) => {
+      visit.job?.team.forEach(async (user) => {
+        this.logger.log('Sending Message in mobile as SMS');
+        await this.smsService.sendMessage(user.phoneNumber, "You've an appointment today. Please check your schedule in Mobile App/Web App");
+
+        this.logger.log('Sending Message in email as reminder');
         this.mailService.sendEmail('Visit Reminder', 'Orange Cleaning', user.email, {
           template: 'visit-reminder',
           context: {

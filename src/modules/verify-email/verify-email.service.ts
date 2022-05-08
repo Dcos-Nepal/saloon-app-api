@@ -59,7 +59,7 @@ export class VerifyEmailService {
       const userFromDb = await this.userModel.findOne({ email: emailVerify.email });
 
       if (userFromDb) {
-        userFromDb.auth.email.valid = true;
+        userFromDb.auth.email.verified = true;
         const savedUser = await userFromDb.save();
 
         await emailVerify.remove();

@@ -125,7 +125,7 @@ export class UsersService extends BaseService<User, IUser> {
 
         // Saving and returning the user
         return await createdUser.save({ session });
-      } else if (!userRegistered.auth.email.valid) {
+      } else if (!userRegistered.auth.email.verified) {
         return userRegistered;
       } else {
         throw new HttpException('REGISTRATION.USER_ALREADY_REGISTERED', HttpStatus.FORBIDDEN);
@@ -213,13 +213,43 @@ export class UsersService extends BaseService<User, IUser> {
    * @returns Promise<User>
    */
   async validateUserById(id: ObjectId | string): Promise<User> {
-    const user = await this.findById(id, { fields: '_id firstName lastName email' });
+    const user = await this.findById(id, { fields: '_id firstName lastName email auth phoneNumber' });
 
     if (!user) {
       throw new NotFoundException(`User of ID ${id} was not found`);
     }
 
     return user;
+  }
+
+  /**
+   * Mark email as confirmed
+   * @param email String
+   * @returns Promise<User>
+   */
+  async markEmailAsConfirmed(email: string) {
+    const userFromDb: User = await this.userModel.findOne({ email: email });
+
+    if (!userFromDb.auth.email.verified) {
+      return this.userModel.updateOne({ email }, { auth: { email: { verified: true } } });
+    }
+
+    return userFromDb;
+  }
+
+  /**
+   * Marks Phone Number as confirmed/verified
+   * @param userId String
+   * @returns Promise<User>
+   */
+  async markPhoneNumberAsConfirmed(userId: string) {
+    const userFromDb: User = await this.userModel.findOne({ _id: userId });
+
+    if (!userFromDb.auth.email.verified) {
+      return this.userModel.updateOne({ _id: userId }, { auth: { phoneNumber: { verified: true } } });
+    }
+
+    return userFromDb;
   }
 
   /**

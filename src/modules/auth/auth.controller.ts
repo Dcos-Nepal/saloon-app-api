@@ -22,7 +22,7 @@ import { RegisterUserDto } from '../users/dto/register-user.dto';
 @ApiTags('Authentication')
 @Controller({
   path: '/auth',
-  version: '1.0.0'
+  version: '1'
 })
 export class AuthController {
   private logger: Logger = new Logger('AuthController');

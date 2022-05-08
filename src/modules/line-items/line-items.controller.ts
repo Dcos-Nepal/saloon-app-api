@@ -12,7 +12,7 @@ import { LineItem } from './interfaces/line-item.interface';
 
 @Controller({
   path: '/line-items',
-  version: '1.0.0'
+  version: '1'
 })
 @UseGuards(AuthGuard('jwt'))
 export class LineItemsController {

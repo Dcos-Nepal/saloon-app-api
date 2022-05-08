@@ -100,11 +100,6 @@ export class JobsService extends BaseService<Job, IJob> {
       job.primaryVisit = primaryVisit._id;
       job.startDate = primaryVisit.startDate;
       await job.save({ session });
-
-      // TODO
-      // send notification here
-      // for client
-      // for Workers
     }
 
     return job;
@@ -129,7 +124,6 @@ export class JobsService extends BaseService<Job, IJob> {
 
       return job;
     }
-    // throw not found exception
   }
 
   /**
@@ -160,7 +154,7 @@ export class JobsService extends BaseService<Job, IJob> {
         template: 'job-assigned',
         context: {
           receiverName: assignee.fullName,
-          linkToPasswordReset: `${this.configService.get('WEB_APP_URL')}/dashboard/jobs/${jobId}`
+          linkToJob: `${this.configService.get('WEB_APP_URL')}/dashboard/jobs/${jobId}`
         }
       });
       return mailResponse?.messageId ? true : false;

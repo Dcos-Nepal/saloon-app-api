@@ -68,7 +68,10 @@ export interface IUser {
   };
   auth?: {
     email: {
-      valid: boolean;
+      verified: boolean;
+    };
+    phoneNumber: {
+      verified: boolean;
     };
   };
   isDeleted?: boolean;

@@ -109,7 +109,7 @@ export class AuthService {
       throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
 
-    if (!userFromDb.auth.email.valid) {
+    if (!userFromDb.auth.email.verified) {
       throw new HttpException('LOGIN.EMAIL_NOT_VERIFIED', HttpStatus.FORBIDDEN);
     }
 
