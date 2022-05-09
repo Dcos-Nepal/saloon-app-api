@@ -1,4 +1,4 @@
-import { IsArray, IsOptional, IsDate, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class CompleteVisitDto {
   @IsString()
@@ -10,7 +10,4 @@ export class CompleteVisitDto {
 
   @IsString()
   completedBy: string;
-
-  @IsDate()
-  date: Date;
 }

@@ -203,14 +203,14 @@ export class VisitsController {
   @UseInterceptors(FilesInterceptor('docs'))
   async markVisitComplete(
     @Param('visitId') visitId,
-    @Body() completeJobDto: CompleteVisitDto,
+    @Body() completeVisitDto: CompleteVisitDto,
     @UploadedFiles() files: Express.Multer.File[]
   ): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedVisit: IVisit;
       await session.withTransaction(async () => {
-        updatedVisit = await this.visitsService.markVisitAsComplete(visitId, completeJobDto, files || [], session);
+        updatedVisit = await this.visitsService.markVisitAsComplete(visitId, completeVisitDto, files || [], session);
       });
       session.endSession();
 
