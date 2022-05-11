@@ -8,7 +8,7 @@ export const QuotesSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     quoteFor: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
-    property: { type: mongoose.Types.ObjectId, required: true, ref: 'Property' },
+    property: { type: mongoose.Types.ObjectId, required: false, default: null, ref: 'Property' },
     jobRequest: { type: mongoose.Types.ObjectId, required: false, ref: 'JobRequest', default: null },
     lineItems: [
       {
