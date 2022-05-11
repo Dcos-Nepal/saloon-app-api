@@ -237,7 +237,10 @@ export class VisitsService extends BaseService<Visit, IVisit> {
    * Sends reminder of upcoming Appointments
    */
   async sendVisitReminder() {
+    this.logger.log('Getting Todays Visits...');
     const visitsOfToday: any[] = await this.getTodayVisits();
+
+    this.logger.log('Total Visits for today are: ', visitsOfToday.length || 0);
 
     visitsOfToday.forEach((visit) => {
       visit.job?.team.forEach(async (user) => {
@@ -260,11 +263,15 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     });
   }
 
-  @Cron('* * 4 * * *', {
+  /**
+   * Runs the CORN Job every day 6AM in the Morning
+   */
+  @Cron('0 0 6 * * *', {
     name: 'Visit reminder',
     timeZone: 'Australia/Adelaide'
   })
   visitReminderScheduler() {
+    this.logger.log(`Running the CORN Job at ${new Date().toDateString()}`);
     this.sendVisitReminder();
   }
 }
