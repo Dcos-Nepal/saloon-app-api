@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ResponseError } from 'src/common/dto/response.dto';
 import { ConfigService } from 'src/configs/config.service';
 import { Twilio } from 'twilio';
 
@@ -20,7 +21,11 @@ export default class SmsService {
    */
   initiatePhoneNumberVerification(phoneNumber: string) {
     const serviceSid = this.configService.get('TWILIO_VERIFICATION_SERVICE_SID');
-    return this.twilioClient.verify.services(serviceSid).verifications.create({ to: phoneNumber, channel: 'sms' });
+    try {
+      return this.twilioClient.verify.services(serviceSid).verifications.create({ to: phoneNumber, channel: 'sms' });
+    } catch (error) {
+      return new ResponseError('Error while sending OTP code', error);
+    }
   }
 
   /**
@@ -48,7 +53,11 @@ export default class SmsService {
    */
   async sendMessage(receiverPhoneNumber: string, message: string) {
     const senderPhoneNumber = this.configService.get('TWILIO_SENDER_PHONE_NUMBER');
-
-    return this.twilioClient.messages.create({ body: message, from: senderPhoneNumber, to: receiverPhoneNumber });
+    try {
+      return await this.twilioClient.messages.create({ body: message, from: senderPhoneNumber, to: receiverPhoneNumber });
+    } catch (error) {
+      console.log(error);
+      return new ResponseError('Error while sending SMS message', error);
+    }
   }
 }
