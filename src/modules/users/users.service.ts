@@ -341,8 +341,8 @@ export class UsersService extends BaseService<User, IUser> {
     filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
     const [workerCount, clientCount] = await Promise.all([
-      this.model.countDocuments({ ...filter, type: 'WORKER' }),
-      this.model.countDocuments({ ...filter, type: 'CLIENT' })
+      this.model.countDocuments({ ...filter, roles: { $in: ['WORKER'] } }),
+      this.model.countDocuments({ ...filter, roles: { $in: ['CLIENT'] } })
     ]);
     return {
       workerCount,
