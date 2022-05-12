@@ -45,9 +45,6 @@ export class InvoiceController {
 
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
-      // Merging filter and query params
-      // filter = { ...filter, query };
-
       const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'email', 'phoneNumber', 'address'] }];
       const options = { authUser, query, toPopulate };
       const invoices = await this.invoiceService.findAll(filter, options);
@@ -71,7 +68,7 @@ export class InvoiceController {
   }
 
   @Post()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async create(@Body() invoice: CreateInvoiceDto, @CurrentUser() authUser: User) {
     try {
@@ -173,7 +170,7 @@ export class InvoiceController {
   }
 
   @Delete('/:invoiceId')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN')
   @UseGuards(RolesGuard)
   async delete(@Param() param): Promise<IResponse> {
     try {
