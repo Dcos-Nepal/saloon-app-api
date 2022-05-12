@@ -125,7 +125,7 @@ export class UsersController {
   }
 
   @Get('/recommendations')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async recommendation(@Query() query): Promise<IResponse> {
     try {
