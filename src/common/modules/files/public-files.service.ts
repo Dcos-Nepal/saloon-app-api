@@ -48,10 +48,10 @@ export class PublicFilesService {
    * @param key String
    * @returns String
    */
-  public generatePresignedUrl(key: string) {
+  async generatePresignedUrl(key: string) {
     const s3 = this.aws.s3;
 
-    return s3.getSignedUrlPromise('getObject', {
+    return await s3.getSignedUrlPromise('getObject', {
       Bucket: this.configService.getAWSConfig().AWS_PRIVATE_BUCKET,
       Key: key
     });

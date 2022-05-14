@@ -11,7 +11,7 @@ export interface IJob {
   title: string;
   instruction: string;
   jobFor: string | User;
-  property: string | Property;
+  property?: string | Property;
   remindInvoicing?: boolean;
   startDate?: Date;
   type: JobType;
@@ -32,6 +32,8 @@ export interface IJob {
   primaryVisit?: string | Visit;
   isCompleted?: boolean;
   isDeleted?: boolean;
+  notes?: string;
+  docs?: [{ key: string; url: string }];
 }
 
 export enum JobType {

@@ -42,6 +42,13 @@ export const JobSchema = new mongoose.Schema(
       date: { type: Date }
     },
     type: { type: String, enum: Object.keys(JobType), required: true, default: JobType['ONE-OFF'] },
+    notes: { type: String },
+    docs: [
+      {
+        url: { type: String },
+        key: { type: String }
+      }
+    ],
     createdBy: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
   },
   {

@@ -22,7 +22,8 @@ export class CreateJobDto {
 
   @IsString()
   @IsMongoId()
-  property: string;
+  @IsOptional()
+  property?: string;
 
   @IsEnum(JobType)
   type: JobType;
@@ -53,4 +54,11 @@ export class CreateJobDto {
   @IsBoolean()
   @Type(() => Boolean)
   notifyTeam?: boolean;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @IsOptional()
+  docs?: [{ key: string; url: string }];
 }

@@ -19,7 +19,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
     const errors = await validate(object);
 
     if (errors.length > 0) {
-      throw new HttpException({ message: 'Data validation failed!', errors: this.buildError(errors) }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: 'Data validation failed!', errors: errors }, HttpStatus.BAD_REQUEST);
     }
 
     return value;
