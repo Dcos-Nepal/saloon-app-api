@@ -62,7 +62,7 @@ export class VerifyEmailService {
         userFromDb.auth.email.verified = true;
         const savedUser = await userFromDb.save();
 
-        await emailVerify.remove();
+        await emailVerify.delete();
 
         return !!savedUser;
       }
