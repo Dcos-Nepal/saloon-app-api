@@ -16,7 +16,7 @@ export interface IInvoice {
   issuedDate?: string | Date;
   total: number;
   isPaid: boolean;
-  paidDate?: Date;
+  paidDate?: string | Date;
   dueOnReceipt?: boolean;
   dueDuration?: number;
   due?: string | Date;

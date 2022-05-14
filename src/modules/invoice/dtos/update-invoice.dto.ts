@@ -1,15 +1,13 @@
-import { IsBoolean, IsDate, IsOptional } from 'class-validator';
+import { IsBoolean, IsOptional } from 'class-validator';
 
 export class UpdateInvoiceDto {
   @IsBoolean()
   @IsOptional()
   isPaid?: boolean;
 
-  @IsDate()
   @IsOptional()
-  paidDate?: Date;
+  paidDate?: string | Date;
 
-  @IsDate()
   @IsOptional()
   due?: string | Date;
 }
