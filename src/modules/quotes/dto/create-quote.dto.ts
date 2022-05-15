@@ -19,11 +19,6 @@ export class CreateQuoteDto {
   property: string;
 
   @IsString()
-  @IsMongoId()
-  @IsOptional()
-  createdBy: string;
-
-  @IsString()
   @IsOptional()
   @IsMongoId()
   jobRequest: string;
@@ -32,4 +27,9 @@ export class CreateQuoteDto {
   @ValidateNested()
   @Type(() => JobLineItem)
   lineItems: JobLineItem[];
+
+  @IsString()
+  @IsMongoId()
+  @IsOptional()
+  createdBy: string;
 }

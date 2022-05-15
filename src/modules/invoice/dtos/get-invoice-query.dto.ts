@@ -24,4 +24,9 @@ export class GetInvoiceQueryDto {
   @IsDate()
   @IsOptional()
   paidDate?: Date;
+
+  @IsString()
+  @IsMongoId()
+  @IsOptional()
+  createdBy?: string;
 }

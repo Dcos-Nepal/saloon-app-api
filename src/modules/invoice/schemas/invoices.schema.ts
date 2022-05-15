@@ -26,7 +26,8 @@ export const InvoiceSchema = new mongoose.Schema(
         quantity: { type: Number, default: 1 },
         unitPrice: { type: Number, default: 0 }
       }
-    ]
+    ],
+    createdBy: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
   },
   {
     timestamps: true,

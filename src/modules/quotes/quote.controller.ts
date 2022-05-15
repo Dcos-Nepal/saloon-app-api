@@ -32,7 +32,7 @@ export class QuoteController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
@@ -59,7 +59,7 @@ export class QuoteController {
   }
 
   @Get('/summary')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async getSummary(): Promise<IResponse> {
     try {
@@ -72,7 +72,7 @@ export class QuoteController {
 
   @Get('/:quoteId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const populate = [
@@ -123,7 +123,7 @@ export class QuoteController {
   }
 
   @Put('/:quoteId')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async update(@Param() param, @Body() updatedQuoteDto: UpdateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
@@ -156,7 +156,7 @@ export class QuoteController {
   }
 
   @Put('/:quoteId/update-status')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async updateStatus(@CurrentUser() authUser: User, @Param() param, @Body() quote: UpdateQuoteStatusDto): Promise<IResponse> {
     try {

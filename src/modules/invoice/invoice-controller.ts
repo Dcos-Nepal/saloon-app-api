@@ -28,7 +28,7 @@ export class InvoiceController {
   ) {}
 
   @Get()
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async find(@Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
     let filter: mongoose.FilterQuery<Type> = {};
@@ -43,6 +43,10 @@ export class InvoiceController {
         filter = { invoiceFor: { $eq: query.invoiceFor } };
       }
 
+      if (query.createdBy) {
+        filter = { createdBy: { $eq: query.createdBy } };
+      }
+
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
       const toPopulate = [{ path: 'invoiceFor', select: ['firstName', 'lastName', 'email', 'phoneNumber', 'address'] }];
@@ -55,7 +59,7 @@ export class InvoiceController {
   }
 
   @Get('/:id')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async findOne(@Param() id: string, @Query() query: GetInvoiceQueryDto, @CurrentUser() authUser: User) {
     try {
@@ -71,6 +75,9 @@ export class InvoiceController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async create(@Body() invoice: CreateInvoiceDto, @CurrentUser() authUser: User) {
+    // Add Created by Id
+    invoice.createdBy = authUser._id;
+
     try {
       const session = await this.connection.startSession();
       let newInvoice: Invoice;
@@ -101,7 +108,7 @@ export class InvoiceController {
   }
 
   @Post(':invoiceId/send')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async sendInvoice(@Param() param) {
     try {
@@ -134,7 +141,7 @@ export class InvoiceController {
   }
 
   @Put('/:invoiceId')
-  @Roles('ADMIN', 'CLIENT')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async update(@Param() param, @Body() invoiceUpdateDto: UpdateInvoiceDto): Promise<IResponse> {
     try {
@@ -170,7 +177,7 @@ export class InvoiceController {
   }
 
   @Delete('/:invoiceId')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async delete(@Param() param): Promise<IResponse> {
     try {

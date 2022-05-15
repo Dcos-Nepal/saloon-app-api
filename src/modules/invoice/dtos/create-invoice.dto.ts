@@ -51,4 +51,9 @@ export class CreateInvoiceDto implements IInvoice {
   @ValidateNested()
   @Type(() => JobLineItem)
   lineItems: JobLineItem[];
+
+  @IsString()
+  @IsMongoId()
+  @IsOptional()
+  createdBy?: string;
 }

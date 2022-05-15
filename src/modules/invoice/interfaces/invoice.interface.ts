@@ -20,6 +20,7 @@ export interface IInvoice {
   dueOnReceipt?: boolean;
   dueDuration?: number;
   due?: string | Date;
+  createdBy?: string | User;
 }
 
 export interface Invoice extends IInvoice, Document {

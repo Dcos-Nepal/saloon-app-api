@@ -4,8 +4,10 @@ import { Logger } from '@nestjs/common';
 import { AWSConfig } from './dto/aws.dto';
 
 export class AWSLib {
-  public sns: AWS.SNS;
+  // For Email Service
   public ses: AWS.SES;
+
+  // For Access to S3 Bucket
   public s3: AWS.S3;
 
   private logger: Logger = new Logger('AWSModule');
@@ -24,7 +26,6 @@ export class AWSLib {
     }
 
     // Initialize Services to use form AWS
-    this.sns = new AWS.SNS();
     this.ses = new AWS.SES();
     this.s3 = new AWS.S3();
 
