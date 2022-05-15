@@ -87,7 +87,7 @@ export class VisitsController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   async getSummary(@Query() query: VisitSummaryDto): Promise<IResponse> {
     try {
-      const visits = await this.visitsService.getSummary(query.startDate, query.endDate);
+      const visits = await this.visitsService.getSummary(query);
       return new ResponseSuccess('COMMON.SUCCESS', visits);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

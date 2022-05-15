@@ -13,6 +13,7 @@ import { CompleteVisitDto } from './dto/complete-visit.dto';
 import { VisitFeedbackDto } from './dto/visit-feedback.dto';
 import { Visit, IVisit, VisitStatusType } from './interfaces/visit.interface';
 import SmsService from 'src/common/modules/sms/sms.service';
+import { VisitSummaryDto } from './dto/summary.dto';
 
 @Injectable()
 export class VisitsService extends BaseService<Visit, IVisit> {
@@ -73,21 +74,23 @@ export class VisitsService extends BaseService<Visit, IVisit> {
   /**
    *  Gets Summary for Visits
    *
-   * @param startDate Date
-   * @param endDate Date
+   * @param filter VisitSummaryDto
    * @returns Visit[]
    */
-  async getSummary(startDate: Date, endDate: Date) {
-    const cond: any = { $or: [{ startDate: { $gte: startDate }, endDate: { $lte: endDate } }] };
+  async getSummary(filter: VisitSummaryDto) {
+    const cond: any = { $or: [{ startDate: { $gte: filter.startDate }, endDate: { $lte: filter.endDate } }] };
 
-    if (startDate) cond['$or'].push({ startDate: { $lte: startDate }, endDate: { $gte: startDate } });
-    if (endDate) cond['$or'].push({ startDate: { $lte: endDate }, endDate: { $gte: endDate } });
+    if (filter.startDate) cond['$or'].push({ startDate: { $lte: filter.startDate }, endDate: { $gte: filter.startDate } });
+    if (filter.endDate) cond['$or'].push({ startDate: { $lte: filter.endDate }, endDate: { $gte: filter.endDate } });
+
+    if (filter.visitFor) cond['visitFor'] = filter.visitFor;
+    if (filter.team) cond['team'] = filter.team;
 
     const visits = await this.visitModel.find(cond);
     const visitSummaries = visits.reduce((acc, visit) => {
       const totalPricePerVisit = visit.lineItems.reduce((acc, lineItem) => (acc += lineItem.quantity * lineItem.unitPrice), 0);
       const singleVisits = rrulestr(visit.rruleSet)
-        .between(startDate, endDate, true)
+        .between(filter.startDate, filter.endDate, true)
         .map((visitDate) => {
           return {
             status: visit.status,

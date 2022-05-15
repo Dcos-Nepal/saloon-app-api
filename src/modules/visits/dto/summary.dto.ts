@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsDate } from 'class-validator';
+import { IsDate, IsMongoId, IsOptional } from 'class-validator';
 
 export class VisitSummaryDto {
   @IsDate()
@@ -9,4 +9,12 @@ export class VisitSummaryDto {
   @IsDate()
   @Type(() => Date)
   endDate: Date;
+
+  @IsMongoId()
+  @IsOptional()
+  visitFor?: string;
+
+  @IsMongoId()
+  @IsOptional()
+  team?: string;
 }
