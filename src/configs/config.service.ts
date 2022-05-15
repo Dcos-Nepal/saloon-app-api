@@ -39,6 +39,7 @@ export class ConfigService {
   public getAWSConfig() {
     return {
       AWS_REGION: this.get('AWS_REGION'),
+      AWS_SES_REGION: this.get('AWS_SES_REGION'),
       AWS_ACCESS_KEY_ID: this.get('AWS_ACCESS_KEY_ID'),
       AWS_SECRET_ACCESS_KEY: this.get('AWS_SECRET_ACCESS_KEY'),
       AWS_PUBLIC_BUCKET: this.get('AWS_PUBLIC_BUCKET'),

@@ -82,14 +82,19 @@ export class VerifyEmailService {
 
     if (model && model.emailToken) {
       try {
-        const mailResponse: IMailResponse = await this.mailService.sendEmail('No-reply: Verify your email', 'Orange Cleaning', email, {
-          template: 'confirm-account',
-          context: {
-            autoPass,
-            receiverName: email,
-            linkToActivate: `${this.configService.get('WEB_APP_URL')}/verify-email/${model.emailToken}`
+        const mailResponse: IMailResponse = await this.mailService.sendEmail(
+          'No-reply: Verify your email',
+          `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`,
+          email,
+          {
+            template: 'confirm-account',
+            context: {
+              autoPass,
+              receiverName: email,
+              linkToActivate: `${this.configService.get('WEB_APP_URL')}/verify-email/${model.emailToken}`
+            }
           }
-        });
+        );
         return mailResponse?.messageId ? true : false;
       } catch (error) {
         this.logger.error('Error: ', JSON.stringify(error));

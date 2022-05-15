@@ -30,7 +30,7 @@ export class InvoiceService extends BaseService<Invoice, IInvoice> {
 
     const mailResponse = await this.mailService.sendEmail(
       `Invoice #${invoice.refCode} - Orange Cleaning`,
-      'Orange Cleaning',
+      `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`,
       (<User>invoice.invoiceFor).email,
       {
         template: 'invoice',

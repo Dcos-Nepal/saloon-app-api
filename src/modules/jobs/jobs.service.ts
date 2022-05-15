@@ -150,13 +150,18 @@ export class JobsService extends BaseService<Job, IJob> {
     const assignee: User = await this.userModel.findById(userId).select(['fullName', 'email']);
 
     try {
-      const mailResponse: IMailResponse = await this.mailService.sendEmail('Job Assignment Email', 'Orange Cleaning', assignee.email, {
-        template: 'job-assigned',
-        context: {
-          receiverName: assignee.fullName,
-          linkToJob: `${this.configService.get('WEB_APP_URL')}/dashboard/jobs/${jobId}`
+      const mailResponse: IMailResponse = await this.mailService.sendEmail(
+        'Job Assignment Email',
+        `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`,
+        assignee.email,
+        {
+          template: 'job-assigned',
+          context: {
+            receiverName: assignee.fullName,
+            linkToJob: `${this.configService.get('WEB_APP_URL')}/dashboard/jobs/${jobId}`
+          }
         }
-      });
+      );
       return mailResponse?.messageId ? true : false;
     } catch (error) {
       this.logger.error('Error: ', JSON.stringify(error));

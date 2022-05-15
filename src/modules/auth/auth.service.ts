@@ -237,13 +237,18 @@ export class AuthService {
 
     if (tokenModel && tokenModel.newPasswordToken) {
       try {
-        const mailResponse: IMailResponse = await this.mailService.sendEmail('Password reset request', 'Orange Cleaning', email, {
-          template: 'forgot-password',
-          context: {
-            receiverName: userFromDb.fullName,
-            linkToPasswordReset: `${this.configService.get('WEB_APP_URL')}/change-password/${tokenModel.newPasswordToken}`
+        const mailResponse: IMailResponse = await this.mailService.sendEmail(
+          'Password reset request',
+          `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`,
+          email,
+          {
+            template: 'forgot-password',
+            context: {
+              receiverName: userFromDb.fullName,
+              linkToPasswordReset: `${this.configService.get('WEB_APP_URL')}/change-password/${tokenModel.newPasswordToken}`
+            }
           }
-        });
+        );
         return mailResponse?.messageId ? true : false;
       } catch (error) {
         this.logger.error('Error: ', JSON.stringify(error));

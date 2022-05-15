@@ -5,33 +5,33 @@ import { Global, Module } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { ConfigModule } from 'src/configs/config.module';
 import { ConfigService } from 'src/configs/config.service';
+import * as AWS from 'aws-sdk';
 
 @Global() // 👈 optional to make module global
 @Module({
   imports: [
     ConfigModule,
     MailerModule.forRootAsync({
-      useFactory: async (config: ConfigService) => ({
-        transport: {
-          host: config.get('MAIL_HOST'),
-          port: config.get('MAIL_PORT'),
-          auth: {
-            user: config.get('MAIL_USER'),
-            pass: config.get('MAIL_PASS')
+      useFactory: async (config: ConfigService) => {
+        console.log(config.getAWSConfig());
+        console.log(config.getMailConfig());
+        return {
+          transport: {
+            SES: new AWS.SES({
+              accessKeyId: config.getAWSConfig().AWS_ACCESS_KEY_ID,
+              secretAccessKey: config.getAWSConfig().AWS_SECRET_ACCESS_KEY,
+              region: config.getAWSConfig().AWS_SES_REGION
+            })
           },
-          secure: config.get('MAIL_SECURE') === 'true'
-        },
-        defaults: {
-          from: `"No Reply" <${config.get('MAIL_FROM')}>`
-        },
-        template: {
-          dir: join(__dirname, 'templates'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true
+          template: {
+            dir: join(__dirname, 'templates'),
+            adapter: new HandlebarsAdapter(),
+            options: {
+              strict: true
+            }
           }
-        }
-      }),
+        };
+      },
       inject: [ConfigService]
     })
   ],

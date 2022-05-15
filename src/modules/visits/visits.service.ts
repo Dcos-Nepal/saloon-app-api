@@ -14,12 +14,14 @@ import { VisitFeedbackDto } from './dto/visit-feedback.dto';
 import { Visit, IVisit, VisitStatusType } from './interfaces/visit.interface';
 import SmsService from 'src/common/modules/sms/sms.service';
 import { VisitSummaryDto } from './dto/summary.dto';
+import { ConfigService } from 'src/configs/config.service';
 
 @Injectable()
 export class VisitsService extends BaseService<Visit, IVisit> {
   logger: Logger;
 
   constructor(
+    private readonly configService: ConfigService,
     private readonly smsService: SmsService,
     private readonly mailService: MailService,
     private readonly fileService: PublicFilesService,
@@ -251,7 +253,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
         await this.smsService.sendMessage(user.phoneNumber, "You've an appointment today. Please check your schedule in Mobile App/Web App");
 
         this.logger.log('Sending Message in email as reminder');
-        this.mailService.sendEmail('Visit Reminder', 'Orange Cleaning', user.email, {
+        this.mailService.sendEmail('Visit Reminder', `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`, user.email, {
           template: 'visit-reminder',
           context: {
             startTime: visit.startTime,
