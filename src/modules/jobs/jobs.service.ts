@@ -177,7 +177,15 @@ export class JobsService extends BaseService<Job, IJob> {
    * @returns
    */
   private async createPrimaryVisit(job: Job, schedule: Schedule, session: ClientSession) {
-    const visitObj: IVisit = { ...schedule, job: job._id, inheritJob: true, isPrimary: true, hasMultiVisit: job.type === 'RECURRING', visitFor: job.jobFor };
+    const visitObj: IVisit = {
+      ...schedule,
+      job: job._id,
+      inheritJob: true,
+      isPrimary: true,
+      hasMultiVisit: job.type === 'RECURRING',
+      visitFor: job.jobFor,
+      team: job.team
+    };
     if (schedule.excRrule) visitObj.excRrule = schedule.excRrule;
     return await this.visitsService.create(visitObj, session);
   }
