@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class ClientModel {
   @ApiPropertyOptional()
@@ -21,8 +21,8 @@ export class ClientModel {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsArray()
-  preferredTime?: [string];
+  @IsString()
+  preferredTime?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

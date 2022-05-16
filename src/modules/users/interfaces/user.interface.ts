@@ -32,7 +32,7 @@ export interface IClient {
   referredBy?: string;
   referralCode?: string;
   location?: IUserLocation;
-  preferredTime?: [string];
+  preferredTime?: string;
   company?: string;
   isCompanyNamePrimary?: boolean;
 }

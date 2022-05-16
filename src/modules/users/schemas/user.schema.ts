@@ -39,7 +39,7 @@ export const ClientSchema = new mongoose.Schema(
       type: PointSchema
     },
     company: { type: String },
-    preferredTime: [{ type: String }],
+    preferredTime: { type: String },
     isCompanyNamePrimary: { type: Boolean, default: false }
   },
   { _id: false }
