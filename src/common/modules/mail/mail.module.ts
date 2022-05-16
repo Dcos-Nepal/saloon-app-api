@@ -1,11 +1,11 @@
 import { join } from 'path';
+import * as AWS from 'aws-sdk';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Global, Module } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { ConfigModule } from 'src/configs/config.module';
 import { ConfigService } from 'src/configs/config.service';
-import * as AWS from 'aws-sdk';
 
 @Global() // 👈 optional to make module global
 @Module({
@@ -13,8 +13,6 @@ import * as AWS from 'aws-sdk';
     ConfigModule,
     MailerModule.forRootAsync({
       useFactory: async (config: ConfigService) => {
-        console.log(config.getAWSConfig());
-        console.log(config.getMailConfig());
         return {
           transport: {
             SES: new AWS.SES({
