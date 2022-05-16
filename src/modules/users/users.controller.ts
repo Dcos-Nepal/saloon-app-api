@@ -61,6 +61,7 @@ export class UsersController {
     filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
     if (query.roles) filter.roles = { $in: query.roles.split(',') };
+    if (query.createdBy) filter.createdBy = { $eq: query.createdBy };
 
     if (query.nearBy && query.lat && query.lon) {
       filter.userData.location = {
