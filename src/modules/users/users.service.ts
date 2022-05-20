@@ -357,17 +357,19 @@ export class UsersService extends BaseService<User, IUser> {
    * @returns coordinates
    */
   async getCoordinates(location: string) {
+    this.logger.log("Getting Coordinates using Client's address");
     try {
       const address = encodeURI(location);
       const apiKey = this.configService.getGeoCoordinatesConfig().apiKey;
       const locations: AnyObject = await this.httpService.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`).toPromise();
 
+      this.logger.log('Getting the decoded coordinates for the client');
       return locations?.data?.results?.length
         ? [+locations?.data?.results[0]?.geometry?.location?.lng, +locations?.data?.results[0]?.geometry?.location?.lat]
         : [0, 0];
     } catch (ex) {
+      this.logger.log("Error while decoding client's address to coordinates");
       this.logger.error(ex);
-
       return [0, 0];
     }
   }
@@ -381,20 +383,25 @@ export class UsersService extends BaseService<User, IUser> {
    * @returns workers
    */
   getRelevantRecommendedWorkers = (recommendations, jobType, dateWithStartTime, dateWithEndTime) => {
+    this.logger.log("Getting today's date");
     const date = new Date();
 
+    this.logger.log('Filtering the recommendations');
     return recommendations.filter((recommendation) => {
       const userData: IWorker = recommendation.userData;
 
+      this.logger.log('Checks if the worker provides service requested in job');
       if (jobType && !userData?.services?.includes(jobType)) {
         return false;
       }
 
+      this.logger.log("Preparing the Job Start Time with worker's availability");
       const startTimes = userData.workingHours?.start?.split(':');
       if (dateWithStartTime && (!startTimes || startTimes.length < 2 || dateWithStartTime < date.setHours(parseInt(startTimes[0]), parseInt(startTimes[1])))) {
         return false;
       }
 
+      this.logger.log("Preparing the Job End Time with worker's availability");
       const endTimes = userData.workingHours?.end?.split(':');
       if (dateWithEndTime && (!endTimes || endTimes.length < 2 || dateWithEndTime > date.setHours(parseInt(endTimes[0]), parseInt(endTimes[1])))) {
         return false;
@@ -410,19 +417,22 @@ export class UsersService extends BaseService<User, IUser> {
    * @returns workers
    */
   async getRecommendedWorkers(query: AnyObject) {
+    this.logger.log('Filters for finding workers that are active');
     const filters = {
       roles: { $in: ['WORKER'] },
       $or: [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }]
     };
 
     if (query.jobType) {
+      this.logger.log('Filtering workers providing specific service or Job Type');
       filters['userData.jobType'] = { $eq: query.jobType };
     }
 
     if ((query.lat && query.lon) || query.address) {
+      this.logger.log('Finding the users within the 40 KM of radius of Client');
       filters['userData.location'] = {
         $near: {
-          $maxDistance: 500,
+          $maxDistance: 40000, // 40x1000km = 40000KM
           $geometry: {
             type: 'Point',
             coordinates: query.lat && query.lon ? [+query.lat, +query.lon] : await this.getCoordinates(query.address)
@@ -431,18 +441,26 @@ export class UsersService extends BaseService<User, IUser> {
       };
     }
 
+    this.logger.log('Finding recommendations using the filters above');
     const recommendations = await this.model.find(filters);
 
+    this.logger.log('returns first 5 recommendations if filters are not provided');
     if (!query.startTime && !query.endTime && !query.jobType) {
       return recommendations.slice(0, query.limit || 5);
     }
 
+    this.logger.log("Getting today's date");
     const date = new Date();
+
+    this.logger.log('Preparing Jobs Start date and time');
     const dateWithStartTime =
       query.startTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.startTime.split(':')[0]), parseInt(query.startTime.split(':')[1])) : null;
+
+    this.logger.log('Preparing Jobs End date and time');
     const dateWithEndTime =
       query.endTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.endTime.split(':')[0]), parseInt(query.endTime.split(':')[1])) : null;
 
+    this.logger.log('Getting relevant recommendations with the filters applied');
     return this.getRelevantRecommendedWorkers(recommendations, query.jobType, dateWithStartTime, dateWithEndTime).slice(0, query.limit || 5);
   }
 }
