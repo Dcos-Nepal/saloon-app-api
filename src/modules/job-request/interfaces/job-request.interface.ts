@@ -8,6 +8,11 @@ export interface IJobRequest {
   type?: string;
   client: string;
   property?: string;
+  workingDays?: [string];
+  workingHours?: {
+    start: string;
+    end: string;
+  };
   status?: string;
   isDeleted?: boolean;
   createdBy?: string;

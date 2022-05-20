@@ -30,11 +30,9 @@ export class UpdateVisitDto {
   @Type(() => JobLineItem)
   lineItems: JobLineItem[];
 
-  @IsDate()
   @IsOptional()
   startDate: Date;
 
-  @IsDate()
   @IsOptional()
   endDate?: Date;
 

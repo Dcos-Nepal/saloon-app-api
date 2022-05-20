@@ -13,7 +13,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { Property } from './interfaces/property.interface';
-import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 
 @Controller({
@@ -26,6 +25,8 @@ export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
@@ -46,6 +47,8 @@ export class PropertiesController {
   }
 
   @Get('/:propertyId')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const property = await this.propertiesService.findById(param.propertyId, { authUser });
@@ -57,8 +60,7 @@ export class PropertiesController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CLIENT')
-  @UseGuards(SelfOrAdminGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async create(@Body() property: CreatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -75,9 +77,8 @@ export class PropertiesController {
   }
 
   @Put('/:propertyId')
-  @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  @UseGuards(SelfOrAdminGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async update(@Param() param, @Body() property: UpdatePropertyDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -94,8 +95,8 @@ export class PropertiesController {
   }
 
   @Delete('/:propertyId')
-  @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'CLIENT', 'WORKER')
   async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
