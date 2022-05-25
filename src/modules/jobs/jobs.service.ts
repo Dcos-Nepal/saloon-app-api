@@ -19,6 +19,7 @@ import BaseService from 'src/base/base-service';
 import { VisitsService } from '../visits/visits.service';
 import { MailService } from 'src/common/modules/mail/mail.service';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class JobsService extends BaseService<Job, IJob> {
@@ -128,13 +129,13 @@ export class JobsService extends BaseService<Job, IJob> {
 
   /**
    * Get Summary info
-   *
+   * @param filter mongoose.FilterQuery<Job>
    * @returns Object
    */
-  async getSummary() {
+  async getSummary(filter: mongoose.FilterQuery<Job>) {
     const [activeJobsCount, isCompleted] = await Promise.all([
-      this.jobModel.countDocuments({ startDate: { $lte: new Date() }, isCompleted: false }),
-      this.jobModel.countDocuments({ isCompleted: true })
+      this.jobModel.countDocuments({ ...filter, startDate: { $lte: new Date() }, isCompleted: false }),
+      this.jobModel.countDocuments({ ...filter, isCompleted: true })
     ]);
     return { activeJobsCount, isCompleted };
   }

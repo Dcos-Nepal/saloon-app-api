@@ -116,9 +116,15 @@ export class UsersController {
   @Get('/summary')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
-  async summary(): Promise<IResponse> {
+  async summary(@Query() query): Promise<IResponse> {
+    const filter: mongoose.FilterQuery<User> = {};
+
+    if (query?.createdBy) {
+      filter.createdBy = { $eq: query.createdBy };
+    }
+
     try {
-      const summary = await this.usersService.getSummary();
+      const summary = await this.usersService.getSummary(filter);
       return new ResponseSuccess('COMMON.SUCCESS', summary);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

@@ -336,14 +336,19 @@ export class UsersService extends BaseService<User, IUser> {
     return false;
   }
 
-  async getSummary() {
-    const filter: mongoose.FilterQuery<any> = {};
+  /**
+   * Gets Summary for Users
+   * @param filter mongoose.FilterQuery<User>
+   * @returns Object
+   */
+  async getSummary(filter: mongoose.FilterQuery<User>) {
     filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
     const [workerCount, clientCount] = await Promise.all([
       this.model.countDocuments({ ...filter, roles: { $in: ['WORKER'] } }),
       this.model.countDocuments({ ...filter, roles: { $in: ['CLIENT'] } })
     ]);
+
     return {
       workerCount,
       clientCount,

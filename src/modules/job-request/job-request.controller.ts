@@ -59,9 +59,15 @@ export class JobRequestController {
   @Get('/summary')
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
-  async getSummary(): Promise<IResponse> {
+  async getSummary(@Query() query): Promise<IResponse> {
+    const filter: mongoose.FilterQuery<JobRequest> = {};
+
+    if (query?.client) {
+      filter.client = { $eq: query.client };
+    }
+
     try {
-      const summary = await this.jobRequestService.getSummary();
+      const summary = await this.jobRequestService.getSummary(filter);
 
       return new ResponseSuccess('COMMON.SUCCESS', summary);
     } catch (error) {

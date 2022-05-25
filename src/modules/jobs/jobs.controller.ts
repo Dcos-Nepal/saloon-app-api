@@ -74,9 +74,19 @@ export class JobsController {
   @Get('/summary')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
-  async getSummary(): Promise<IResponse> {
+  async getSummary(@Query() query): Promise<IResponse> {
+    const filter: mongoose.FilterQuery<Job> = { ...query };
+
+    if (query?.jobFor) {
+      filter.jobFor = { $eq: query.jobFor };
+    }
+
+    if (query?.team) {
+      filter.team = { $eq: query.team };
+    }
+
     try {
-      const summary = await this.jobsService.getSummary();
+      const summary = await this.jobsService.getSummary(filter);
       return new ResponseSuccess('COMMON.SUCCESS', summary);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -160,7 +170,7 @@ export class JobsController {
   @Put('/:jobId')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
-  async update(@Param() param, @Body() property: UpdateJobDto): Promise<IResponse> {
+  async update(@Param() param, @Body() property: UpdateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedJob: IJob;
@@ -168,6 +178,16 @@ export class JobsController {
         updatedJob = await this.jobsService.update(param.jobId, property, session);
       });
       session.endSession();
+
+      updatedJob = await this.jobsService.findById(param.jobId, {
+        authUser,
+        toPopulate: [
+          { path: 'jobFor', select: ['fullName', 'phoneNumber', 'email', 'address'] },
+          { path: 'team', select: ['fullName'] },
+          { path: 'property', select: [''] },
+          { path: 'primaryVisit', select: [''] }
+        ]
+      });
 
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
@@ -276,7 +296,7 @@ export class JobsController {
   @Put('/:jobId/feedback')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT')
-  async jobFeedback(@Param() param, @Body() jobFeedbackDto: JobFeedbackDto): Promise<IResponse> {
+  async provideJobFeedback(@Param() param, @Body() jobFeedbackDto: JobFeedbackDto): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedJob: IJob;
