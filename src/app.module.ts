@@ -24,6 +24,7 @@ import { FilesModule } from './common/modules/files/files.module';
 import { UserDevicesModule } from './modules/devices/devices.module';
 import { NotificationModule } from './common/modules/notification/notification.module';
 import { VerifyEmailModule } from './modules/verify-email/verify-email.module';
+import { ServicesModule } from './modules/services/service.module';
 
 @Module({
   imports: [
@@ -55,7 +56,8 @@ import { VerifyEmailModule } from './modules/verify-email/verify-email.module';
     JobRequestModule,
     PropertiesModule,
     UserDevicesModule,
-    VerifyEmailModule
+    VerifyEmailModule,
+    ServicesModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway]
