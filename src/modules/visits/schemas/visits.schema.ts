@@ -53,7 +53,8 @@ export const VisitSchema = new mongoose.Schema(
         updatedBy: { type: mongoose.Types.ObjectId, ref: 'User' },
         status: { type: String, enum: Object.keys(VisitStatusType), default: 'PENDING' }
       }
-    ]
+    ],
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,

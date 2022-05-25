@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { JobLineItem } from 'src/modules/jobs/dto/job-line-items.dto';
-import { IsArray, IsBoolean, IsDate, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class UpdateVisitDto {
   @IsString()

@@ -33,6 +33,7 @@ export interface IVisit {
     rating: number;
     date?: Date;
   };
+  isDeleted?: boolean;
 }
 
 export interface IVisitStatus {
