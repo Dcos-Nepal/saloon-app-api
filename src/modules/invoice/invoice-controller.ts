@@ -27,6 +27,25 @@ export class InvoiceController {
     private readonly invoiceService: InvoiceService
   ) {}
 
+  @Get('/summary')
+  @Roles('ADMIN', 'CLIENT')
+  @UseGuards(RolesGuard)
+  async getSummary(@Query() query): Promise<IResponse> {
+    const filter: mongoose.FilterQuery<Invoice> = {};
+
+    if (query?.invoiceFor) {
+      filter.invoiceFor = { $eq: query.invoiceFor };
+    }
+
+    try {
+      const summary = await this.invoiceService.getSummary(filter);
+
+      return new ResponseSuccess('COMMON.SUCCESS', summary);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
   @Get()
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)

@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
+import * as mongoose from 'mongoose';
 import BaseService from 'src/base/base-service';
 import { User } from '../users/interfaces/user.interface';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -47,5 +48,19 @@ export class InvoiceService extends BaseService<Invoice, IInvoice> {
     }
 
     return null;
+  }
+
+  /**
+   * Filters Job Invoices
+   *
+   * @param filter mongoose.FilterQuery<JobRequest>
+   * @returns Object
+   */
+  async getSummary(filter: mongoose.FilterQuery<Invoice>) {
+    const paidTypes = [true, false];
+
+    const [paidCount, unpaidCount] = await Promise.all(paidTypes.map((isPaid) => this.invoiceModel.countDocuments({ ...filter, isPaid })));
+
+    return { paidCount, unpaidCount };
   }
 }
