@@ -66,7 +66,7 @@ export class VisitsController {
             select: ['fullName', 'address', 'email', 'phoneNumber']
           }
         ],
-        select: ['title', 'type']
+        select: ['title', 'type', 'lineItems']
       },
       {
         path: 'team',
