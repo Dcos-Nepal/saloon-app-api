@@ -54,17 +54,17 @@ export const WorkerSchema = new mongoose.Schema({
     idCard: {
       url: { type: String },
       key: { type: String },
-      type: { type: String, enum: ['ID_CARD'] }
+      type: { type: String, enum: ['ID_CARD'], default: 'ID_CARD' }
     },
     cleaningCert: {
       url: { type: String },
       key: { type: String },
-      type: { type: String, enum: ['CLEANING_CERTIFICATE'] }
+      type: { type: String, enum: ['CLEANING_CERTIFICATE'], default: 'CLEANING_CERTIFICATE' }
     },
     policeCert: {
       url: { type: String },
       key: { type: String },
-      type: { type: String, enum: ['POLICE_CERTIFICATE'] }
+      type: { type: String, enum: ['VACCINATION_CERTIFICATE'], default: 'VACCINATION_CERTIFICATE' }
     }
   },
   jobType: { type: String, index: true },
