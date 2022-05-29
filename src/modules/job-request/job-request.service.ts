@@ -18,12 +18,12 @@ export class JobRequestService extends BaseService<JobRequest, IJobRequest> {
    * @returns Object
    */
   async getSummary(filter: mongoose.FilterQuery<JobRequest>) {
-    const statusTypes = ['PENDING', 'IN-PROGRESS', 'ACTIVE', 'IN-ACTIVE'];
+    const statusTypes = ['ACTIVE', 'CANCELLED', 'COMPLETED'];
 
-    const [pendingCount, inProgressCount, activeCount, inActiveCount] = await Promise.all(
+    const [activeCount, completedCount, cancelledCount] = await Promise.all(
       statusTypes.map((status) => this.jobRequestModel.countDocuments({ ...filter, status }))
     );
 
-    return { pendingCount, inProgressCount, activeCount, inActiveCount };
+    return { activeCount, completedCount, cancelledCount };
   }
 }
