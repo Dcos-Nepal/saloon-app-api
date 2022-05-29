@@ -59,7 +59,7 @@ export class JobsController {
       }
 
       const toPopulate = [
-        { path: 'jobFor', select: ['fullName', 'address'] },
+        { path: 'jobFor', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email'] },
         { path: 'property', select: [''] },
         { path: 'primaryVisit', select: ['rruleSet'] }
       ];
