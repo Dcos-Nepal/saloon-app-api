@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import BaseService from 'src/base/base-service';
@@ -28,6 +28,13 @@ export class ChatRequestService extends BaseService<ChatRequest, IChatRequest> {
     this.logger.log(`Create: create chat request `);
     createChatRequest.inviter = inviter._id.toString();
 
+    this.logger.log(`Here check if the chat request is already made or not`);
+    const isAlreadyInvited = await this.chatReqModel.exists({ invitee: createChatRequest.invitee, inviter: createChatRequest.inviter });
+
+    if (!!isAlreadyInvited) {
+      throw new BadRequestException("You've already invited to chat");
+    }
+
     const chatRequest = new this.chatReqModel(createChatRequest);
     const request = await chatRequest.save();
 
@@ -44,6 +51,7 @@ export class ChatRequestService extends BaseService<ChatRequest, IChatRequest> {
    */
   async acceptChatRequest(invitee: User, requestId: string) {
     const chatRequest: ChatRequest = await this.chatReqModel.findById(requestId);
+
     if (chatRequest.invitee.toString() === invitee._id.toString() && !chatRequest.isAccepted) {
       const chatRoom = new ChatRoomDto();
 

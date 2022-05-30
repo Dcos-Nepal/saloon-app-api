@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Logger, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from 'src/common/decorators/current-user';
@@ -59,6 +59,10 @@ export class ChatController {
         return new ResponseError('CHAT.ERROR.CREATE_REQUEST_FAILED');
       }
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        return new ResponseSuccess('CHAT.REQUEST_ALREADY_EXISTS', "You've already sent a request to this user");
+      }
+
       this.logger.error('Error: ', error);
       return new ResponseError('CHAT.ERROR.CREATE_REQUEST_FAILED', error);
     }
