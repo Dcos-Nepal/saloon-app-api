@@ -23,7 +23,7 @@ export interface IUserDocument {
   policeCert?: {
     url: string;
     key: string;
-    type: 'POLICE_CERTIFICATE';
+    type: 'VACCINATION_CERTIFICATE';
   };
 }
 

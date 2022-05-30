@@ -29,7 +29,7 @@ export class WorkerModel {
     policeCert?: {
       url: string;
       key: string;
-      type: 'POLICE_CERTIFICATE';
+      type: 'VACCINATION_CERTIFICATE';
     };
   };
 
