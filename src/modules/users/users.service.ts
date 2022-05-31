@@ -19,6 +19,8 @@ import { ConfigService } from 'src/configs/config.service';
 import { PropertiesService } from '../properties/properties.service';
 import { IProperty, Property } from '../properties/interfaces/property.interface';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
+import { formatAddress } from 'src/common/utils';
+import { VerifyEmailService } from '../verify-email/verify-email.service';
 
 // For Encryption
 const saltRounds = 10;
@@ -32,7 +34,8 @@ export class UsersService extends BaseService<User, IUser> {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly publicFilesService: PublicFilesService,
-    private readonly propertiesService: PropertiesService
+    private readonly propertiesService: PropertiesService,
+    private readonly verifyEmailService: VerifyEmailService
   ) {
     super(userModel);
   }
@@ -53,7 +56,23 @@ export class UsersService extends BaseService<User, IUser> {
     const user: User = await this.userModel.findById(id).select('-password -__v');
 
     if (!user?._id) {
-      throw new NotFoundException('User not found!');
+      throw new NotFoundException("User you're trying to update is not found!");
+    }
+
+    // For Changed Email
+    // If email has changed mark the auth.email.verified as false
+    if (body.email && body.email !== user.email) {
+      user.auth.email.verified = false;
+
+      // Send email verification email here
+      await this.verifyEmailService.createEmailToken(body.email, session);
+      await this.verifyEmailService.sendEmailVerification(body.email);
+    }
+
+    // For Changed Phone number
+    // If phone number has changed mark the auth.phoneNumber as false
+    if (body.phoneNumber && body.phoneNumber !== user.phoneNumber) {
+      user.auth.phoneNumber.verified = false;
     }
 
     // Encrypt the password
@@ -63,7 +82,7 @@ export class UsersService extends BaseService<User, IUser> {
 
     if (body.address) {
       body.userData = { ...user.toJSON().userData, ...body.userData };
-      const coordinates = await await this.getCoordinates(`${body.address.street1}, ${body.address.city}, ${body.address.state}, ${body.address.country}`);
+      const coordinates = await this.getCoordinates(`${formatAddress(body.address)}`);
       body.userData.location = {
         coordinates,
         type: 'Point'
