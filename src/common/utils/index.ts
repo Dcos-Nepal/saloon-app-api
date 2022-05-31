@@ -9,7 +9,11 @@ export const generateHash = (input) => {
  * @param address  Address
  * @returns String
  */
-export const formatAddress = (address: { street1: string; street2: string; city: string; postalCode: string; country: string }) => {
+export const formatAddress = (address: { street1?: string; street2?: string; city?: string; postalCode?: string; country?: string }) => {
+  if (!address) {
+    return '';
+  }
+
   const addressStack = [];
 
   if (address?.street1) addressStack.push(address?.street1);
