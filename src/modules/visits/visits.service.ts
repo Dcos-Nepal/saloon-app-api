@@ -15,6 +15,7 @@ import { Visit, IVisit, VisitStatusType } from './interfaces/visit.interface';
 import SmsService from 'src/common/modules/sms/sms.service';
 import { VisitSummaryDto } from './dto/summary.dto';
 import { ConfigService } from 'src/configs/config.service';
+import { formatAddress } from 'src/common/utils';
 
 @Injectable()
 export class VisitsService extends BaseService<Visit, IVisit> {
@@ -220,7 +221,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
           populate: [
             {
               path: 'jobFor',
-              select: ['fullName', 'address', 'email', 'phoneNumber']
+              select: ['fullName', 'email', 'phoneNumber', 'address']
             },
             {
               path: 'property',
@@ -250,7 +251,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
     visitsOfToday.forEach((visit) => {
       visit.job?.team.forEach(async (user) => {
         this.logger.log('Sending Message in mobile as SMS');
-        await this.smsService.sendMessage(user.phoneNumber, "You've an appointment today. Please check your schedule in Mobile App/Web App");
+        await this.smsService.sendMessage(user.phoneNumber, "You've a Job appointment today. Please check your schedule in Mobile App/Web App");
 
         this.logger.log('Sending Message in email as reminder');
         this.mailService.sendEmail('Visit Reminder', `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`, user.email, {
@@ -261,7 +262,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
             visitFor: `${visit.job?.jobFor.fullName}(${visit.job?.jobFor.phoneNumber || visit.job?.jobFor.email})`,
             receiverName: user.fullName.trim(),
             visitTitle: visit.title || visit.job.title,
-            address: `${visit.job?.property.name}, ${visit.job?.property.street1}, ${visit.job?.property.street1}, ${visit.job?.property.city} ${visit.job?.property.postalCode}, ${visit.job?.property.state}`
+            address: visit.job?.property ? `${formatAddress(visit.job?.property)}` : `${formatAddress(visit.job?.jobFor?.address)}`
           }
         });
       });
