@@ -88,7 +88,7 @@ export class AuthService {
 
     if (userDevice?.id) {
       this.logger.log('Cleaning existing device for the user');
-      await this.userDeviceService.softDelete(userDevice?.id, session);
+      await this.userDeviceService.remove(userDevice?.id, session);
     }
 
     this.logger.log('Returning the logout status of the user');
