@@ -81,7 +81,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
    * @returns Visit[]
    */
   async getSummary(filter: VisitSummaryDto) {
-    const cond: any = { $or: [{ startDate: { $gte: filter.startDate }, endDate: { $lte: filter.endDate } }] };
+    const cond: any = { $or: [{ startDate: { $gte: filter.startDate }, endDate: { $lte: filter.endDate } }], isDeleted: false };
 
     if (filter.startDate) cond['$or'].push({ startDate: { $lte: filter.startDate }, endDate: { $gte: filter.startDate } });
     if (filter.endDate) cond['$or'].push({ startDate: { $lte: filter.endDate }, endDate: { $gte: filter.endDate } });
@@ -267,6 +267,19 @@ export class VisitsService extends BaseService<Visit, IVisit> {
         });
       });
     });
+  }
+
+  /**
+   * Updates all visits for given job
+   *
+   * @param jobId String
+   * @param session ClientSession
+   * @returns Object
+   */
+  async updateJobVisits(jobId: string, session: ClientSession) {
+    const updatedVisits = await this.model.updateMany({ job: jobId }, { $set: { isDeleted: true } }, { session });
+
+    return updatedVisits;
   }
 
   /**

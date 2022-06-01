@@ -101,8 +101,7 @@ export class JobsController {
       const job = await this.jobsService.findById(param.jobId, {
         authUser,
         toPopulate: [
-          { path: 'jobFor', select: ['fullName', 'phoneNumber', 'email', 'address'] },
-          { path: 'team', select: ['fullName'] },
+          { path: 'jobFor', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email'] },
           { path: 'property', select: [''] },
           { path: 'primaryVisit', select: [''] }
         ]
@@ -234,7 +233,7 @@ export class JobsController {
       const session = await this.connection.startSession();
       let deletedJob: Job;
       await session.withTransaction(async () => {
-        deletedJob = await this.jobsService.softDelete(param.jobId, session);
+        deletedJob = await this.jobsService.deleteJob(param.jobId, session);
       });
       session.endSession();
 

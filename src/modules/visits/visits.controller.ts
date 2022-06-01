@@ -39,9 +39,11 @@ export class VisitsController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     let filter: mongoose.FilterQuery<Visit> = { ...query };
+    // Get only not deleted visits
+    filter.isDeleted = false;
 
     if (query.q) {
-      filter = { title: { $regex: query.q, $options: 'i' } };
+      filter.title = { $regex: query.q, $options: 'i' };
     }
 
     if (query.job) {

@@ -171,6 +171,24 @@ export class JobsService extends BaseService<Job, IJob> {
   }
 
   /**
+   * Soft deleting job
+   *
+   * @param jobId String
+   * @param session ClientSession
+   * @returns Observable<Job>
+   */
+  async deleteJob(jobId: string, session: ClientSession) {
+    const job = await this.jobModel.findById(jobId);
+
+    if (job) {
+      await this.softDelete(jobId, session);
+      await this.visitsService.updateJobVisits(job._id, session);
+    }
+
+    return job;
+  }
+
+  /**
    * Private Functions
    */
 
