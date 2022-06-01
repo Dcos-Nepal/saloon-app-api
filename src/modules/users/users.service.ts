@@ -21,6 +21,7 @@ import { IProperty, Property } from '../properties/interfaces/property.interface
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 import { formatAddress } from 'src/common/utils';
 import { VerifyEmailService } from '../verify-email/verify-email.service';
+import { randomString } from 'src/common/utils/random-string';
 
 // For Encryption
 const saltRounds = 10;
@@ -53,6 +54,7 @@ export class UsersService extends BaseService<User, IUser> {
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
 
+    let autoPass = '';
     const user: User = await this.userModel.findById(id).select('-password -__v');
 
     if (!user?._id) {
@@ -62,11 +64,19 @@ export class UsersService extends BaseService<User, IUser> {
     // For Changed Email
     // If email has changed mark the auth.email.verified as false
     if (body.email && body.email !== user.email) {
+      if (!user?.auth?.email?.verified) {
+        autoPass = randomString(10);
+      }
+
       user.auth.email.verified = false;
 
       // Send email verification email here
       await this.verifyEmailService.createEmailToken(body.email, session);
-      await this.verifyEmailService.sendEmailVerification(body.email);
+
+      // Sending email verification email
+      !!autoPass
+        ? await this.verifyEmailService.sendEmailVerification(body.email, !!autoPass, autoPass)
+        : await this.verifyEmailService.sendEmailVerification(body.email);
     }
 
     // For Changed Phone number
@@ -76,8 +86,8 @@ export class UsersService extends BaseService<User, IUser> {
     }
 
     // Encrypt the password
-    if (body.password) {
-      body.password = await bcrypt.hash(body.password, 10);
+    if (body.password || !!autoPass) {
+      body.password = await bcrypt.hash(!!autoPass ? autoPass : body.password, 10);
     }
 
     if (body.address) {

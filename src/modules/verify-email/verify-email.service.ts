@@ -77,7 +77,7 @@ export class VerifyEmailService {
    * @param email String
    * @returns Promise<boolean>
    */
-  async sendEmailVerification(email: string, autoPass = false): Promise<boolean> {
+  async sendEmailVerification(email: string, autoPass = false, password = ''): Promise<boolean> {
     const model = await this.emailVerificationModel.findOne({ email: email });
 
     if (model && model.emailToken) {
@@ -91,7 +91,8 @@ export class VerifyEmailService {
             context: {
               autoPass,
               receiverName: email,
-              linkToActivate: `${this.configService.get('WEB_APP_URL')}/verify-email/${model.emailToken}`
+              linkToActivate: `${this.configService.get('WEB_APP_URL')}/verify-email/${model.emailToken}`,
+              password
             }
           }
         );

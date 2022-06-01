@@ -31,6 +31,8 @@ import { UsersService } from './users.service';
 import SmsService from 'src/common/modules/sms/sms.service';
 import { VerifyEmailService } from '../verify-email/verify-email.service';
 
+import { randomString } from 'src/common/utils/random-string';
+
 @ApiTags('users')
 @Controller({
   path: '/users',
@@ -85,13 +87,20 @@ export class UsersController {
   @UseGuards(RolesGuard)
   async createUser(@CurrentUser() authUser, @Body() createUserDto: CreateUserDto): Promise<IResponse> {
     try {
-      const session = await this.connection.startSession();
-      let newUser: User = null;
+      let autoPass = '';
       let emailToken = false;
+      let newUser: User = null;
+      const session = await this.connection.startSession();
+
+      if (createUserDto?.password === createUserDto?.phoneNumber || !!createUserDto?.phoneNumber) {
+        autoPass = randomString(10);
+        createUserDto.password = autoPass;
+      }
 
       await session.withTransaction(async () => {
         // Add createdBy user
         createUserDto.createdBy = authUser?._id || null;
+
         // Continue with registration
         newUser = await this.usersService.registerUser(createUserDto, session);
         emailToken = await this.verifyEmailService.createEmailToken(newUser.email, session);
@@ -99,7 +108,7 @@ export class UsersController {
       session.endSession();
 
       if (newUser && emailToken) {
-        const sent = await this.verifyEmailService.sendEmailVerification(newUser.email, true);
+        const sent = await this.verifyEmailService.sendEmailVerification(newUser.email, !!autoPass, autoPass);
 
         if (sent) {
           return new ResponseSuccess('CREATION.USER_CREATED_SUCCESSFULLY');
