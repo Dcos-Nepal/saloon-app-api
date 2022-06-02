@@ -148,7 +148,11 @@ export class JobsService extends BaseService<Job, IJob> {
    * @returns Promise<boolean>
    */
   async sendJobAssignmentEmail(userId: string, jobId: string): Promise<boolean> {
-    const assignee: User = await this.userModel.findById(userId).select(['fullName', 'email']);
+    const assignee: User = await this.userModel.findById(userId).select(['fullName', 'email', 'auth']);
+
+    if (!assignee.auth.email.verified) {
+      return false;
+    }
 
     try {
       const mailResponse: IMailResponse = await this.mailService.sendEmail(

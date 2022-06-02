@@ -79,7 +79,7 @@ export class UsersService extends BaseService<User, IUser> {
         : await this.verifyEmailService.sendEmailVerification(body.email);
     }
 
-    // For Changed Phone number
+    // For Changed Phone Number
     // If phone number has changed mark the auth.phoneNumber as false
     if (body.phoneNumber && body.phoneNumber !== user.phoneNumber) {
       user.auth.phoneNumber.verified = false;
