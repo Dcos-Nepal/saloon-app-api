@@ -140,7 +140,7 @@ export class JobsController {
           // Notify Teams via Push Notification:
           const notificationPayload: NotificationPayload = {
             notification: {
-              title: 'Job Assigned to you!',
+              title: 'Job assigned to you!',
               body: `A job of ref. #${newJob.refCode} has been assigned to you.`
             },
             mobileData: {
@@ -162,10 +162,10 @@ export class JobsController {
 
       const toPopulate = [
         { path: 'jobFor', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email'] },
-        { path: 'property', select: [''] },
         { path: 'primaryVisit', select: ['rruleSet'] }
       ];
 
+      // Fetch newly created Job
       newJob = await this.jobsService.findById(newJob._id, { toPopulate });
 
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
