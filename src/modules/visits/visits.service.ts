@@ -230,7 +230,7 @@ export class VisitsService extends BaseService<Visit, IVisit> {
             {
               path: 'team',
               model: 'User',
-              select: ['fullName', 'address', 'email', 'phoneNumber']
+              select: ['fullName', 'address', 'email', 'phoneNumber', 'auth']
             }
           ],
           select: ['title', '']
@@ -250,21 +250,25 @@ export class VisitsService extends BaseService<Visit, IVisit> {
 
     visitsOfToday.forEach((visit) => {
       visit.job?.team.forEach(async (user) => {
-        this.logger.log('Sending Message in mobile as SMS');
-        await this.smsService.sendMessage(user.phoneNumber, "You've a Job appointment today. Please check your schedule in Mobile App/Web App");
+        if (user.auth.phoneNumber.verified) {
+          this.logger.log('Sending Message in mobile as SMS');
+          await this.smsService.sendMessage(user.phoneNumber, "You've a Job appointment today. Please check your schedule in Mobile App/Web App");
+        }
 
-        this.logger.log('Sending Message in email as reminder');
-        this.mailService.sendEmail('Visit Reminder', `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`, user.email, {
-          template: 'visit-reminder',
-          context: {
-            startTime: visit.startTime,
-            instruction: visit.instruction,
-            visitFor: `${visit.job?.jobFor.fullName}(${visit.job?.jobFor.phoneNumber || visit.job?.jobFor.email})`,
-            receiverName: user.fullName.trim(),
-            visitTitle: visit.title || visit.job.title,
-            address: visit.job?.property ? `${formatAddress(visit.job?.property)}` : `${formatAddress(visit.job?.jobFor?.address)}`
-          }
-        });
+        if (user.auth.email.verified) {
+          this.logger.log('Sending Message in email as reminder');
+          this.mailService.sendEmail('Visit Reminder', `"Orange Cleaning" <${this.configService.getMailConfig().MAIL_USER}>`, user.email, {
+            template: 'visit-reminder',
+            context: {
+              startTime: visit.startTime,
+              instruction: visit.instruction,
+              visitFor: `${visit.job?.jobFor.fullName}(${visit.job?.jobFor.phoneNumber || visit.job?.jobFor.email})`,
+              receiverName: user.fullName.trim(),
+              visitTitle: visit.title || visit.job.title,
+              address: visit.job?.property ? `${formatAddress(visit.job?.property)}` : `${formatAddress(visit.job?.jobFor?.address)}`
+            }
+          });
+        }
       });
     });
   }

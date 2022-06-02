@@ -116,6 +116,13 @@ export class QuoteController {
       };
       this.deviceService.sendNotification(typeof newQuote.quoteFor === 'string' ? newQuote.quoteFor : newQuote.quoteFor?._id, notificationPayload);
 
+      const populate = [
+        { path: 'quoteFor', select: ['firstName', 'lastName', 'email', 'phoneNumber'] },
+        { path: 'property', select: ['name', 'street1', 'street2', 'city', 'state', 'postalCode', 'country', 'user', 'isDeleted'] }
+      ];
+
+      newQuote = await this.quoteService.findById(newQuote._id, { toPopulate: populate });
+
       return new ResponseSuccess('COMMON.SUCCESS', newQuote);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

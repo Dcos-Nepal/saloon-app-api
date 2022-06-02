@@ -20,14 +20,21 @@ export class InvoiceService extends BaseService<Invoice, IInvoice> {
   }
 
   async sendInvoice(invoiceId: string, session: ClientSession) {
-    const invoice = await this.invoiceModel.findById(invoiceId).populate('invoiceFor', 'email fullName');
+    const invoice = await this.invoiceModel.findById(invoiceId).populate('invoiceFor', 'email fullName auth');
     if (!invoice) throw new NotFoundException('Invoice not found');
 
     invoice.issued = true;
     invoice.issuedDate = new Date();
 
-    if (invoice.dueDuration) invoice.due = DateTime.now().toUTC().toISODate();
+    if (invoice.dueDuration) {
+      invoice.due = DateTime.now().toUTC().toISODate();
+    }
+
     await invoice.save({ session });
+
+    if (!(<User>invoice.invoiceFor).auth.email.verified) {
+      return invoice;
+    }
 
     const mailResponse = await this.mailService.sendEmail(
       `Invoice #${invoice.refCode} - Orange Cleaning`,
