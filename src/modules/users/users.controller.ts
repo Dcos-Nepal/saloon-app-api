@@ -111,7 +111,7 @@ export class UsersController {
         const sent = await this.verifyEmailService.sendEmailVerification(newUser.email, !!autoPass, autoPass);
 
         if (sent) {
-          return new ResponseSuccess('CREATION.USER_CREATED_SUCCESSFULLY');
+          return new ResponseSuccess('CREATION.USER_CREATED_SUCCESSFULLY', { data: newUser });
         }
 
         return new ResponseError('CREATION.ERROR.MAIL_NOT_SENT');
