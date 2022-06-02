@@ -160,6 +160,14 @@ export class JobsController {
         });
       }
 
+      const toPopulate = [
+        { path: 'jobFor', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email'] },
+        { path: 'property', select: [''] },
+        { path: 'primaryVisit', select: ['rruleSet'] }
+      ];
+
+      newJob = await this.jobsService.findById(newJob._id, { toPopulate });
+
       return new ResponseSuccess('COMMON.SUCCESS', newJob);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
