@@ -10,4 +10,4 @@ import { MobileNotificationService } from './service/mobile-notification.service
   providers: [MobileNotificationService],
   exports: [MobileNotificationService]
 })
-export class NotificationModule {}
+export class PushNotificationModule {}

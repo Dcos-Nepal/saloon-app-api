@@ -102,6 +102,7 @@ export class JobsController {
         authUser,
         toPopulate: [
           { path: 'jobFor', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email'] },
+          { path: 'team', select: ['fullName'] },
           { path: 'property', select: [''] },
           { path: 'primaryVisit', select: [''] }
         ]
@@ -179,8 +180,9 @@ export class JobsController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   async update(@Param() param, @Body() property: UpdateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const session = await this.connection.startSession();
       let updatedJob: IJob;
+      const session = await this.connection.startSession();
+
       await session.withTransaction(async () => {
         updatedJob = await this.jobsService.update(param.jobId, property, session);
       });

@@ -133,10 +133,11 @@ export class VisitsController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   async update(@Param() param, @Body() visit: UpdateVisitDto, @Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const session = await this.connection.startSession();
       let updatedVisit: IVisit;
+      const session = await this.connection.startSession();
+
       await session.withTransaction(async () => {
-        updatedVisit = query.updateFollowing
+        updatedVisit = query?.updateFollowing
           ? await this.visitsService.updateSelfAndFollowing(visit as IVisit, session)
           : await this.visitsService.update(param.visitId, visit, session, { authUser });
       });
