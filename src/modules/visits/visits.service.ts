@@ -281,9 +281,21 @@ export class VisitsService extends BaseService<Visit, IVisit> {
    * @returns Object
    */
   async updateJobVisits(jobId: string, session: ClientSession) {
-    const updatedVisits = await this.model.updateMany({ job: jobId }, { $set: { isDeleted: true } }, { session });
+    return await this.updateMany({ job: jobId }, { isDeleted: true }, session);
+  }
 
-    return updatedVisits;
+  /**
+   * Updates all Jobs for given query
+   *
+   * @param query any
+   * @param data any
+   * @param session ClientSession
+   * @returns Object
+   */
+  async updateManyVisits(query: any, data: any, session: ClientSession) {
+    const updatedJobs = await this.model.updateMany(query, { $set: data }, { session });
+
+    return updatedJobs;
   }
 
   /**

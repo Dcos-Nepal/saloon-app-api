@@ -175,6 +175,20 @@ export class JobsService extends BaseService<Job, IJob> {
   }
 
   /**
+   * Updates all Jobs for given query
+   *
+   * @param query any
+   * @param data any
+   * @param session ClientSession
+   * @returns Object
+   */
+  async updateManyJobs(query: any, data: any, session: ClientSession) {
+    const updatedJobs = await this.model.updateMany(query, { $set: data }, { session });
+
+    return updatedJobs;
+  }
+
+  /**
    * Soft deleting job
    *
    * @param jobId String

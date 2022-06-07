@@ -118,11 +118,23 @@ class BaseService<EntityModel, Entity> {
    * @param body
    * @param session
    * @param options
-   * @returns
+   * @returns Promise<EntityModel>
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async update(id: string, body: Partial<Entity>, session: ClientSession, options?: IServiceOptions): Promise<EntityModel> {
     return await this.model.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session });
+  }
+
+  /**
+   * Updates all Jobs for given query
+   *
+   * @param query any
+   * @param data any
+   * @param session ClientSession
+   * @returns Promise<any>
+   */
+  async updateMany(query: any, data: any, session: ClientSession): Promise<any> {
+    return await this.model.updateMany(query, { $set: data }, { session });
   }
 
   /**

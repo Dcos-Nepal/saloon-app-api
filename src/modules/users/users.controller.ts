@@ -32,6 +32,10 @@ import SmsService from 'src/common/modules/sms/sms.service';
 import { VerifyEmailService } from '../verify-email/verify-email.service';
 
 import { randomString } from 'src/common/utils/random-string';
+import { JobsService } from '../jobs/jobs.service';
+import { VisitsService } from '../visits/visits.service';
+import { QuoteService } from '../quotes/quote.service';
+import { JobRequestService } from '../job-request/job-request.service';
 
 @ApiTags('users')
 @Controller({
@@ -46,6 +50,10 @@ export class UsersController {
   constructor(
     private readonly smsService: SmsService,
     private readonly usersService: UsersService,
+    private readonly jobsService: JobsService,
+    private readonly visitsService: VisitsService,
+    private readonly quotesService: QuoteService,
+    private readonly jobRequestsService: JobRequestService,
     private readonly verifyEmailService: VerifyEmailService,
     @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
@@ -248,10 +256,23 @@ export class UsersController {
   @Roles('ADMIN')
   async delete(@Param() param): Promise<IResponse> {
     try {
-      const session = await this.connection.startSession();
       let deletedUser: User;
+      const session = await this.connection.startSession();
+
       await session.withTransaction(async () => {
         deletedUser = await this.usersService.softDelete(param.userId, session);
+
+        // Marking the jobs to be as deleted.
+        await this.jobsService.updateMany({ jobFor: param.userId }, { isDeleted: true }, session);
+
+        // Marking the Visits to be deleted
+        await this.visitsService.updateMany({ visitFor: param.userId }, { isDeleted: true }, session);
+
+        // Marking the Quotes to be deleted
+        await this.quotesService.updateMany({ quoteFor: param.userId }, { isDeleted: true }, session);
+
+        // Marking the Job Requests to be deleted
+        await this.jobRequestsService.updateMany({ jobRequestFor: param.userId }, { isDeleted: true }, session);
       });
       session.endSession();
       return new ResponseSuccess('COMMON.SUCCESS', deletedUser);

@@ -12,6 +12,10 @@ import { PropertySchema } from '../properties/schemas/property.schema';
 import { PublicFilesService } from 'src/common/modules/files/public-files.service';
 import { VerifyEmailModule } from '../verify-email/verify-email.module';
 import { SmsModule } from 'src/common/modules/sms/sms.module';
+import { JobsModule } from '../jobs/jobs.module';
+import { VisitsModule } from '../visits/visits.module';
+import { QuoteModule } from '../quotes/quotes.module';
+import { JobRequestModule } from '../job-request/job-request.module';
 
 @Module({
   imports: [
@@ -25,7 +29,11 @@ import { SmsModule } from 'src/common/modules/sms/sms.module';
     }),
     ConfigModule,
     SmsModule,
-    VerifyEmailModule
+    VerifyEmailModule,
+    JobsModule,
+    VisitsModule,
+    QuoteModule,
+    JobRequestModule
   ],
   controllers: [UsersController],
   providers: [UsersService, PropertiesService, PublicFilesService],
