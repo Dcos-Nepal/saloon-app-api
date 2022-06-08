@@ -1,3 +1,4 @@
+import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
 
@@ -26,5 +27,6 @@ export class NotificationQueryDto extends PaginationQueryDto {
 
   @IsOptional()
   @IsBoolean()
-  isRead?: boolean;
+  @Transform(({ value }) => value === 'true')
+  isRead?: string;
 }

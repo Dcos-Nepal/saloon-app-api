@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, UseGuards, Type, Sse } from '@nestjs/common';
+import { Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, UseGuards, Type, Sse, Put } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
@@ -10,11 +10,14 @@ import { NotificationService } from './notification.service';
 import { CreateNotificationDto, NotificationQueryDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { User } from '../users/interfaces/user.interface';
 
 @Controller({
   path: '/notifications',
   version: '1'
 })
+@UseGuards(AuthGuard('jwt'))
 export class NotificationController {
   private logger: Logger;
 
@@ -84,11 +87,11 @@ export class NotificationController {
       if (Notification) {
         return new ResponseSuccess('NOTIFICATION.UPDATE', Notification);
       } else {
-        return new ResponseError('NOTIFICATION.ERROR.UPDATE_SERVICE_FAILED');
+        return new ResponseError('NOTIFICATION.ERROR.UPDATE_FAILED');
       }
     } catch (error) {
       this.logger.error('Error: ', error);
-      return new ResponseError('NOTIFICATION.ERROR.UPDATE_SERVICE_FAILED', error);
+      return new ResponseError('NOTIFICATION.ERROR.UPDATE_FAILED', error);
     }
   }
 
@@ -100,6 +103,7 @@ export class NotificationController {
       await session.withTransaction(async () => {
         removedItem = await this.notificationService.softDelete(notifyId, session);
       });
+      session.endSession();
       return new ResponseSuccess('NOTIFICATION.DELETE', removedItem);
     } catch (error) {
       this.logger.error('Error: ', error);
@@ -107,8 +111,29 @@ export class NotificationController {
     }
   }
 
+  @Put('/mark-as-read')
+  async markNotificationAsRead(@CurrentUser() authUser: User) {
+    try {
+      let updatedNotifications: any;
+      const session = await this.connection.startSession();
+
+      await session.withTransaction(async () => {
+        updatedNotifications = await this.notificationService.updateMany({ receiver: authUser._id }, { isRead: true }, session);
+      });
+      session.endSession();
+
+      if (!!updatedNotifications) {
+        return new ResponseSuccess('NOTIFICATION.UPDATE', Notification);
+      } else {
+        return new ResponseError('NOTIFICATION.ERROR.UPDATE_FAILED');
+      }
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError('NOTIFICATION.ERROR.UPDATE_FAILED', error);
+    }
+  }
+
   @Sse('/events/:receiver')
-  @UseGuards(AuthGuard('jwt'))
   async sse(@Param('receiver') receiver): Promise<Observable<MessageEvent<any>>> {
     const filter: mongoose.FilterQuery<Type> = {
       isRead: false
