@@ -25,7 +25,6 @@ import { UserDevicesModule } from './modules/devices/devices.module';
 import { PushNotificationModule } from './common/modules/notification/push-notification.module';
 import { VerifyEmailModule } from './modules/verify-email/verify-email.module';
 import { ServicesModule } from './modules/services/service.module';
-import { NotifyModule } from './modules/notifications/notification.module';
 
 @Module({
   imports: [
