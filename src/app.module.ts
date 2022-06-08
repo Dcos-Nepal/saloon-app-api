@@ -25,7 +25,7 @@ import { UserDevicesModule } from './modules/devices/devices.module';
 import { PushNotificationModule } from './common/modules/notification/push-notification.module';
 import { VerifyEmailModule } from './modules/verify-email/verify-email.module';
 import { ServicesModule } from './modules/services/service.module';
-import { NotifiModule } from './modules/notifications/notification.module';
+import { NotifyModule } from './modules/notifications/notification.module';
 
 @Module({
   imports: [
@@ -58,8 +58,7 @@ import { NotifiModule } from './modules/notifications/notification.module';
     PropertiesModule,
     UserDevicesModule,
     VerifyEmailModule,
-    ServicesModule,
-    NotifiModule
+    ServicesModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService, AppSocketGateway]

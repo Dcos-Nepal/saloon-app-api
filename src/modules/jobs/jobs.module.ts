@@ -17,6 +17,7 @@ import { PublicFilesService } from 'src/common/modules/files/public-files.servic
 import { UserDevicesModule } from '../devices/devices.module';
 import { MailModule } from 'src/common/modules/mail/mail.module';
 import { SmsModule } from 'src/common/modules/sms/sms.module';
+import { NotifyModule } from '../notifications/notification.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SmsModule } from 'src/common/modules/sms/sms.module';
     ]),
     SmsModule,
     MailModule,
+    NotifyModule,
     UserDevicesModule
   ],
   controllers: [JobsController],

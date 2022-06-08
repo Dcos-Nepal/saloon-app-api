@@ -12,6 +12,10 @@ export class CreateNotificationDto {
   description?: string;
 
   @IsOptional()
+  @IsString()
+  type?: string;
+
+  @IsOptional()
   @IsMongoId()
   receiver?: string;
 

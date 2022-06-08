@@ -123,7 +123,7 @@ export class NotificationController {
       session.endSession();
 
       if (!!updatedNotifications) {
-        return new ResponseSuccess('NOTIFICATION.UPDATE', Notification);
+        return new ResponseSuccess('NOTIFICATION.UPDATE', updatedNotifications);
       } else {
         return new ResponseError('NOTIFICATION.ERROR.UPDATE_FAILED');
       }
