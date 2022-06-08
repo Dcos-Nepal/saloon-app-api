@@ -1,4 +1,4 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
 
