@@ -188,13 +188,13 @@ export class VisitsController {
   async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
-      let isVisitDeleted: boolean;
+      let deletedVisit: Visit;
       await session.withTransaction(async () => {
-        isVisitDeleted = await this.visitsService.remove(param.visitId, session);
+        deletedVisit = await this.visitsService.softDelete(param.visitId, session);
       });
       session.endSession();
 
-      return new ResponseSuccess('COMMON.SUCCESS', isVisitDeleted);
+      return new ResponseSuccess('COMMON.SUCCESS', !!deletedVisit);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
