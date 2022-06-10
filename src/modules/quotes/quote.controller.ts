@@ -16,6 +16,7 @@ import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor'
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
 import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
+import { QuoteSummaryDto } from './dto/quote-summary.dto';
 
 @Controller({
   path: '/quotes',
@@ -61,9 +62,9 @@ export class QuoteController {
   @Get('/summary')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
-  async getSummary(): Promise<IResponse> {
+  async getSummary(@Query() query: QuoteSummaryDto): Promise<IResponse> {
     try {
-      const summary = await this.quoteService.getSummary();
+      const summary = await this.quoteService.getSummary(query);
       return new ResponseSuccess('COMMON.SUCCESS', summary);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

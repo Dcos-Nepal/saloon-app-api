@@ -1,3 +1,4 @@
+import * as mongoose from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
@@ -28,10 +29,15 @@ export class QuoteService extends BaseService<Quote, IQuote> {
     return await this.update(quoteId, quote, session, { authUser });
   }
 
-  async getSummary() {
+  /**
+   * Get Summary of Quotes
+   * @param filter mongoose.FilterQuery<Quote>
+   * @returns Promise<Object>
+   */
+  async getSummary(filter: mongoose.FilterQuery<Quote>) {
     const statusTypes = ['PENDING', 'ACCEPTED', 'REJECTED'];
     const [pendingCount, acceptedCount, rejectedCount] = await Promise.all(
-      statusTypes.map((status) => this.quoteModel.countDocuments({ 'status.status': status }))
+      statusTypes.map((status) => this.quoteModel.countDocuments({ ...filter, 'status.status': status }))
     );
     return { pendingCount, acceptedCount, rejectedCount };
   }
