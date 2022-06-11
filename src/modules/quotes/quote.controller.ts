@@ -63,7 +63,9 @@ export class QuoteController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async getSummary(@Query() query: QuoteSummaryDto): Promise<IResponse> {
-    query = { ...query, isDeleted: false };
+    // Get summary of only not deleted quotes
+    query.isDeleted = false;
+
     try {
       const summary = await this.quoteService.getSummary(query);
       return new ResponseSuccess('COMMON.SUCCESS', summary);
