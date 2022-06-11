@@ -77,7 +77,7 @@ export class JobsController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async getSummary(@Query() query): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<Job> = { ...query };
+    const filter: mongoose.FilterQuery<Job> = { ...query, isDeleted: false };
 
     if (query?.jobFor) {
       filter.jobFor = { $eq: query.jobFor };

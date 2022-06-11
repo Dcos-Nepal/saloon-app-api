@@ -8,4 +8,7 @@ export class QuoteSummaryDto {
   @IsMongoId()
   @IsOptional()
   createdBy?: string;
+
+  @IsOptional()
+  isDeleted?: boolean;
 }

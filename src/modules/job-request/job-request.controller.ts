@@ -60,7 +60,7 @@ export class JobRequestController {
   @Roles('ADMIN', 'CLIENT')
   @UseGuards(RolesGuard)
   async getSummary(@Query() query): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<JobRequest> = {};
+    const filter: mongoose.FilterQuery<JobRequest> = { isDeleted: false };
 
     if (query?.client) {
       filter.client = { $eq: query.client };

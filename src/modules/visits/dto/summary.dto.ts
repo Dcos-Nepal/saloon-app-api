@@ -17,4 +17,7 @@ export class VisitSummaryDto {
   @IsMongoId()
   @IsOptional()
   team?: string;
+
+  @IsOptional()
+  isDeleted?: boolean;
 }

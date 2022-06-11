@@ -88,6 +88,9 @@ export class VisitsController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   async getSummary(@Query() query: VisitSummaryDto): Promise<IResponse> {
+    // Get summary of only not deleted visits
+    query.isDeleted = false;
+
     try {
       const visits = await this.visitsService.getSummary(query);
       return new ResponseSuccess('COMMON.SUCCESS', visits);

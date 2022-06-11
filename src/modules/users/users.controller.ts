@@ -134,7 +134,7 @@ export class UsersController {
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)
   async summary(@Query() query): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<User> = {};
+    const filter: mongoose.FilterQuery<User> = { isDeleted: false };
 
     if (query?.createdBy) {
       filter.createdBy = { $eq: query.createdBy };
