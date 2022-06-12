@@ -5,9 +5,10 @@ import { QuoteController } from './quote.controller';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { LoggerMiddleware } from 'src/common/middlewares/middleware';
 import { UserDevicesModule } from '../devices/devices.module';
+import { NotifyModule } from '../notifications/notification.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Quotes', schema: QuotesSchema }]), UserDevicesModule],
+  imports: [MongooseModule.forFeature([{ name: 'Quotes', schema: QuotesSchema }]), NotifyModule, UserDevicesModule],
   controllers: [QuoteController],
   providers: [QuoteService],
   exports: [QuoteService]

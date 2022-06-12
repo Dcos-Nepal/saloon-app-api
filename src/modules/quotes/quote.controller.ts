@@ -17,6 +17,7 @@ import { TransformInterceptor } from 'src/common/interceptors/transform.intercep
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards, UseInterceptors } from '@nestjs/common';
 import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 import { QuoteSummaryDto } from './dto/quote-summary.dto';
+import { NotificationService } from '../notifications/notification.service';
 
 @Controller({
   path: '/quotes',
@@ -28,7 +29,8 @@ export class QuoteController {
   constructor(
     @InjectConnection() private readonly connection: mongoose.Connection,
     private readonly deviceService: UserDeviceService,
-    private readonly quoteService: QuoteService
+    private readonly quoteService: QuoteService,
+    private readonly notifyService: NotificationService
   ) {}
 
   @Get()
@@ -105,6 +107,14 @@ export class QuoteController {
       });
       session.endSession();
 
+      // Send in-app notification to client
+      await this.notifyService.create({
+        title: 'Job Quote Created!',
+        description: `A job quote of ref. #${newQuote.refCode} has been created.`,
+        receiver: newQuote.quoteFor as string,
+        type: 'Job Quote'
+      });
+
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
         notification: {
@@ -145,6 +155,14 @@ export class QuoteController {
       });
       session.endSession();
 
+      // Send in-app notification to client
+      await this.notifyService.create({
+        title: 'Job Quote Updated!',
+        description: `A job quote of ref. #${updatedQuote.refCode} has been updated.`,
+        receiver: updatedQuote.quoteFor as string,
+        type: 'Job Quote'
+      });
+
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
         notification: {
@@ -178,6 +196,14 @@ export class QuoteController {
       });
       session.endSession();
 
+      // Send in-app notification to client
+      await this.notifyService.create({
+        title: 'Job Quote Status Changed!',
+        description: `A status of job quote of ref. #${updatedQuote.refCode} has been updated.`,
+        receiver: updatedQuote.quoteFor as string,
+        type: 'Job Quote'
+      });
+
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
         notification: {
@@ -210,6 +236,14 @@ export class QuoteController {
         deletedQuote = await this.quoteService.softDelete(param.quoteId, session);
       });
       session.endSession();
+
+      // Send in-app notification to client
+      await this.notifyService.create({
+        title: 'Job Quote Deleted!',
+        description: `A job quote of ref. #${deletedQuote.refCode} has been deleted.`,
+        receiver: deletedQuote.quoteFor as string,
+        type: 'Job Quote'
+      });
 
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
