@@ -5,9 +5,10 @@ import { InvoiceController } from './invoice-controller';
 import { LoggerMiddleware } from 'src/common/middlewares/middleware';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UserDevicesModule } from '../devices/devices.module';
+import { NotifyModule } from '../notifications/notification.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Invoice', schema: InvoiceSchema }]), UserDevicesModule],
+  imports: [MongooseModule.forFeature([{ name: 'Invoice', schema: InvoiceSchema }]), NotifyModule, UserDevicesModule],
   controllers: [InvoiceController],
   providers: [InvoiceService],
   exports: [InvoiceService]

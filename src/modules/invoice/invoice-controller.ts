@@ -14,6 +14,7 @@ import { GetInvoiceQueryDto } from './dtos/get-invoice-query.dto';
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
 import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
+import { NotificationService } from '../notifications/notification.service';
 
 @Controller({
   path: '/invoices',
@@ -24,7 +25,8 @@ export class InvoiceController {
   constructor(
     @InjectConnection() private readonly connection: mongoose.Connection,
     private readonly deviceService: UserDeviceService,
-    private readonly invoiceService: InvoiceService
+    private readonly invoiceService: InvoiceService,
+    private readonly notifyService: NotificationService
   ) {}
 
   @Get('/summary')
@@ -105,6 +107,14 @@ export class InvoiceController {
       });
       session.endSession();
 
+      // Send Notification to Client
+      await this.notifyService.create({
+        title: 'Visit Invoice Created!',
+        description: `A Visit Invoice of ref. #${newInvoice.refCode} has been created.`,
+        receiver: newInvoice.invoiceFor as string,
+        type: 'Visit Invoice'
+      });
+
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
         notification: {
@@ -138,6 +148,14 @@ export class InvoiceController {
       });
       session.endSession();
 
+      // Send Notification to Client
+      await this.notifyService.create({
+        title: 'Visit Invoice Received!',
+        description: `A Visit Invoice of ref. #${invoice.refCode} has been received.`,
+        receiver: invoice.invoiceFor as string,
+        type: 'Visit Invoice'
+      });
+
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
         notification: {
@@ -170,6 +188,14 @@ export class InvoiceController {
         updatedInvoice = await this.invoiceService.update(param.invoiceId, invoiceUpdateDto, session);
       });
       session.endSession();
+
+      // Send Notification to Client
+      await this.notifyService.create({
+        title: 'Visit Invoice Updated!',
+        description: `A Visit Invoice of ref. #${updatedInvoice.refCode} has been updated.`,
+        receiver: updatedInvoice.invoiceFor as string,
+        type: 'Visit Invoice'
+      });
 
       // Notify Client via Push Notification:
       const notificationPayload: NotificationPayload = {
