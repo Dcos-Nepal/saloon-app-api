@@ -5,9 +5,10 @@ import { JobRequestController } from './job-request.controller';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { LoggerMiddleware } from 'src/common/middlewares/middleware';
 import { UserDevicesModule } from '../devices/devices.module';
+import { NotifyModule } from '../notifications/notification.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'JobRequest', schema: JobRequestSchema }]), UserDevicesModule],
+  imports: [MongooseModule.forFeature([{ name: 'JobRequest', schema: JobRequestSchema }]), NotifyModule, UserDevicesModule],
   controllers: [JobRequestController],
   providers: [JobRequestService],
   exports: [JobRequestService]
