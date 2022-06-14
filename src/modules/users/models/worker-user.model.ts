@@ -24,12 +24,12 @@ export class WorkerModel {
     cleaningCert?: {
       url: string;
       key: string;
-      type: 'CLEANING_CERTIFICATE';
+      type: 'VACCINATION_CERTIFICATE';
     };
     policeCert?: {
       url: string;
       key: string;
-      type: 'VACCINATION_CERTIFICATE';
+      type: 'POLICE_CERTIFICATE';
     };
   };
 
