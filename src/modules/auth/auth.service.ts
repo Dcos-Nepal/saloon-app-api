@@ -51,6 +51,10 @@ export class AuthService {
       throw new NotFoundException('User for given credentials is not found');
     }
 
+    if (authUser.user?._id && userLogin?.deviceType !== 'WEB' && authUser?.user?.roles.includes('ADMIN')) {
+      throw new NotFoundException('User for given credentials is not found');
+    }
+
     const userDeviceDto: IUserDevice = {
       user: authUser.user?._id.toString(),
       deviceToken: userLogin.deviceToken,
