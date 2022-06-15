@@ -5,6 +5,17 @@ class BaseService<EntityModel, Entity> {
   constructor(readonly model: Model<EntityModel>) {}
 
   /**
+   * Counts all Entity Models
+   *
+   * @param query FilterQuery
+   * @returns Promise<{count: number}>
+   */
+  async count(filter: FilterQuery<Entity>): Promise<{ count: number }> {
+    const count = await this.model.countDocuments(filter);
+    return { count };
+  }
+
+  /**
    * Finds Entity Model using Entity Id
    *
    * @param id ObjectId | string

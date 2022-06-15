@@ -63,6 +63,24 @@ export class NotificationController {
     }
   }
 
+  @Get('/count/filtered')
+  async count(@Query() query: NotificationQueryDto) {
+    const filter: mongoose.FilterQuery<Type> = { ...query };
+
+    try {
+      const ServicesResponse = await this.notificationService.count(filter);
+
+      if (ServicesResponse) {
+        return new ResponseSuccess('NOTIFICATION.COUNT', ServicesResponse);
+      } else {
+        return new ResponseError('NOTIFICATION.ERROR.COUNT_FAILED');
+      }
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError('NOTIFICATION.ERROR.COUNT_FAILED', error);
+    }
+  }
+
   @Get('/:notifyId')
   async findOne(@Param('notifyId') notifyId: string) {
     try {
