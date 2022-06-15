@@ -227,7 +227,7 @@ export class QuoteController {
 
   @Delete('/:quoteId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'WORKER')
   async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
