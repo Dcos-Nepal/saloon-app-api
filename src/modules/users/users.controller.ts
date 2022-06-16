@@ -253,7 +253,7 @@ export class UsersController {
 
   @Delete('/:userId')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'WORKER')
   async delete(@Param() param): Promise<IResponse> {
     try {
       let deletedUser: User;
