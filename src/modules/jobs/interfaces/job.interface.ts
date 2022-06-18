@@ -14,6 +14,7 @@ export interface IJob {
   property?: string | Property;
   remindInvoicing?: boolean;
   startDate?: Date;
+  endDate?: Date;
   type: JobType;
   team?: string[] | User[];
   createdBy: string | User;

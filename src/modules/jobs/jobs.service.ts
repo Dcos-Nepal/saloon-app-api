@@ -100,6 +100,9 @@ export class JobsService extends BaseService<Job, IJob> {
       const primaryVisit = await this.createPrimaryVisit(job, data.schedule, session);
       job.primaryVisit = primaryVisit._id;
       job.startDate = primaryVisit.startDate;
+      job.endDate = primaryVisit.endDate;
+
+      // Saving the job
       await job.save({ session });
     }
 
@@ -119,8 +122,17 @@ export class JobsService extends BaseService<Job, IJob> {
 
     if (job) {
       if (data.schedule) {
-        if (job.primaryVisit) await this.visitsService.update(job.primaryVisit.toString(), data.schedule, session);
-        else await this.createPrimaryVisit(job, data.schedule, session);
+        if (job.primaryVisit) {
+          const visitData = {
+            ...data.schedule,
+            visitFor: job.jobFor,
+            team: job.team,
+            hasMultiVisit: job.type === 'RECURRING'
+          };
+          await this.visitsService.update(job.primaryVisit.toString(), visitData, session);
+        } else {
+          await this.createPrimaryVisit(job, data.schedule, session);
+        }
       }
 
       return job;
@@ -134,7 +146,7 @@ export class JobsService extends BaseService<Job, IJob> {
    */
   async getSummary(filter: mongoose.FilterQuery<Job>) {
     const [activeJobsCount, isCompleted] = await Promise.all([
-      this.jobModel.countDocuments({ ...filter, startDate: { $lte: new Date() }, isCompleted: false }),
+      this.jobModel.countDocuments({ ...filter, isCompleted: false }),
       this.jobModel.countDocuments({ ...filter, isCompleted: true })
     ]);
     return { activeJobsCount, isCompleted };
