@@ -184,6 +184,24 @@ export class UsersController {
     }
   }
 
+  @Get('/:id/approve')
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  async approveWorker(@Param() params): Promise<IResponse> {
+    try {
+      const session = await this.connection.startSession();
+      let updatedUser: User;
+      await session.withTransaction(async () => {
+        updatedUser = await this.usersService.approveWorker(params.id, session);
+      });
+      session.endSession();
+
+      return new ResponseSuccess('COMMON.SUCCESS', updatedUser);
+    } catch (error) {
+      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
+    }
+  }
+
   @Put('/:id')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
   @UseGuards(RolesGuard)

@@ -103,6 +103,30 @@ export class UsersService extends BaseService<User, IUser> {
   }
 
   /**
+   * Update User's Details
+   *
+   * @param id String
+   * @param session ClientSession
+   *
+   * @returns Promise<User>
+   */
+  async approveWorker(id: string, session: ClientSession) {
+    const user: User = await this.userModel.findById(id).select('-password -__v');
+
+    if (!user?._id) {
+      throw new NotFoundException("User you're trying to update is not found!");
+    }
+
+    if (user.userData.type === 'WORKER') {
+      user.userData = { ...user.toJSON().userData, isApproved: true };
+
+      return await this.userModel.findOneAndUpdate({ _id: id }, { ...user }, { new: true, lean: true, session }).select('-password -__v');
+    }
+
+    return user;
+  }
+
+  /**
    * Finds User using the email address
    *
    * @param email string
