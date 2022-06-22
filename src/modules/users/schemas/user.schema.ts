@@ -46,6 +46,7 @@ export const ClientSchema = new mongoose.Schema(
 );
 
 export const WorkerSchema = new mongoose.Schema({
+  isApproved: { type: Boolean, default: false },
   location: {
     index: '2dsphere',
     type: PointSchema

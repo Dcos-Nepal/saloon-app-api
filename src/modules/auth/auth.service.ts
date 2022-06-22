@@ -14,7 +14,7 @@ import { ConsentType } from './schemas/consent-registry.schema';
 import { UserDto } from '../users/dto/user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 
-import { User } from '../users/interfaces/user.interface';
+import { IWorker, User } from '../users/interfaces/user.interface';
 import { ForgotPassword } from './interfaces/forgot-password.interface';
 import { ConsentRegistry } from './interfaces/consent-registry.interface';
 
@@ -115,6 +115,10 @@ export class AuthService {
 
     if (!userFromDb.auth.email.verified) {
       throw new HttpException('LOGIN.EMAIL_NOT_VERIFIED', HttpStatus.FORBIDDEN);
+    }
+
+    if (userFromDb?.userData?.type === 'WORKER' && !(userFromDb?.userData as IWorker)?.isApproved) {
+      throw new HttpException('LOGIN.USER_NOT_APPROVED', HttpStatus.FORBIDDEN);
     }
 
     const isValidPass = await bcrypt.compare(password, userFromDb.password);

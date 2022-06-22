@@ -39,6 +39,7 @@ export interface IClient {
 
 export interface IWorker {
   type?: string;
+  isApproved?: boolean;
   location?: IUserLocation;
   services?: [string];
   documents?: IUserDocument;

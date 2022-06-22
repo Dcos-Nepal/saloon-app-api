@@ -108,8 +108,8 @@ export class UsersService extends BaseService<User, IUser> {
    * @param email string
    * @returns Promise<User>
    */
-  async findByEmail(email: string): Promise<User> {
-    return await this.userModel.findOne({ email: email }).exec();
+  async findByEmail(email: string, considerDeleted = false): Promise<User> {
+    return await this.userModel.findOne({ email: email, isDeleted: !considerDeleted ? considerDeleted : true }).exec();
   }
 
   /**
