@@ -474,7 +474,7 @@ export class UsersService extends BaseService<User, IUser> {
    * @param query
    * @returns workers
    */
-  async getRecommendedWorkers(query: AnyObject) {
+  async getRecommendedWorkers(query: { jobType?: string; lat?: number; lon?: number; address?: string; startTime?: string; endTime?: string; limit?: number }) {
     this.logger.log('Filters for finding workers that are active');
     const filters = {
       roles: { $in: ['WORKER'] },
@@ -493,7 +493,7 @@ export class UsersService extends BaseService<User, IUser> {
           $maxDistance: 40000, // 40x1000km = 40000KM
           $geometry: {
             type: 'Point',
-            coordinates: query.lat && query.lon ? [+query.lat, +query.lon] : await this.getCoordinates(query.address)
+            coordinates: query.lat && query.lon ? [+query.lon, +query.lat] : await this.getCoordinates(query.address)
           }
         }
       };
