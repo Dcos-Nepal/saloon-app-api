@@ -475,6 +475,8 @@ export class UsersService extends BaseService<User, IUser> {
    * @returns workers
    */
   async getRecommendedWorkers(query: { jobType?: string; lat?: number; lon?: number; address?: string; startTime?: string; endTime?: string; limit?: number }) {
+    let recommendations = [];
+
     this.logger.log('Filters for finding workers that are active');
     const filters = {
       roles: { $in: ['WORKER'] },
@@ -483,24 +485,29 @@ export class UsersService extends BaseService<User, IUser> {
 
     if (query.jobType) {
       this.logger.log('Filtering workers providing specific service or Job Type');
-      filters['userData.jobType'] = { $eq: query.jobType };
+      filters['userData.services'] = query.jobType;
     }
 
     if ((query.lat && query.lon) || query.address) {
-      this.logger.log('Finding the users within the 40 KM of radius of Client');
-      filters['userData.location'] = {
-        $near: {
-          $maxDistance: 40000, // 40x1000km = 40000KM
-          $geometry: {
-            type: 'Point',
-            coordinates: query.lat && query.lon ? [+query.lon, +query.lat] : await this.getCoordinates(query.address)
+      this.logger.log('Finding the recommended workers within the 40 KM of radius of Client');
+      recommendations = await this.model.aggregate([
+        {
+          $geoNear: {
+            near: {
+              type: 'Point',
+              coordinates: (query.lat && query.lon ? [+query.lon, +query.lat] : await this.getCoordinates(query.address)) as [number, number]
+            },
+            maxDistance: 40 * 1000, // 40x1000km = 40000KM,
+            spherical: true,
+            distanceField: 'distance',
+            query: filters
           }
         }
-      };
+      ]);
+    } else {
+      this.logger.log('Finding recommendations using the filters above');
+      recommendations = await this.model.find(filters);
     }
-
-    this.logger.log('Finding recommendations using the filters above');
-    const recommendations = await this.model.find(filters);
 
     this.logger.log('returns first 5 recommendations if filters are not provided');
     if (!query.startTime && !query.endTime && !query.jobType) {
