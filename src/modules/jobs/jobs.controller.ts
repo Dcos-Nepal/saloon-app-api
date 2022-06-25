@@ -104,7 +104,7 @@ export class JobsController {
         authUser,
         toPopulate: [
           { path: 'jobFor', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email'] },
-          { path: 'team', select: ['fullName'] },
+          { path: 'team', select: ['fullName', 'address', 'userData'] },
           { path: 'property', select: [''] },
           { path: 'primaryVisit', select: [''] }
         ]
