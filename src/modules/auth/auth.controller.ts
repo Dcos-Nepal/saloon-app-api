@@ -99,6 +99,18 @@ export class AuthController {
     }
   }
 
+  @Get('/me')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'))
+  public async me(@CurrentUser() user): Promise<IResponse> {
+    try {
+      return new ResponseSuccess('ME.SUCCESS', user);
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError(error.message, error);
+    }
+  }
+
   @Get('/verify/:token')
   public async verifyEmail(@Param() params): Promise<IResponse> {
     try {

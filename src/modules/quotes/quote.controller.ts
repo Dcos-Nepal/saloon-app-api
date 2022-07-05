@@ -18,6 +18,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Type, UseGuards
 import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
 import { QuoteSummaryDto } from './dto/quote-summary.dto';
 import { NotificationService } from '../notifications/notification.service';
+import { WorkerVerificationGuard } from '../auth/guards/worker-verification.guard';
 
 @Controller({
   path: '/quotes',
@@ -93,8 +94,8 @@ export class QuoteController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'WORKER')
+  @UseGuards(RolesGuard, WorkerVerificationGuard)
   async create(@Body() quote: CreateQuoteDto, @CurrentUser() authUser: User): Promise<IResponse> {
     // Add Created by Id
     quote.createdBy = authUser._id;

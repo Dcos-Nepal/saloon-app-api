@@ -19,6 +19,7 @@ import { JobFeedbackDto } from './dto/job-feedback.dto';
 import { FilesInterceptor } from '@nestjs/platform-express/multer/interceptors/files.interceptor';
 import { UserDeviceService, NotificationPayload } from '../devices/devices.service';
 import { NotificationService } from '../notifications/notification.service';
+import { WorkerVerificationGuard } from '../auth/guards/worker-verification.guard';
 
 @Controller({
   path: '/jobs',
@@ -116,8 +117,8 @@ export class JobsController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
   @Roles('ADMIN', 'CLIENT', 'WORKER')
+  @UseGuards(RolesGuard, WorkerVerificationGuard)
   async create(@Body() jobCreateDto: CreateJobDto, @CurrentUser() authUser: User): Promise<IResponse> {
     // Check if we need to notify team
     const notifyTeam = jobCreateDto.notifyTeam;

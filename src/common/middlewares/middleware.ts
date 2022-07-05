@@ -20,7 +20,7 @@ export class LoggerMiddleware implements NestMiddleware {
         obfuscateRequest.currentPassword = '*******';
       }
 
-      if (obfuscateRequest != {}) {
+      if (obfuscateRequest != null) {
         this.logger.log(new Date().toString() + ' - [Request] ' + req.baseUrl + ' - ' + JSON.stringify(obfuscateRequest));
       }
     } catch (error) {

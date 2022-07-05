@@ -36,6 +36,7 @@ import { JobsService } from '../jobs/jobs.service';
 import { VisitsService } from '../visits/visits.service';
 import { QuoteService } from '../quotes/quote.service';
 import { JobRequestService } from '../job-request/job-request.service';
+import { WorkerVerificationGuard } from '../auth/guards/worker-verification.guard';
 
 @ApiTags('users')
 @Controller({
@@ -92,7 +93,7 @@ export class UsersController {
 
   @Post('')
   @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, WorkerVerificationGuard)
   async createUser(@CurrentUser() authUser, @Body() createUserDto: CreateUserDto): Promise<IResponse> {
     try {
       let autoPass = '';
