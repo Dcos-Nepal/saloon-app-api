@@ -16,6 +16,8 @@ import { JobsModule } from '../jobs/jobs.module';
 import { VisitsModule } from '../visits/visits.module';
 import { QuoteModule } from '../quotes/quotes.module';
 import { JobRequestModule } from '../job-request/job-request.module';
+import { NotifyModule } from '../notifications/notification.module';
+import { UserDevicesModule } from '../devices/devices.module';
 
 @Module({
   imports: [
@@ -33,7 +35,9 @@ import { JobRequestModule } from '../job-request/job-request.module';
     JobsModule,
     VisitsModule,
     QuoteModule,
-    JobRequestModule
+    JobRequestModule,
+    NotifyModule,
+    UserDevicesModule
   ],
   controllers: [UsersController],
   providers: [UsersService, PropertiesService, PublicFilesService],

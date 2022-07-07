@@ -37,6 +37,8 @@ import { VisitsService } from '../visits/visits.service';
 import { QuoteService } from '../quotes/quote.service';
 import { JobRequestService } from '../job-request/job-request.service';
 import { WorkerVerificationGuard } from '../auth/guards/worker-verification.guard';
+import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
+import { NotificationService } from '../notifications/notification.service';
 
 @ApiTags('users')
 @Controller({
@@ -56,6 +58,8 @@ export class UsersController {
     private readonly quotesService: QuoteService,
     private readonly jobRequestsService: JobRequestService,
     private readonly verifyEmailService: VerifyEmailService,
+    private readonly deviceService: UserDeviceService,
+    private readonly notifyService: NotificationService,
     @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
@@ -196,6 +200,29 @@ export class UsersController {
         updatedUser = await this.usersService.approveWorker(params.id, session);
       });
       session.endSession();
+
+      // Send in-app notification to client
+      await this.notifyService.create({
+        title: 'Account Approved!',
+        description: `Your worker account has been approved.`,
+        receiver: updatedUser._id,
+        type: 'ACCOUNT'
+      });
+
+      // Notify Client via Push Notification:
+      const notificationPayload: NotificationPayload = {
+        notification: {
+          title: 'Account Approved!',
+          body: `Your worker account has been approved.`
+        },
+        mobileData: {
+          type: 'ACCOUNT_APPROVED',
+          routeName: '/account',
+          metaData: '',
+          click_action: 'APP_NOTIFICATION_CLICK'
+        }
+      };
+      this.deviceService.sendNotification(updatedUser._id, notificationPayload);
 
       return new ResponseSuccess('COMMON.SUCCESS', updatedUser);
     } catch (error) {
