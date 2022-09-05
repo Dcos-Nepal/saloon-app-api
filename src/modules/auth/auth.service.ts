@@ -107,7 +107,7 @@ export class AuthService {
    * @returns Object
    */
   async validateLogin(email: string, password: string) {
-    const userFromDb = await this.userModel.findOne({ email: email });
+    const userFromDb = await this.userModel.findOne({ email: email, isDeleted: false });
 
     if (!userFromDb) {
       throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
