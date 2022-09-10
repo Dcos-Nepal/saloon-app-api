@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 import { randomStringCaps } from 'src/common/utils/random-string';
 import { User } from '../interfaces/user.interface';
 
@@ -77,7 +78,7 @@ export const WorkerSchema = new mongoose.Schema({
   }
 });
 
-export const UserDataSchema = new mongoose.Schema(
+export const UserDataSchema: Schema = new mongoose.Schema(
   {
     referralCode: { type: String, required: true, default: 'OC-00000' },
     referredBy: { type: mongoose.Types.ObjectId, required: false, ref: 'User', default: null }
@@ -89,14 +90,14 @@ export const UserDataSchema = new mongoose.Schema(
   }
 );
 
-export const UserSchema = new mongoose.Schema(
+export const UserSchema: Schema = new mongoose.Schema(
   {
     userCode: { type: String },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     fullName: { type: String },
-    email: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
+    email: { type: String, required: false },
+    phoneNumber: { type: String, required: false },
     address: {
       type: {
         street1: { type: String, required: true },

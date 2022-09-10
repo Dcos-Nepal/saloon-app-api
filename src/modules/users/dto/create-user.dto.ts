@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested, IsMongoId } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested, IsMongoId, ValidateIf } from 'class-validator';
 
 import { UserAddressDto } from './user-address.dto';
 import { IUserRole } from '../interfaces/user.interface';
@@ -30,23 +30,8 @@ export class CreateUserDto {
   roles: IUserRole[];
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsEmail({ message: 'Invalid email provided' })
-  email: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  @MinLength(8)
-  @MaxLength(60)
-  password: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  @Matches(/^\+(?:[0-9] ?){6,14}[0-9]$/, {
-    message: 'Invalid phone number provided'
-  })
   phoneNumber: string;
 
   @ApiPropertyOptional()
@@ -54,6 +39,18 @@ export class CreateUserDto {
   @ValidateNested()
   @Type(() => UserAddressDto)
   address: UserAddressDto;
+
+  @ApiProperty()
+  @IsOptional()
+  email: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(60)
+  @ValidateIf((o) => o.email !== '')
+  password: string;
 
   @ApiProperty()
   @IsNotEmpty()

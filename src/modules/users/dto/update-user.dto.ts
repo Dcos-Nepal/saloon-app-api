@@ -27,11 +27,7 @@ export class UpdateUserDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
-  @Matches(/[0-9]{10}/, {
-    message: 'Invalid phone number provided'
-  })
   phoneNumber?: string;
 
   @ApiPropertyOptional()
