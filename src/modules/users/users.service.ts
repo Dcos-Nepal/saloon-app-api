@@ -184,6 +184,33 @@ export class UsersService extends BaseService<User, IUser> {
         throw new HttpException('REGISTRATION.USER_ALREADY_REGISTERED', HttpStatus.FORBIDDEN);
       }
     } else {
+      if (newUser.firstName && newUser.lastName) {
+        /**
+         * Check if the user is referred by some other user
+         */
+        if (newUser?.userData?.referredBy) {
+          const referrer = await this.findByReferralCode(newUser.userData.referredBy);
+          if (referrer) {
+            newUser.userData.referredBy = referrer._id;
+          }
+        }
+
+        /**
+         * Continue with registration process
+         */
+
+        if (newUser.password) {
+          // Generating New Password
+          newUser.password = await bcrypt.hash(newUser.password, saltRounds);
+        }
+
+        // Creating User Model
+        const createdUser = new this.userModel(newUser);
+
+        // Saving and returning the user
+        return await createdUser.save({ session });
+      }
+
       throw new HttpException('REGISTRATION.MISSING_MANDATORY_PARAMETERS', HttpStatus.FORBIDDEN);
     }
   }

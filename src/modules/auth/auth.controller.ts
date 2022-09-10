@@ -18,6 +18,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { UserLogoutDto } from './dto/user-logout.dto';
 import { VerifyEmailService } from '../verify-email/verify-email.service';
 import { RegisterUserDto } from '../users/dto/register-user.dto';
+import { User } from '../users/interfaces/user.interface';
 
 @ApiTags('Authentication')
 @Controller({
@@ -39,21 +40,26 @@ export class AuthController {
   async register(@Body() registerUserDto: RegisterUserDto): Promise<IResponse> {
     try {
       let sent = false;
+      let newUser: User = null;
       const session = await this.connection.startSession();
 
       await session.withTransaction(async () => {
-        const newUser = await this.userService.registerUser(registerUserDto, session);
-        await this.verifyEmailService.createEmailToken(newUser.email, session);
+        newUser = await this.userService.registerUser(registerUserDto, session);
 
-        sent = await this.verifyEmailService.sendEmailVerification(newUser.email);
+        if (newUser?.email) {
+          await this.verifyEmailService.createEmailToken(newUser.email, session);
+          sent = await this.verifyEmailService.sendEmailVerification(newUser.email);
+        }
       });
       session.endSession();
 
       if (sent) {
         return new ResponseSuccess('REGISTRATION.USER_REGISTERED_SUCCESSFULLY');
+      } else if (newUser?.email) {
+        return new ResponseError('REGISTRATION.ERROR.MAIL_NOT_SENT');
       }
 
-      return new ResponseError('REGISTRATION.ERROR.MAIL_NOT_SENT');
+      return new ResponseSuccess('User registered successfully!');
     } catch (error) {
       this.logger.error('Error: ', error);
       return new ResponseError(error.message, error);

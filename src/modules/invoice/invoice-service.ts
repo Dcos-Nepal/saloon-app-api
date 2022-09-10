@@ -32,7 +32,7 @@ export class InvoiceService extends BaseService<Invoice, IInvoice> {
 
     await invoice.save({ session });
 
-    if (!(<User>invoice.invoiceFor).auth.email.verified) {
+    if (!(<User>invoice.invoiceFor).email || !(<User>invoice.invoiceFor).auth.email.verified) {
       return invoice;
     }
 
