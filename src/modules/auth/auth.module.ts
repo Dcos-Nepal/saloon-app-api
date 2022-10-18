@@ -15,11 +15,7 @@ import { UsersService } from '../users/users.service';
 import { AuthController } from './auth.controller';
 
 @Module({
-  imports: [
-    ConfigModule,
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-    HttpModule
-  ],
+  imports: [ConfigModule, MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), HttpModule],
   controllers: [AuthController],
   providers: [AuthService, UsersService, JWTService, JwtStrategy],
   exports: [AuthService, UsersService, JWTService, JwtStrategy]

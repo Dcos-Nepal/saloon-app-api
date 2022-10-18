@@ -4,7 +4,7 @@ import { IUserRole } from '../interfaces/user.interface';
 export class BaseUserModel {
   @IsString()
   fullName?: string;
-  
+
   @IsString()
   firstName: string;
 
@@ -36,7 +36,7 @@ export class BaseUserModel {
   referralCode?: string;
 
   @IsString()
-  referredBy? : string;
+  referredBy?: string;
 
   @IsString()
   createdBy?: string;

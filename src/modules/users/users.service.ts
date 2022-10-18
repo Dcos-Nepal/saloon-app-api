@@ -33,7 +33,7 @@ export class UsersService extends BaseService<User, IUser> {
   async update(id: string, body: Partial<IUser>, session: ClientSession, { authUser }: IServiceOptions) {
     if (authUser.roles.includes['ADMIN'] && authUser._id != id) throw new ForbiddenException();
 
-    let autoPass = '';
+    const autoPass = '';
     const user: User = await this.userModel.findById(id).select('-password -__v');
 
     if (!user?._id) {
