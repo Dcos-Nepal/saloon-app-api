@@ -6,7 +6,6 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { AppModule } from './app.module';
-import { RedisIoAdapter } from './common/redis-adapter';
 import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CustomValidationPipe } from './common/pipes/validation-pipe';
@@ -16,9 +15,6 @@ export async function createApp(): Promise<NestExpressApplication> {
 
   // Enable CORS
   app.enableCors();
-
-  // Uses Redis Adaptor
-  app.useWebSocketAdapter(new RedisIoAdapter((<any>app).getHttpServer()));
 
   // Enable Shutdown Hooks
   app.enableShutdownHooks();

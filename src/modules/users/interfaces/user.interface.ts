@@ -1,84 +1,21 @@
 import { Document } from 'mongoose';
-import { IBaseAddress } from 'src/common/interfaces';
-import { ISetting } from './setting.interface';
 
-export type IUserRole = 'ADMIN' | 'CLIENT' | 'WORKER';
-
-export interface IUserLocation {
-  type: string;
-  coordinates: number[];
-}
-
-export interface IUserDocument {
-  idCard?: {
-    url: string;
-    key: string;
-    type: 'ID_CARD';
-  };
-  cleaningCert?: {
-    url: string;
-    key: string;
-    type: 'VACCINATION_CERTIFICATE';
-  };
-  policeCert?: {
-    url: string;
-    key: string;
-    type: 'POLICE_CERTIFICATE';
-  };
-}
-
-export interface IClient {
-  type?: string;
-  referredBy?: string;
-  referralCode?: string;
-  location?: IUserLocation;
-  preferredTime?: string;
-  company?: string;
-  isCompanyNamePrimary?: boolean;
-}
-
-export interface IWorker {
-  type?: string;
-  isApproved?: boolean;
-  location?: IUserLocation;
-  services?: [string];
-  documents?: IUserDocument;
-  workingDays?: [string];
-  workingHours?: {
-    start: string;
-    end: string;
-  };
-  referredBy?: string;
-  referralCode?: string;
-}
+export type IUserRole = 'SUPER_ADMIN' | 'SHOP_ADMIN' | 'RECEPTIONIST' | 'CONSULTANT' | 'CUSTOMER';
 
 export interface IUser {
   _id?: string;
-  userCode?: string;
+  fullName?: string;
   firstName: string;
   lastName: string;
-  fullName?: string;
-  email: string;
   phoneNumber: string;
+  email: string;
   password: string;
+  memberCode: string;
   roles: IUserRole[];
-  address?: IBaseAddress;
-  avatar?: {
-    key: string;
-    url: string;
-  };
-  auth?: {
-    email: {
-      verified: boolean;
-    };
-    phoneNumber: {
-      verified: boolean;
-    };
-  };
+  shopId?: string;
   isDeleted?: boolean;
-  userData: IClient | IWorker;
-  settings?: ISetting;
-  lastOnline?: Date;
+  isActive?: boolean;
+  createdBy?: string;
 }
 
 export interface User extends IUser, Document {

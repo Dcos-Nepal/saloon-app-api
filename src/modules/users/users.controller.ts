@@ -2,43 +2,23 @@ import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
 import { ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query, Put, UploadedFile, Logger, Delete, BadRequestException } from '@nestjs/common';
-
-import { Roles } from '../../common/decorators/roles.decorator';
-import { CurrentUser } from 'src/common/decorators/current-user';
+import { Controller, Get, Post, Body, UseGuards, UseInterceptors, Param, Query, Put, Logger, Delete } from '@nestjs/common';
 
 import { LoggingInterceptor } from '../../common/interceptors/logging.interceptor';
 import { TransformInterceptor } from '../../common/interceptors/transform.interceptor';
 
-import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
-import { SelfOrAdminGuard } from '../auth/guards/permission.guard';
-
 import { UserDto } from './dto/user.dto';
-import { ProfileDto } from './dto/profile.dto';
-import { SettingsDto } from './dto/settings.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserPropertyDto } from './dto/create-property.dto';
-import { OtpVerifyCode } from 'src/common/modules/sms/OtpVerifyCode.dto';
-import { ResponseSuccess, ResponseError } from '../../common/dto/response.dto';
 
 import { IUser, User } from './interfaces/user.interface';
-import { Property } from '../properties/interfaces/property.interface';
 import { IResponse } from '../../common/interfaces/response.interface';
 
 import { UsersService } from './users.service';
-import SmsService from 'src/common/modules/sms/sms.service';
-import { VerifyEmailService } from '../verify-email/verify-email.service';
 
 import { randomString } from 'src/common/utils/random-string';
-import { JobsService } from '../jobs/jobs.service';
-import { VisitsService } from '../visits/visits.service';
-import { QuoteService } from '../quotes/quote.service';
-import { JobRequestService } from '../job-request/job-request.service';
-import { WorkerVerificationGuard } from '../auth/guards/worker-verification.guard';
-import { NotificationPayload, UserDeviceService } from '../devices/devices.service';
-import { NotificationService } from '../notifications/notification.service';
+import { ResponseSuccess, ResponseError } from '../../common/dto/response.dto';
+import { CurrentUser } from 'src/common/decorators/current-user';
 
 @ApiTags('users')
 @Controller({
@@ -50,22 +30,9 @@ import { NotificationService } from '../notifications/notification.service';
 export class UsersController {
   private logger: Logger = new Logger('UsersController');
 
-  constructor(
-    private readonly smsService: SmsService,
-    private readonly usersService: UsersService,
-    private readonly jobsService: JobsService,
-    private readonly visitsService: VisitsService,
-    private readonly quotesService: QuoteService,
-    private readonly jobRequestsService: JobRequestService,
-    private readonly verifyEmailService: VerifyEmailService,
-    private readonly deviceService: UserDeviceService,
-    private readonly notifyService: NotificationService,
-    @InjectConnection() private readonly connection: mongoose.Connection
-  ) {}
+  constructor(private readonly usersService: UsersService, @InjectConnection() private readonly connection: mongoose.Connection) {}
 
   @Get()
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
   async findAll(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
     let filter: mongoose.FilterQuery<User> = { _id: { $ne: authUser._id }, ...query };
 
@@ -78,15 +45,6 @@ export class UsersController {
     if (query.roles) filter.roles = { $in: query.roles.split(',') };
     if (query.createdBy) filter.createdBy = { $eq: query.createdBy };
 
-    if (query.nearBy && query.lat && query.lon) {
-      filter.userData.location = {
-        $near: {
-          $maxDistance: +query.nearBy || 1000,
-          $geometry: { type: 'Point', coordinates: [+query.lat, +query.lon] }
-        }
-      };
-    }
-
     try {
       const users = await this.usersService.findAll(filter, { authUser, query, fields: '-password' });
       return new ResponseSuccess('COMMON.SUCCESS', users);
@@ -96,13 +54,9 @@ export class UsersController {
   }
 
   @Post('')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard, WorkerVerificationGuard)
   async createUser(@CurrentUser() authUser, @Body() createUserDto: CreateUserDto): Promise<IResponse> {
     try {
       let autoPass = '';
-      let emailToken = false;
-      let newUser: User = null;
       const session = await this.connection.startSession();
 
       if (createUserDto?.password === createUserDto?.phoneNumber || !!createUserDto?.phoneNumber) {
@@ -115,20 +69,9 @@ export class UsersController {
         createUserDto.createdBy = authUser?._id || null;
 
         // Continue with registration
-        newUser = await this.usersService.registerUser(createUserDto, session);
-        emailToken = await this.verifyEmailService.createEmailToken(newUser.email, session);
+        await this.usersService.registerUser(createUserDto, session);
       });
       session.endSession();
-
-      if (newUser && emailToken) {
-        const sent = await this.verifyEmailService.sendEmailVerification(newUser.email, !!autoPass, autoPass);
-
-        if (sent) {
-          return new ResponseSuccess('CREATION.USER_CREATED_SUCCESSFULLY', { data: newUser });
-        }
-
-        return new ResponseError('CREATION.ERROR.MAIL_NOT_SENT');
-      }
     } catch (error) {
       this.logger.error('Error: ', error);
       return new ResponseError(error.message, error);
@@ -136,8 +79,6 @@ export class UsersController {
   }
 
   @Get('/summary')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
   async summary(@Query() query): Promise<IResponse> {
     const filter: mongoose.FilterQuery<User> = { isDeleted: false };
 
@@ -153,24 +94,10 @@ export class UsersController {
     }
   }
 
-  @Get('/recommendations')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
-  async recommendation(@Query() query): Promise<IResponse> {
-    try {
-      const recommendations = await this.usersService.getRecommendedWorkers(query);
-      return new ResponseSuccess('COMMON.SUCCESS', recommendations);
-    } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
-    }
-  }
-
   @Get('/me')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
   async currentUserProfile(@CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const user = await this.usersService.findById(authUser.id);
+      const user = await this.usersService.findById((authUser as any).id);
       return new ResponseSuccess('COMMON.SUCCESS', new UserDto(user));
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
@@ -178,8 +105,6 @@ export class UsersController {
   }
 
   @Get('/:id')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
   async findById(@Param() params): Promise<IResponse> {
     try {
       const user = await this.usersService.findById(params.id);
@@ -189,50 +114,7 @@ export class UsersController {
     }
   }
 
-  @Get('/:id/approve')
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  async approveWorker(@Param() params): Promise<IResponse> {
-    try {
-      const session = await this.connection.startSession();
-      let updatedUser: User;
-      await session.withTransaction(async () => {
-        updatedUser = await this.usersService.approveWorker(params.id, session);
-      });
-      session.endSession();
-
-      // Send in-app notification to client
-      await this.notifyService.create({
-        title: 'Account Approved!',
-        description: `Your worker account has been approved.`,
-        receiver: updatedUser._id,
-        type: 'ACCOUNT'
-      });
-
-      // Notify Client via Push Notification:
-      const notificationPayload: NotificationPayload = {
-        notification: {
-          title: 'Account Approved!',
-          body: `Your worker account has been approved.`
-        },
-        mobileData: {
-          type: 'ACCOUNT_APPROVED',
-          routeName: '/account',
-          metaData: '',
-          click_action: 'APP_NOTIFICATION_CLICK'
-        }
-      };
-      this.deviceService.sendNotification(updatedUser._id, notificationPayload);
-
-      return new ResponseSuccess('COMMON.SUCCESS', updatedUser);
-    } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
-    }
-  }
-
   @Put('/:id')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
   async update(@Body() body: UpdateUserDto, @Param() params, @CurrentUser() authUser: IUser): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
@@ -249,8 +131,6 @@ export class UsersController {
   }
 
   @Get('/:email')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
   async findByEmail(@Param() params): Promise<IResponse> {
     try {
       const user = await this.usersService.findByEmail(params.email);
@@ -260,46 +140,7 @@ export class UsersController {
     }
   }
 
-  @Post('/profile/update')
-  @UseGuards(SelfOrAdminGuard)
-  async updateProfile(@Body() profileDto: ProfileDto): Promise<IResponse> {
-    try {
-      const user = await this.usersService.updateProfile(profileDto);
-      return new ResponseSuccess('PROFILE.UPDATE_SUCCESS', new UserDto(user));
-    } catch (error) {
-      return new ResponseError('PROFILE.UPDATE_ERROR', error);
-    }
-  }
-
-  @Post('settings/update')
-  @UseGuards(SelfOrAdminGuard)
-  async updateSettings(@Body() settingsDto: SettingsDto): Promise<IResponse> {
-    try {
-      const user = await this.usersService.updateSettings(settingsDto);
-      return new ResponseSuccess('SETTINGS.UPDATE_SUCCESS', new UserDto(user));
-    } catch (error) {
-      return new ResponseError('SETTINGS.UPDATE_ERROR', error);
-    }
-  }
-
-  @Post('profile/avatar')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async addAvatar(@CurrentUser() authUser, @UploadedFile() file: Express.Multer.File) {
-    const session = await this.connection.startSession();
-    let updatedUser: User;
-    await session.withTransaction(async () => {
-      updatedUser = await this.usersService.addAvatar(authUser._id, file.buffer, file.originalname, session);
-    });
-    session.endSession();
-
-    return updatedUser;
-  }
-
   @Delete('/:userId')
-  @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'WORKER')
   async delete(@Param() param): Promise<IResponse> {
     try {
       let deletedUser: User;
@@ -307,100 +148,11 @@ export class UsersController {
 
       await session.withTransaction(async () => {
         deletedUser = await this.usersService.softDelete(param.userId, session);
-
-        // Marking the jobs to be as deleted.
-        await this.jobsService.updateMany({ jobFor: param.userId }, { isDeleted: true }, session);
-
-        // Marking the Visits to be deleted
-        await this.visitsService.updateMany({ visitFor: param.userId }, { isDeleted: true }, session);
-
-        // Marking the Quotes to be deleted
-        await this.quotesService.updateMany({ quoteFor: param.userId }, { isDeleted: true }, session);
-
-        // Marking the Job Requests to be deleted
-        await this.jobRequestsService.updateMany({ jobRequestFor: param.userId }, { isDeleted: true }, session);
       });
       session.endSession();
       return new ResponseSuccess('COMMON.SUCCESS', deletedUser);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
-    }
-  }
-
-  /**
-   * Property related endpoints
-   */
-
-  @Post('/:userId/properties')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
-  async createProperty(@Param() params, @Body() property: CreateUserPropertyDto, @CurrentUser() authUser: IUser): Promise<IResponse> {
-    try {
-      const session = await this.connection.startSession();
-      let newProperty: Property;
-      await session.withTransaction(async () => {
-        newProperty = await this.usersService.addProperty({ ...property, user: params.userId }, session, { authUser });
-      });
-      return new ResponseSuccess('PROPERTY_CREATED', newProperty);
-    } catch (error) {
-      return new ResponseError('PROPERTY_CREATE_ERROR', error);
-    }
-  }
-
-  @Get('/:id/properties')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
-  async findProperties(@Param() params, @Query() query): Promise<IResponse> {
-    try {
-      const properties = await this.usersService.findProperties(params.id, query);
-      return new ResponseSuccess('COMMON.SUCCESS', properties);
-    } catch (error) {
-      return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
-    }
-  }
-
-  /**
-   * Mobile Phone Verification endpoints
-   */
-  @Post('otp/send')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
-  async initiatePhoneNumberVerification(@CurrentUser() authUser: User): Promise<any> {
-    if (authUser.auth.phoneNumber.verified) {
-      throw new BadRequestException('Phone number already confirmed');
-    }
-
-    try {
-      const response = await this.smsService.initiatePhoneNumberVerification(authUser.phoneNumber);
-      return new ResponseSuccess('OTP.SEND.SUCCESS', response);
-    } catch (error) {
-      return new ResponseError(error?.message, error);
-    }
-  }
-
-  @Post('otp/verify')
-  @Roles('ADMIN', 'CLIENT', 'WORKER')
-  @UseGuards(RolesGuard)
-  async checkVerificationCode(@CurrentUser() authUser: User, @Body() verificationData: OtpVerifyCode): Promise<any> {
-    if (authUser.auth.phoneNumber.verified) {
-      throw new BadRequestException('Phone number already confirmed');
-    }
-
-    try {
-      let updatedUser: User;
-      const response = await this.smsService.confirmPhoneNumber(authUser.phoneNumber, verificationData.code);
-
-      if (response.status === 'approved') {
-        const session = await this.connection.startSession();
-        const userUpdate = { auth: { ...authUser.auth, phoneNumber: { verified: true } } };
-        await session.withTransaction(async () => {
-          updatedUser = await this.usersService.update(authUser._id, userUpdate, session, { authUser });
-        });
-        session.endSession();
-      }
-      return new ResponseSuccess('OTP.VERIFY.SUCCESS', updatedUser);
-    } catch (error) {
-      return new ResponseError(error?.message, error);
     }
   }
 }

@@ -1,13 +1,7 @@
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Matches, IsEmail, MinLength, MaxLength, IsArray, IsOptional, ValidateNested, IsMongoId, ValidateIf } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, Matches, MinLength, MaxLength, IsArray, IsOptional, ValidateIf } from 'class-validator';
 
-import { UserAddressDto } from './user-address.dto';
 import { IUserRole } from '../interfaces/user.interface';
-import { BaseUserModel } from '../models/base-user.model';
-import { UserType } from '../schemas/user.schema';
-import { ClientModel } from '../models/client-user.model';
-import { WorkerModel } from '../models/worker-user.model';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -34,12 +28,6 @@ export class CreateUserDto {
   @IsString()
   phoneNumber: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => UserAddressDto)
-  address: UserAddressDto;
-
   @ApiProperty()
   @IsOptional()
   email: string;
@@ -52,22 +40,6 @@ export class CreateUserDto {
   @ValidateIf((o) => o.email !== '')
   password: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @ValidateNested({ each: true })
-  @Type(() => BaseUserModel, {
-    discriminator: {
-      property: 'type',
-      subTypes: [
-        { value: ClientModel, name: UserType.CLIENT },
-        { value: WorkerModel, name: UserType.WORKER }
-      ]
-    },
-    keepDiscriminatorProperty: true
-  })
-  userData: ClientModel | WorkerModel;
-
   @IsOptional()
-  @IsMongoId()
   createdBy?: string;
 }

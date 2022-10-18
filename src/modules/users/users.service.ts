@@ -1,43 +1,22 @@
 import * as bcrypt from 'bcryptjs';
 import * as mongoose from 'mongoose';
-import { HttpService } from '@nestjs/axios';
 import { InjectModel } from '@nestjs/mongoose';
-import { AnyObject, ClientSession, Model, ObjectId } from 'mongoose';
+import { ClientSession, Model, ObjectId } from 'mongoose';
 import { Injectable, HttpStatus, HttpException, NotFoundException, Logger } from '@nestjs/common';
 
-import { ProfileDto } from './dto/profile.dto';
-import { SettingsDto } from './dto/settings.dto';
-import { RegisterUserDto } from './dto/register-user.dto';
-
 import { IServiceOptions } from 'src/common/interfaces';
-import { IUser, User, IWorker } from './interfaces/user.interface';
-
-import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
-
+import { IUser, User } from './interfaces/user.interface';
 import BaseService from 'src/base/base-service';
-import { ConfigService } from 'src/configs/config.service';
-import { PropertiesService } from '../properties/properties.service';
-import { IProperty, Property } from '../properties/interfaces/property.interface';
-import { PublicFilesService } from 'src/common/modules/files/public-files.service';
-import { formatAddress } from 'src/common/utils';
-import { VerifyEmailService } from '../verify-email/verify-email.service';
-import { randomString } from 'src/common/utils/random-string';
+import { ForbiddenException } from 'src/common/exceptions/forbidden.exception';
 
 // For Encryption
 const saltRounds = 10;
 
 @Injectable()
 export class UsersService extends BaseService<User, IUser> {
-  private logger: Logger = new Logger('UsersService');
+  // private logger: Logger = new Logger('UsersService');
 
-  constructor(
-    @InjectModel('User') private readonly userModel: Model<User>,
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    private readonly publicFilesService: PublicFilesService,
-    private readonly propertiesService: PropertiesService,
-    private readonly verifyEmailService: VerifyEmailService
-  ) {
+  constructor(@InjectModel('User') private readonly userModel: Model<User>) {
     super(userModel);
   }
 
@@ -63,67 +42,24 @@ export class UsersService extends BaseService<User, IUser> {
 
     // For Changed Email
     // If email has changed mark the auth.email.verified as false
-    if (body.email && body.email !== user.email) {
-      if (!user?.auth?.email?.verified) {
-        autoPass = randomString(10);
-      }
-
-      user.auth.email.verified = false;
-
-      // Send email verification email here
-      await this.verifyEmailService.createEmailToken(body.email, session);
-
-      // Sending email verification email
-      !!autoPass
-        ? await this.verifyEmailService.sendEmailVerification(body.email, !!autoPass, autoPass)
-        : await this.verifyEmailService.sendEmailVerification(body.email);
-    }
+    // if (body.email && body.email !== user.email) {
+    //   if (!user?.auth?.email?.verified) {
+    //     autoPass = randomString(10);
+    //   }
+    // }
 
     // For Changed Phone Number
     // If phone number has changed mark the auth.phoneNumber as false
-    if (body.phoneNumber && body.phoneNumber !== user.phoneNumber) {
-      user.auth.phoneNumber.verified = false;
-    }
+    // if (body.phoneNumber && body.phoneNumber !== user.phoneNumber) {
+    //   user.auth.phoneNumber.verified = false;
+    // }
 
     // Encrypt the password
     if (body.password || !!autoPass) {
       body.password = await bcrypt.hash(!!autoPass ? autoPass : body.password, 10);
     }
 
-    if (body.address) {
-      body.userData = { ...user.toJSON().userData, ...body.userData };
-      const coordinates = await this.getCoordinates(`${formatAddress(body.address)}`);
-      body.userData.location = {
-        coordinates,
-        type: 'Point'
-      };
-    }
-
     return await this.userModel.findOneAndUpdate({ _id: id }, { ...body }, { new: true, lean: true, session }).select('-password -__v');
-  }
-
-  /**
-   * Update User's Details
-   *
-   * @param id String
-   * @param session ClientSession
-   *
-   * @returns Promise<User>
-   */
-  async approveWorker(id: string, session: ClientSession) {
-    const user: User = await this.userModel.findById(id).select('-password -__v');
-
-    if (!user?._id) {
-      throw new NotFoundException("User you're trying to update is not found!");
-    }
-
-    if (user.userData.type === 'WORKER') {
-      user.userData = { ...user.toJSON().userData, isApproved: true };
-
-      return await this.userModel.findOneAndUpdate({ _id: id }, { ...user }, { new: true, lean: true, session }).select('-password -__v');
-    }
-
-    return user;
   }
 
   /**
@@ -152,19 +88,19 @@ export class UsersService extends BaseService<User, IUser> {
    * @param newUser RegisterUserDto
    * @returns Promise<User>
    */
-  async registerUser(newUser: RegisterUserDto, session: ClientSession): Promise<User> {
+  async registerUser(newUser: any, session: ClientSession): Promise<User> {
     if (this.isValidEmail(newUser.email) && newUser.password) {
       const userRegistered = await this.findByEmail(newUser.email);
       if (!userRegistered) {
         /**
          * Check if the user is referred by some other user
          */
-        if (newUser?.userData?.referredBy) {
-          const referrer = await this.findByReferralCode(newUser.userData.referredBy);
-          if (referrer) {
-            newUser.userData.referredBy = referrer._id;
-          }
-        }
+        // if (newUser?.userData?.referredBy) {
+        //   const referrer = await this.findByReferralCode(newUser.userData.referredBy);
+        //   if (referrer) {
+        //     newUser.userData.referredBy = referrer._id;
+        //   }
+        // }
 
         /**
          * Continue with registration process
@@ -178,8 +114,6 @@ export class UsersService extends BaseService<User, IUser> {
 
         // Saving and returning the user
         return await createdUser.save({ session });
-      } else if (!userRegistered.auth.email.verified) {
-        return userRegistered;
       } else {
         throw new HttpException('REGISTRATION.USER_ALREADY_REGISTERED', HttpStatus.FORBIDDEN);
       }
@@ -188,12 +122,12 @@ export class UsersService extends BaseService<User, IUser> {
         /**
          * Check if the user is referred by some other user
          */
-        if (newUser?.userData?.referredBy) {
-          const referrer = await this.findByReferralCode(newUser.userData.referredBy);
-          if (referrer) {
-            newUser.userData.referredBy = referrer._id;
-          }
-        }
+        // if (newUser?.userData?.referredBy) {
+        //   const referrer = await this.findByReferralCode(newUser.userData.referredBy);
+        //   if (referrer) {
+        //     newUser.userData.referredBy = referrer._id;
+        //   }
+        // }
 
         /**
          * Continue with registration process
@@ -233,60 +167,6 @@ export class UsersService extends BaseService<User, IUser> {
   }
 
   /**
-   * Updates User Profile Info
-   *
-   * @param profileDto ProfileDto
-   * @returns Promise<User>
-   */
-  async updateProfile(profileDto: ProfileDto): Promise<User> {
-    const userFromDb: User = await this.userModel.findOne({ email: profileDto.email });
-
-    if (!userFromDb) {
-      throw new HttpException('COMMON.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
-    }
-
-    if (profileDto.firstName) {
-      userFromDb.firstName = profileDto.firstName;
-    }
-
-    if (profileDto.lastName) {
-      userFromDb.lastName = profileDto.lastName;
-    }
-
-    if (profileDto.phoneNumber) {
-      userFromDb.phoneNumber = profileDto.phoneNumber;
-    }
-
-    await userFromDb.save();
-    return userFromDb;
-  }
-
-  /**
-   * Updates User's Settings
-   *
-   * @param settingsDto SettingsDto
-   * @returns Promise<User>
-   */
-  async updateSettings(settingsDto: SettingsDto): Promise<User> {
-    const userFromDb = await this.userModel.findOne({ email: settingsDto.email });
-
-    if (!userFromDb) {
-      throw new HttpException('COMMON.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
-    }
-
-    userFromDb.settings = userFromDb.settings;
-
-    for (const key in settingsDto) {
-      if (settingsDto.hasOwnProperty(key) && key != 'email') {
-        userFromDb.settings[key] = settingsDto[key];
-      }
-    }
-
-    await userFromDb.save();
-    return userFromDb;
-  }
-
-  /**
    * Validates User using its User id
    *
    * @param id ObjectId | string
@@ -307,85 +187,30 @@ export class UsersService extends BaseService<User, IUser> {
    * @param email String
    * @returns Promise<User>
    */
-  async markEmailAsConfirmed(email: string) {
-    const userFromDb: User = await this.userModel.findOne({ email: email });
+  // async markEmailAsConfirmed(email: string) {
+  //   const userFromDb: User = await this.userModel.findOne({ email: email });
 
-    if (!userFromDb.auth.email.verified) {
-      return this.userModel.updateOne({ email }, { auth: { email: { verified: true } } });
-    }
+  //   if (!userFromDb.auth.email.verified) {
+  //     return this.userModel.updateOne({ email }, { auth: { email: { verified: true } } });
+  //   }
 
-    return userFromDb;
-  }
+  //   return userFromDb;
+  // }
 
   /**
    * Marks Phone Number as confirmed/verified
    * @param userId String
    * @returns Promise<User>
    */
-  async markPhoneNumberAsConfirmed(userId: string) {
-    const userFromDb: User = await this.userModel.findOne({ _id: userId });
+  // async markPhoneNumberAsConfirmed(userId: string) {
+  //   const userFromDb: User = await this.userModel.findOne({ _id: userId });
 
-    if (!userFromDb.auth.email.verified) {
-      return this.userModel.updateOne({ _id: userId }, { auth: { phoneNumber: { verified: true } } });
-    }
+  //   if (!userFromDb.auth.email.verified) {
+  //     return this.userModel.updateOne({ _id: userId }, { auth: { phoneNumber: { verified: true } } });
+  //   }
 
-    return userFromDb;
-  }
-
-  /**
-   * Adds User Avatar
-   *
-   * @param userId String
-   * @param imageBuffer Buffer
-   * @param filename String
-   * @param session ClientSession
-   *
-   * @returns Promise<User>
-   */
-  async addAvatar(userId: string, fileBuffer: Buffer, filename: string, session: ClientSession): Promise<User> {
-    const user: User = await this.userModel.findById(userId);
-
-    if (!user?._id) {
-      throw new NotFoundException('User not found!');
-    }
-
-    this.logger.log('Uploading profile picture to AWS S3 bucket.');
-    const avatar = await this.publicFilesService.uploadFileToS3(fileBuffer, filename, 'image/png', false);
-
-    this.logger.log('Updating profile picture.');
-    user.avatar = {
-      key: avatar.Key,
-      url: avatar.Location
-    };
-
-    await user.save({ session });
-    this.logger.log('User profile picture updated.');
-
-    return user;
-  }
-
-  /**
-   * Find Propertied for given User
-   *
-   * @param userId String
-   * @param query AnyObject
-   * @returns Object
-   */
-  async findProperties(userId: string, query: AnyObject) {
-    return await this.propertiesService.findAll({ ...query, user: userId });
-  }
-
-  /**
-   * Add Property for given User
-   *
-   * @param property IProperty
-   * @param session ClientSession
-   * @param param IServiceOptions
-   * @returns Promise<Property>
-   */
-  async addProperty(property: IProperty, session: ClientSession, { authUser }: IServiceOptions): Promise<Property> {
-    return await this.propertiesService.create(property, session, { authUser });
-  }
+  //   return userFromDb;
+  // }
 
   /**
    * Generates sample UUID
@@ -434,125 +259,5 @@ export class UsersService extends BaseService<User, IUser> {
       clientCount,
       total: workerCount + clientCount
     };
-  }
-
-  /**
-   * Get coordinates of location
-   * @param location
-   * @returns coordinates
-   */
-  async getCoordinates(location: string) {
-    this.logger.log("Getting Coordinates using Client's address");
-    try {
-      const address = encodeURI(location);
-      const apiKey = this.configService.getGeoCoordinatesConfig().apiKey;
-      const locations: AnyObject = await this.httpService.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`).toPromise();
-
-      this.logger.log('Getting the decoded coordinates for the client');
-      return locations?.data?.results?.length
-        ? [+locations?.data?.results[0]?.geometry?.location?.lng, +locations?.data?.results[0]?.geometry?.location?.lat]
-        : [0, 0];
-    } catch (ex) {
-      this.logger.log("Error while decoding client's address to coordinates");
-      this.logger.error(ex);
-      return [0, 0];
-    }
-  }
-
-  /**
-   * Gets recommendations by filtering by availability and jobType
-   * @param recommendations
-   * @param jobType
-   * @param dateWithStartTime
-   * @param dateWithEndTime
-   * @returns workers
-   */
-  getRelevantRecommendedWorkers = (recommendations, jobType, dateWithStartTime, dateWithEndTime) => {
-    this.logger.log("Getting today's date");
-    const date = new Date();
-
-    this.logger.log('Filtering the recommendations');
-    return recommendations.filter((recommendation) => {
-      const userData: IWorker = recommendation.userData;
-
-      this.logger.log('Checks if the worker provides service requested in job');
-      if (jobType && !userData?.services?.includes(jobType)) {
-        return false;
-      }
-
-      this.logger.log("Preparing the Job Start Time with worker's availability");
-      const startTimes = userData.workingHours?.start?.split(':');
-      if (dateWithStartTime && (!startTimes || startTimes.length < 2 || dateWithStartTime < date.setHours(parseInt(startTimes[0]), parseInt(startTimes[1])))) {
-        return false;
-      }
-
-      this.logger.log("Preparing the Job End Time with worker's availability");
-      const endTimes = userData.workingHours?.end?.split(':');
-      if (dateWithEndTime && (!endTimes || endTimes.length < 2 || dateWithEndTime > date.setHours(parseInt(endTimes[0]), parseInt(endTimes[1])))) {
-        return false;
-      }
-
-      return true;
-    });
-  };
-
-  /**
-   * Provide workers recommendation
-   * @param query
-   * @returns workers
-   */
-  async getRecommendedWorkers(query: { jobType?: string; lat?: number; lon?: number; address?: string; startTime?: string; endTime?: string; limit?: number }) {
-    let recommendations = [];
-
-    this.logger.log('Filters for finding workers that are active');
-    const filters = {
-      roles: { $in: ['WORKER'] },
-      $or: [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }]
-    };
-
-    if (query.jobType) {
-      this.logger.log('Filtering workers providing specific service or Job Type');
-      filters['userData.services'] = query.jobType;
-    }
-
-    if ((query.lat && query.lon) || query.address) {
-      this.logger.log('Finding the recommended workers within the 40 KM of radius of Client');
-      recommendations = await this.model.aggregate([
-        {
-          $geoNear: {
-            near: {
-              type: 'Point',
-              coordinates: (query.lat && query.lon ? [+query.lon, +query.lat] : await this.getCoordinates(query.address)) as [number, number]
-            },
-            maxDistance: 40 * 1000, // 40x1000km = 40000KM,
-            spherical: true,
-            distanceField: 'distance',
-            query: filters
-          }
-        }
-      ]);
-    } else {
-      this.logger.log('Finding recommendations using the filters above');
-      recommendations = await this.model.find(filters);
-    }
-
-    this.logger.log('returns first 5 recommendations if filters are not provided');
-    if (!query.startTime && !query.endTime && !query.jobType) {
-      return recommendations.slice(0, query.limit || 5);
-    }
-
-    this.logger.log("Getting today's date");
-    const date = new Date();
-
-    this.logger.log('Preparing Jobs Start date and time');
-    const dateWithStartTime =
-      query.startTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.startTime.split(':')[0]), parseInt(query.startTime.split(':')[1])) : null;
-
-    this.logger.log('Preparing Jobs End date and time');
-    const dateWithEndTime =
-      query.endTime?.split(':')?.length > 1 ? date.setHours(parseInt(query.endTime.split(':')[0]), parseInt(query.endTime.split(':')[1])) : null;
-
-    this.logger.log('Getting relevant recommendations with the filters applied');
-    return this.getRelevantRecommendedWorkers(recommendations, query.jobType, dateWithStartTime, dateWithEndTime).slice(0, query.limit || 5);
   }
 }

@@ -1,137 +1,34 @@
-import * as mongoose from 'mongoose';
-import { Schema } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 import { randomStringCaps } from 'src/common/utils/random-string';
 import { User } from '../interfaces/user.interface';
 
 export enum UserType {
-  ADMIN = 'ADMIN',
-  CLIENT = 'CLIENT',
-  WORKER = 'WORKER',
-  MANAGER = 'MANAGER'
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  SHOP_ADMIN = 'SHOP_ADMIN',
+  RECEPTION = 'RECEPTION',
+  CONSULTANT = 'CONSULTANT',
+  CUSTOMER = 'CUSTOMER'
 }
 
-export const SettingsSchema = new mongoose.Schema(
+export const UserSchema: Schema = new Schema(
   {
-    id: String,
-    key: String,
-    value: String
-  },
-  { _id: false }
-);
-
-export const StaffSchema = new mongoose.Schema({}, { _id: false });
-
-const PointSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    enum: ['Point'],
-    default: 'Point'
-  },
-  coordinates: {
-    type: [Number],
-    default: [0.0, 0.0] //[lon, lat]
-  }
-});
-
-export const ClientSchema = new mongoose.Schema(
-  {
-    location: {
-      index: '2dsphere',
-      type: PointSchema
-    },
-    company: { type: String },
-    preferredTime: { type: String },
-    isCompanyNamePrimary: { type: Boolean, default: false }
-  },
-  { _id: false }
-);
-
-export const WorkerSchema = new mongoose.Schema({
-  isApproved: { type: Boolean, default: false },
-  location: {
-    index: '2dsphere',
-    type: PointSchema
-  },
-  documents: {
-    idCard: {
-      url: { type: String },
-      key: { type: String },
-      type: { type: String, enum: ['ID_CARD'], default: 'ID_CARD' }
-    },
-    cleaningCert: {
-      url: { type: String },
-      key: { type: String },
-      type: { type: String, enum: ['VACCINATION_CERTIFICATE'], default: 'VACCINATION_CERTIFICATE' }
-    },
-    policeCert: {
-      url: { type: String },
-      key: { type: String },
-      type: { type: String, enum: ['POLICE_CERTIFICATE'], default: 'POLICE_CERTIFICATE' }
-    }
-  },
-  jobType: { type: String, index: true },
-  services: [{ type: String }],
-  workingDays: [{ type: String }],
-  workingHours: {
-    start: { type: String },
-    end: { type: String }
-  }
-});
-
-export const UserDataSchema: Schema = new mongoose.Schema(
-  {
-    referralCode: { type: String, required: true, default: 'OC-00000' },
-    referredBy: { type: mongoose.Types.ObjectId, required: false, ref: 'User', default: null }
-  },
-  {
-    _id: false,
-    discriminatorKey: 'type',
-    toJSON: { getters: true }
-  }
-);
-
-export const UserSchema: Schema = new mongoose.Schema(
-  {
-    userCode: { type: String },
+    fullName: { type: String },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    fullName: { type: String },
-    email: { type: String, required: false },
     phoneNumber: { type: String, required: false },
-    address: {
-      type: {
-        street1: { type: String, required: true },
-        street2: { type: String },
-        city: { type: String, required: true },
-        state: { type: String, required: true },
-        postalCode: { type: Number, required: true },
-        country: { type: String, required: true }
-      }
-    },
-    avatar: {
-      key: { type: String },
-      url: { type: String }
-    },
+    email: { type: String, required: false },
     password: {
       type: String,
       required: function () {
         return this.email;
       }
     },
-    auth: {
-      email: {
-        verified: { type: Boolean, default: false }
-      },
-      phoneNumber: {
-        verified: { type: Boolean, default: false }
-      }
-    },
     roles: [{ type: String, required: true }],
-    settings: { type: SettingsSchema, required: false },
-    userData: UserDataSchema,
-    lastOnline: { type: Date },
-    isDeleted: { type: Boolean, default: false },
-    createdBy: { type: mongoose.Types.ObjectId, ref: 'User' }
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false },
+    memberCode: { type: String, required: false, default: null },
+    createdBy: { type: Types.ObjectId, ref: 'User' },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,
@@ -140,21 +37,16 @@ export const UserSchema: Schema = new mongoose.Schema(
   }
 );
 
-// Indexing
-WorkerSchema.index({ location: '2dsphere' });
-ClientSchema.index({ location: '2dsphere' });
-
 /**
  * Before saving new User
  */
 UserSchema.pre('save', function (this: User, next) {
-  this.userCode = `OCU-${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomStringCaps()}`;
   this.fullName = `${this.firstName} ${this.lastName}`;
 
-  if (this.roles.includes('CLIENT') || this.roles.includes('WORKER')) {
-    this.userData = this.userData ? this.userData : {};
-    this.userData.type = this.roles.includes('CLIENT') ? 'CLIENT' : 'WORKER';
-    this.userData.referralCode = `OC-${randomStringCaps()}`;
+  if (!this.roles.includes('SUPER_ADMIN') && this.roles.includes('SHOP_ADMIN')) {
+    if (this.roles.includes('CUSTOMER')) {
+      this.memberCode = `COS-${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomStringCaps()}`;
+    }
   }
   next();
 });
@@ -167,7 +59,3 @@ UserSchema.pre('findOneAndUpdate', async function (next) {
   this.set('fullName', `${this.getUpdate()['firstName'] || docToUpdate.firstName} ${this.getUpdate()['lastName'] || docToUpdate.lastName}`);
   next();
 });
-
-// Schema Discrimination
-(UserSchema.path('userData') as mongoose.Schema.Types.DocumentArray).discriminator(UserType.CLIENT, ClientSchema);
-(UserSchema.path('userData') as mongoose.Schema.Types.DocumentArray).discriminator(UserType.WORKER, WorkerSchema);

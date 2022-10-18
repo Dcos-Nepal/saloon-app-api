@@ -2,8 +2,8 @@ version: '3.4'
 
 services:
   dev:
-    container_name: orange_cleaning_api_dev
-    image: orange-cleaning-api-dev:1.0.0
+    container_name: saloon_api_dev
+    image: saloon-api-dev:1.0.0
     env_file:
       - .env
     build:
@@ -15,18 +15,15 @@ services:
       - 4000:4000
       - 9229:9229
     networks:
-      - orange-cleaning-network
+      - saloon-network
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    depends_on:
-      - mongo
-      - redis
     restart: unless-stopped
 
   prod:
-    container_name: orange_cleaning_api_prod
-    image: orange-cleaning-api-prod:1.0.0
+    container_name: saloon_api_prod
+    image: saloon-api-prod:1.0.0
     build:
       context: .
       target: production
@@ -36,43 +33,12 @@ services:
       - 3000:3000
       - 9229:9229
     networks:
-      - orange-cleaning-network
+      - saloon-network
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    depends_on:
-      - mongo
-      - redis
     restart: unless-stopped
 
-  mongo:
-    image: mongo
-    container_name: orange-cleaning-db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: orange-cleaning-dev-db
-    volumes:
-      - mongodata:/data/db
-    ports:
-      - 27017:27017
-    networks:
-      - orange-cleaning-network
-
-  redis:
-    image: redis:latest
-    container_name: orange-cleaning-redis
-    networks:
-      - orange-cleaning-network
-    volumes:
-      - red_data:/var/lib/redis
-    ports:
-      - '6379:6379'
-
-volumes:
-  mongodata: {}
-  red_data: {}
-
 networks:
-  orange-cleaning-network:
+  saloon-network:
     driver: bridge

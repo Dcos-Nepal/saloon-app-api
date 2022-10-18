@@ -1,7 +1,7 @@
 {
-  "name": "orange-cleaning-api-server",
+  "name": "saloon-app-api-server",
   "version": "0.0.1",
-  "description": "ERP for Orange Cleaning AU",
+  "description": "ERP for Saloon",
   "author": "Buddha's Team, Nepal",
   "private": true,
   "license": "MIT",
@@ -31,6 +31,7 @@
     "@nestjs/platform-express": "^8.2.4",
     "@nestjs/platform-socket.io": "^8.2.4",
     "@nestjs/schedule": "^1.1.0",
+    "@nestjs/serve-static": "^2.2.2",
     "@nestjs/swagger": "^5.1.5",
     "@nestjs/websockets": "^8.2.4",
     "@types/aws-sdk": "^2.7.0",
