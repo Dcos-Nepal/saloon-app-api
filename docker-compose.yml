@@ -12,7 +12,7 @@ services:
       dockerfile: ./Dockerfile
     command: npm run start:debug
     ports:
-      - 4000:4000
+      - 8000:8000
       - 9229:9229
     networks:
       - saloon-network
@@ -30,7 +30,7 @@ services:
       dockerfile: ./Dockerfile
     command: npm run start:prod
     ports:
-      - 3000:3000
+      - 9000:9000
       - 9229:9229
     networks:
       - saloon-network

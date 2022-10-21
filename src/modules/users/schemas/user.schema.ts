@@ -10,7 +10,7 @@ export enum UserType {
   CUSTOMER = 'CUSTOMER'
 }
 
-export const UserSchema: Schema = new Schema(
+export const UserSchema: any = new Schema(
   {
     fullName: { type: String },
     firstName: { type: String, required: true },

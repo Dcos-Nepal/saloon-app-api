@@ -4,7 +4,7 @@ export interface IAppointment {
   notes: string;
   type: string;
   status?: string;
-  services?: string;
+  services?: string[];
   dateTime: Date;
   isActive?: boolean;
   isDeleted?: boolean;

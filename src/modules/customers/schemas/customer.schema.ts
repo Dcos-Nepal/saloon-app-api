@@ -1,6 +1,8 @@
 import { Schema, Types } from 'mongoose';
+import { randomStringCaps } from 'src/common/utils/random-string';
+import { Customer } from '../interfaces/customer.interface';
 
-export const CustomerSchema = new Schema(
+export const CustomerSchema: any = new Schema(
   {
     fullName: { type: String },
     firstName: { type: String, required: true },
@@ -23,3 +25,21 @@ export const CustomerSchema = new Schema(
     toObject: { getters: true }
   }
 );
+
+/**
+ * Before saving new User
+ */
+ CustomerSchema.pre('save', function (this: Customer, next) {
+  this.fullName = `${this.firstName} ${this.lastName}`;
+  this.memberCode = `CUS-${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomStringCaps()}`;
+  next();
+});
+
+/**
+ * Before finding and updating the User
+ */
+ CustomerSchema.pre('findOneAndUpdate', async function (next) {
+  const docToUpdate = await this.model.findOne(this.getQuery());
+  this.set('fullName', `${this.getUpdate()['firstName'] || docToUpdate.firstName} ${this.getUpdate()['lastName'] || docToUpdate.lastName}`);
+  next();
+});

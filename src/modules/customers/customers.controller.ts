@@ -1,6 +1,9 @@
 import * as mongoose from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, Type, UseGuards } from '@nestjs/common';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { Res, Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, Type, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto, CustomerQueryDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -13,7 +16,6 @@ import { AuthGuard } from '@nestjs/passport';
   path: '/customers',
   version: '1'
 })
-@UseGuards(AuthGuard('jwt'))
 export class CustomersController {
   private logger: Logger;
 
@@ -22,7 +24,20 @@ export class CustomersController {
   }
 
   @Post()
-  async createNewCustomer(@Body() createCustomerDto: CreateCustomerDto) {
+  @UseInterceptors(FileInterceptor('photo', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('')
+        return cb(null, `${randomName}${extname(file.originalname)}`)
+      }
+    })
+  }))
+  @UseGuards(AuthGuard('jwt'))
+  async createNewCustomer(@UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
+    // Creating file path
+    createCustomerDto.photo = `${file.filename}`;
+
     try {
       const customer = await this.customersService.create(createCustomerDto);
 
@@ -37,7 +52,13 @@ export class CustomersController {
     }
   }
 
+  @Get('/avatars/:fileId')
+  async serveAvatar(@Param('fileId') fileId, @Res() res): Promise<any> {
+    res.sendFile(fileId, { root: 'uploads' });
+  }
+
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   async findAll(@Query() query: CustomerQueryDto) {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
@@ -62,6 +83,7 @@ export class CustomersController {
   }
 
   @Get('/:customerId')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('customerId') customerId: string) {
     try {
       const customer = await this.customersService.findOne({ _id: customerId });
@@ -78,6 +100,7 @@ export class CustomersController {
   }
 
   @Patch('/:customerId')
+  @UseGuards(AuthGuard('jwt'))
   async update(@Param('customerId') customerId: string, @Body() updateCustomerDto: UpdateCustomerDto) {
     try {
       const customer = await this.customersService.update(customerId, updateCustomerDto);
@@ -94,6 +117,7 @@ export class CustomersController {
   }
 
   @Delete('/:customerId')
+  @UseGuards(AuthGuard('jwt'))
   async remove(@Param('customerId') customerId: string) {
     try {
       const session = await this.connection.startSession();

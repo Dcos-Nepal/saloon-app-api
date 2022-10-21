@@ -48,7 +48,7 @@ export class AppointmentsController {
 
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
-      const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email'] }];
+      const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email', 'photo'] }];
 
       const appointmentResponse = await this.appointmentsService.findAll(filter, { query, toPopulate });
 
