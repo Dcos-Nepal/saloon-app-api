@@ -1,5 +1,6 @@
 import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
+import { Status } from '../interfaces/appointment.interface';
 
 export class CreateAppointmentDto {
   @IsOptional()
@@ -19,8 +20,7 @@ export class CreateAppointmentDto {
   services?: string[];
 
   @IsOptional()
-  @IsString()
-  status?: string;
+  status: Status;
 
   @IsOptional()
   dateTime?: Date;

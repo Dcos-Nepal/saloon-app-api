@@ -71,7 +71,22 @@ export class AppointmentsService extends BaseService<Appointment, IAppointment> 
   async updateAppointment(id: string, updateAppointmentDto: UpdateAppointmentDto) {
     this.logger.log(`Update: Update Appointment of id: ${id}`);
 
-    const updatedAppointment = await this.AppointmentModel.findOneAndUpdate({ _id: id }, { ...updateAppointmentDto }, { new: true }).exec();
+    const appointment: any = await this.AppointmentModel.findOne({ _id: id });
+
+    if (appointment.status.name !== updateAppointmentDto.status.name) {
+      appointment.history.push({
+        name: appointment.status.name,
+        date: appointment.status.date,
+        duration: updateAppointmentDto.status.duration
+      });
+      appointment.status = {
+        name: updateAppointmentDto.status.name,
+        date: new Date(),
+        duration: ''
+      }
+    }
+
+    const updatedAppointment = await appointment.save();
 
     if (!updatedAppointment) {
       throw new NotFoundException(`Appointment with ${id} is not found`);

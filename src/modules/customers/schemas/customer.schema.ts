@@ -2,22 +2,45 @@ import { Schema, Types } from 'mongoose';
 import { randomStringCaps } from 'src/common/utils/random-string';
 import { Customer } from '../interfaces/customer.interface';
 
+export enum PhotoType {
+  FRONT = 'FRONT',
+  RIGHT = 'RIGHT',
+  LEFT = 'LEFT',
+  BACK = 'BACK',
+  NORMAL = 'NORMAL'
+}
+
+const PhotoSchema: any = new Schema({
+  photo: {type: String, default: ''},
+  caption: {type: String, default: ''},
+  type:  {type: String, enum: PhotoType, default: PhotoType.NORMAL},
+  date: { type: Date, default: Date.now}
+});
+
 export const CustomerSchema: any = new Schema(
   {
-    fullName: { type: String },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    photo: { type: String, required: false },
-    address: { type: String, required: false },
-    phoneNumber: { type: String, required: false },
-    gender: { type: String, required: false },
-    dateOfBirth: { type: Date, required: false },
-    email: { type: String, required: false },
-    shopId: { type: Types.ObjectId, ref: 'Shop', required: false },
+    // Auto generated fields
+    fullName: { type: String, default: '-' },
     memberCode: { type: String, required: false, default: null },
-    referredBy: { type: String, required: false, default: null },
+
+    // Fillable fields
+    firstName: { type: String, default: '-'  },
+    lastName: { type: String, rdefault: '-'  },
+    photo: { type: String, default: '-' },
+    address: { type: String, required: false },
+    phoneNumber: { type: String, default: '-' },
+    gender: { type: String, required: false },
+    dateOfBirth: { type: Date, required: true },
+    email: { type: String, required: false },
+    referredBy: { type: String, default: '' },
+    photos: [{ type: PhotoSchema, required: false}],
+
+    // Boolean fields
     isActive: { type: Boolean, required: true, default: true },
-    isDeleted: { type: Boolean, required: true, default: false }
+    isDeleted: { type: Boolean, required: true, default: false },
+
+    // Refrenced fields
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false },
   },
   {
     timestamps: true,

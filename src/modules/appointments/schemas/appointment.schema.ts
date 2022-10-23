@@ -1,32 +1,49 @@
 import { Schema, Types } from 'mongoose';
 
 export enum AppointmentType {
-  SERVICE = 'SERVICE',
-  CONSULTATION = 'CONSULTATION'
+  TREATMENT = 'TREATMENT',
+  CONSULTATION = 'CONSULTATION',
+  MAINTAINANCE = 'MAINTAINANCE',
+  'FOLLOW UP' = 'FOLLOW UP'
 }
 
 export enum AppointmentStatus {
   WAITING = 'WAITING',
-  ON_GOING = 'ON_GOING',
+  IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED'
 }
 
+const StatusSchema: any = new Schema({
+  name: {
+    type: String,
+    enum: AppointmentStatus,
+    default: AppointmentStatus.WAITING,
+  },
+  date: { type: Date, default: Date.now },
+  duration: { type: String, default: ''}
+});
+
 export const AppointmentSchema: any = new Schema(
   {
-    customer: { type: Types.ObjectId, ref: 'Customer', required: false },
-    dateTime: { type: Date, required: true },
-    notes: { type: String, required: false },
-    services: [{ type: String, required: false }],
-    type: { type: String, required: true, default: AppointmentType.CONSULTATION },
-    status: { type: String, required: true, default: AppointmentStatus.WAITING },
-    interval: { type: String, required: true, default: 'Regular'},
-    session: { type: String, required: true, default: '0'},
-    isActive: { type: Boolean, required: true, default: true },
-    isDeleted: { type: Boolean, required: true, default: false }
-
-    // Regular
-    // Monthly
-    // In 15 Days
+    customer: { type: Types.ObjectId, ref: 'Customer' },
+    dateTime: { type: Date, default: Date.now },
+    notes: { type: String, default: '' },
+    services: [{ type: String, default: ''}],
+    type: {
+      type: String,
+      enum : AppointmentType,
+      default: AppointmentType.CONSULTATION
+    },
+    status: { type: StatusSchema, required: true, default: {
+      name: AppointmentStatus.WAITING,
+      date: new Date(),
+      duration: ''
+    }},
+    history: [{ type: StatusSchema }],
+    interval: { type: String, default: 'Regular'},
+    session: { type: String, default: '0'},
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,

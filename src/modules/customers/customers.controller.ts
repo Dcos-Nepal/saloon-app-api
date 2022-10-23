@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { Res, Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, Type, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Res, Controller, Post, Get, Query, Param, Patch, Delete, Body, Logger, Type, UseGuards, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto, CustomerQueryDto } from './dto/create-customer.dto';
@@ -11,6 +11,7 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 
 import { Customer } from './interfaces/customer.interface';
 import { AuthGuard } from '@nestjs/passport';
+import { FileUploadDto } from './dto/file-upload.dto';
 
 @Controller({
   path: '/customers',
@@ -49,6 +50,45 @@ export class CustomersController {
     } catch (error) {
       this.logger.error('Error: ', error);
       return new ResponseError('CUSTOMER.ERROR.CREATE_CUSTOMER_FAILED', error);
+    }
+  }
+
+  @Post('/:customerId/images')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('photos', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('')
+        return cb(null, `${randomName}${extname(file.originalname)}`)
+      }
+    })
+  }))
+  async uploadPhotos(@UploadedFiles() files, @Param('customerId') customerId: String, @Body() fileUploadDto: FileUploadDto) {
+    console.log(files)
+    try {
+      const customer: Customer = await this.customersService.findOne({ _id: customerId });
+
+      // Now prepare the customer object to include images
+      const prepFiles = files.map((file) => ({
+        photo: file.filename,
+        caption: fileUploadDto.caption,
+        type:  fileUploadDto.type,
+        date: Date.now
+      }));
+
+      const toUpdateCustomer = {...customer, photos: [prepFiles]};
+
+      await this.customersService.update(toUpdateCustomer._id, toUpdateCustomer)
+
+      if (toUpdateCustomer) {
+        return new ResponseSuccess('CUSTOMER.UPLOAD_IMAGES', customer);
+      } else {
+        return new ResponseError('CUSTOMER.ERROR.UPLOAD_IMAGES_CUSTOMER_FAILED');
+      }
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError('CUSTOMER.ERROR.UPLOAD_IMAGES_CUSTOMER_FAILED', error);
     }
   }
 
