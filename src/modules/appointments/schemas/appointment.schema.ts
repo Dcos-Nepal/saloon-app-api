@@ -19,14 +19,15 @@ const StatusSchema: any = new Schema({
     enum: AppointmentStatus,
     default: AppointmentStatus.WAITING,
   },
-  date: { type: Date, default: Date.now },
+  date: { type: Date, default: new Date() },
   duration: { type: String, default: ''}
 });
 
 export const AppointmentSchema: any = new Schema(
   {
     customer: { type: Types.ObjectId, ref: 'Customer' },
-    dateTime: { type: Date, default: Date.now },
+    appointmentDate: { type: String, default: '' },
+    appointmentTime: { type: String, default: '' },
     notes: { type: String, default: '' },
     services: [{ type: String, default: ''}],
     type: {

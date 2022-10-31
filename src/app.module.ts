@@ -14,6 +14,7 @@ import { ServicesModule } from './modules/services/service.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { BookingsModule } from './modules/bookings/bookings.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
     }),
 
     // Custom Modules
+    BookingsModule,
     UsersModule,
     AuthModule,
     ShopsModule,

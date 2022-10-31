@@ -55,7 +55,7 @@ export class CustomersController {
 
   @Post('/:customerId/images')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('photos', {
+  @UseInterceptors(FileInterceptor('photo', {
     storage: diskStorage({
       destination: './uploads',
       filename: (req, file, cb) => {
@@ -64,25 +64,25 @@ export class CustomersController {
       }
     })
   }))
-  async uploadPhotos(@UploadedFiles() files, @Param('customerId') customerId: String, @Body() fileUploadDto: FileUploadDto) {
-    console.log(files)
+  async uploadPhotos(@UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
+    console.log(file)
     try {
-      const customer: Customer = await this.customersService.findOne({ _id: customerId });
+      const customer: any = await this.customersService.findOne({ _id: customerId });
 
       // Now prepare the customer object to include images
-      const prepFiles = files.map((file) => ({
+      const prepFiles = {
         photo: file.filename,
         caption: fileUploadDto.caption,
         type:  fileUploadDto.type,
-        date: Date.now
-      }));
+        date: new Date()
+      };
 
-      const toUpdateCustomer = {...customer, photos: [prepFiles]};
+      const toUpdateCustomer = {...customer._doc, photos: [...customer._doc.photos, prepFiles]};
 
-      await this.customersService.update(toUpdateCustomer._id, toUpdateCustomer)
+      await this.customersService.update(customerId, toUpdateCustomer)
 
       if (toUpdateCustomer) {
-        return new ResponseSuccess('CUSTOMER.UPLOAD_IMAGES', customer);
+        return new ResponseSuccess('CUSTOMER.UPLOAD_IMAGES', toUpdateCustomer);
       } else {
         return new ResponseError('CUSTOMER.ERROR.UPLOAD_IMAGES_CUSTOMER_FAILED');
       }

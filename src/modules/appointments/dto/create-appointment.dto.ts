@@ -23,7 +23,10 @@ export class CreateAppointmentDto {
   status: Status;
 
   @IsOptional()
-  dateTime?: Date;
+  appointmentDate?: String;
+
+  @IsOptional()
+  appointmentTime?: String;
 
   @IsOptional()
   @IsBoolean()
@@ -46,4 +49,7 @@ export class AppointmentQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
+
+  @IsOptional()
+  appointmentDate?: string;
 }

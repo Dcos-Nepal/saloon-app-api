@@ -42,17 +42,28 @@ export class AppointmentsController {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
-      if (query.q) {
-        filter = { name: { $regex: query.q, $options: 'i' } };
+      if (query.appointmentDate) {
+        filter.appointmentDate = { $eq: query.appointmentDate};
       }
 
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
       const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email', 'photo'] }];
-
       const appointmentResponse = await this.appointmentsService.findAll(filter, { query, toPopulate });
 
+      let rowsCount = 0;
+      if (query.q) {
+        appointmentResponse.rows = appointmentResponse.rows.filter((row => {
+          if((row.customer as any).fullName.includes(query.q)) {
+            rowsCount += 1;
+            return true;
+          }
+          return false;
+        }));
+      }
+
       if (appointmentResponse) {
+        appointmentResponse.totalCount - rowsCount;
         return new ResponseSuccess('APPOINTMENT.FILTER', appointmentResponse);
       } else {
         return new ResponseError('APPOINTMENT.ERROR.FILTER_APPOINTMENT_FAILED');

@@ -14,7 +14,7 @@ const PhotoSchema: any = new Schema({
   photo: {type: String, default: ''},
   caption: {type: String, default: ''},
   type:  {type: String, enum: PhotoType, default: PhotoType.NORMAL},
-  date: { type: Date, default: Date.now}
+  date: { type: Date, default: new Date() }
 });
 
 export const CustomerSchema: any = new Schema(
