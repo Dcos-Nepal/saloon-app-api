@@ -1,7 +1,6 @@
 import * as mongoose from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { Res, Controller, Post, Get, Query, Param, Patch, Delete, Body, Logger, Type, UseGuards, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomersService } from './customers.service';
@@ -12,6 +11,7 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { Customer } from './interfaces/customer.interface';
 import { AuthGuard } from '@nestjs/passport';
 import { FileUploadDto } from './dto/file-upload.dto';
+import { Helper } from 'src/common/utils/helper';
 
 @Controller({
   path: '/customers',
@@ -27,12 +27,10 @@ export class CustomersController {
   @Post()
   @UseInterceptors(FileInterceptor('photo', {
     storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('')
-        return cb(null, `${randomName}${extname(file.originalname)}`)
-      }
-    })
+      destination: Helper.destinationPath,
+      filename: Helper.customFileName
+    }),
+    fileFilter: Helper.imageFileFilter
   }))
   @UseGuards(AuthGuard('jwt'))
   async createNewCustomer(@UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
@@ -57,15 +55,12 @@ export class CustomersController {
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FileInterceptor('photo', {
     storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('')
-        return cb(null, `${randomName}${extname(file.originalname)}`)
-      }
-    })
+      destination: Helper.destinationPath,
+      filename: Helper.customFileName
+    }),
+    fileFilter: Helper.imageFileFilter
   }))
   async uploadPhotos(@UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
-    console.log(file)
     try {
       const customer: any = await this.customersService.findOne({ _id: customerId });
 

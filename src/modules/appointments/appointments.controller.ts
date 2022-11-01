@@ -46,7 +46,14 @@ export class AppointmentsController {
         filter.appointmentDate = { $eq: query.appointmentDate};
       }
 
-      filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
+      if (query.status) {
+        filter['status.name'] = query.status.toString();
+      }
+
+      filter['$or'] = [{ isDeleted: false }];
+
+      // Remove unnecessary fields
+      delete filter.status;
 
       const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email', 'photo'] }];
       const appointmentResponse = await this.appointmentsService.findAll(filter, { query, toPopulate });

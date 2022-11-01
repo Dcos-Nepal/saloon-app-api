@@ -43,6 +43,10 @@ export class AppointmentQueryDto extends PaginationQueryDto {
   q?: string;
 
   @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
