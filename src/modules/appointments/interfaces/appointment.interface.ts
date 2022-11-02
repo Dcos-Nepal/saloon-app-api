@@ -17,6 +17,7 @@ export interface IAppointment {
   dateTime: Date;
   isActive?: boolean;
   isDeleted?: boolean;
+  createdDate?: string;
 }
 
 export interface Appointment extends IAppointment, Document {

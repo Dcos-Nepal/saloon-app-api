@@ -37,14 +37,15 @@ export const AppointmentSchema: any = new Schema(
     },
     status: { type: StatusSchema, required: true, default: {
       name: AppointmentStatus.WAITING,
-      date: new Date(),
+      date: new Date().toISOString(),
       duration: ''
     }},
     history: [{ type: StatusSchema }],
     interval: { type: String, default: 'Regular'},
     session: { type: String, default: '0'},
     isActive: { type: Boolean, default: true },
-    isDeleted: { type: Boolean, default: false }
+    isDeleted: { type: Boolean, default: false },
+    createdDate: [{ type: String, default: new Date()}],
   },
   {
     timestamps: true,

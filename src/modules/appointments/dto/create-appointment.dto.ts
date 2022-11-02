@@ -35,6 +35,9 @@ export class CreateAppointmentDto {
   @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
+
+  @IsOptional()
+  createdDate?: String;
 }
 
 export class AppointmentQueryDto extends PaginationQueryDto {
