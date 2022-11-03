@@ -20,7 +20,8 @@ const StatusSchema: any = new Schema({
     default: AppointmentStatus.WAITING,
   },
   date: { type: Date, default: new Date() },
-  duration: { type: String, default: ''}
+  duration: { type: String, default: ''},
+  reason: { type: String, default: '' }
 });
 
 export const AppointmentSchema: any = new Schema(
@@ -38,7 +39,8 @@ export const AppointmentSchema: any = new Schema(
     status: { type: StatusSchema, required: true, default: {
       name: AppointmentStatus.WAITING,
       date: new Date().toISOString(),
-      duration: ''
+      duration: '',
+      reason: ''
     }},
     history: [{ type: StatusSchema }],
     interval: { type: String, default: 'Regular'},

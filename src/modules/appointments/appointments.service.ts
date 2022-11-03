@@ -77,11 +77,13 @@ export class AppointmentsService extends BaseService<Appointment, IAppointment> 
       appointment.history.push({
         name: appointment.status.name,
         date: appointment.status.date,
-        duration: updateAppointmentDto.status.duration
+        duration: updateAppointmentDto.status.duration,
+        reason: ''
       });
       appointment.status = {
-        name: updateAppointmentDto.status.name,
         date: new Date(),
+        name: updateAppointmentDto.status.name,
+        reason: updateAppointmentDto.status.reason,
         duration: ''
       }
     }

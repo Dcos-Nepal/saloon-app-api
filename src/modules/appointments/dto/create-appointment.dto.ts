@@ -17,7 +17,7 @@ export class CreateAppointmentDto {
 
   @IsArray()
   @IsOptional()
-  services?: string[];
+  services?: String[];
 
   @IsOptional()
   status: Status;

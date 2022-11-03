@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { diskStorage } from 'multer';
-import { Res, Controller, Post, Get, Query, Param, Patch, Delete, Body, Logger, Type, UseGuards, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Res, Req, Controller, Post, Get, Query, Param, Patch, Delete, Body, Logger, Type, UseGuards, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto, CustomerQueryDto } from './dto/create-customer.dto';
@@ -33,8 +33,12 @@ export class CustomersController {
     fileFilter: Helper.imageFileFilter
   }))
   @UseGuards(AuthGuard('jwt'))
-  async createNewCustomer(@UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
-    // Creating file path
+  async createNewCustomer(@Req() req: any, @UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
+    if (!file || req.fileValidationError) {
+      return new ResponseError(`CREATE:CUSTOMER:ERROR: ${req.fileValidationError}`);
+    }
+    
+    // Else creating file path
     createCustomerDto.photo = `${file.filename}`;
 
     try {
@@ -60,7 +64,11 @@ export class CustomersController {
     }),
     fileFilter: Helper.imageFileFilter
   }))
-  async uploadPhotos(@UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
+  async uploadPhotos(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
+    if (!file || req.fileValidationError) {
+      return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
+    }
+    
     try {
       const customer: any = await this.customersService.findOne({ _id: customerId });
 

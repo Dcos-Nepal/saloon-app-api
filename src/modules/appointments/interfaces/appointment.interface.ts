@@ -4,6 +4,7 @@ export interface Status {
   name: AppointmentStatus;
   date: Date;
   duration?: string;
+  reason?: string;
 }
 
 export interface IAppointment {

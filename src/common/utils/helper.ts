@@ -19,10 +19,11 @@ export class Helper {
     }
 
     static imageFileFilter(req: any, file: any, callback: any) {
-      if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-        return callback(new Error('Only inage files are allowed!'), false);
+      if (!!file && !file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        req.fileValidationError = 'Only inage files are allowed!';
+        return callback(null, false);
       }
 
-      callback(null, true);
+      return callback(null, true);
     }
   }
