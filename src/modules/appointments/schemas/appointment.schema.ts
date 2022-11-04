@@ -1,16 +1,17 @@
 import { Schema, Types } from 'mongoose';
 
 export enum AppointmentType {
-  TREATMENT = 'TREATMENT',
-  CONSULTATION = 'CONSULTATION',
-  MAINTAINANCE = 'MAINTAINANCE',
+  'TREATMENT' = 'TREATMENT',
+  'CONSULTATION' = 'CONSULTATION',
+  'MAINTAINANCE' = 'MAINTAINANCE',
   'FOLLOW UP' = 'FOLLOW UP'
 }
 
 export enum AppointmentStatus {
   WAITING = 'WAITING',
   IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED'
+  COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED'
 }
 
 const StatusSchema: any = new Schema({
@@ -44,7 +45,7 @@ export const AppointmentSchema: any = new Schema(
     }},
     history: [{ type: StatusSchema }],
     interval: { type: String, default: 'Regular'},
-    session: { type: String, default: '0'},
+    session: { type: Number, default: 1},
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
     createdDate: [{ type: String, default: new Date()}],

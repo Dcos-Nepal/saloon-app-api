@@ -25,22 +25,8 @@ export class CustomersController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('photo', {
-    storage: diskStorage({
-      destination: Helper.destinationPath,
-      filename: Helper.customFileName
-    }),
-    fileFilter: Helper.imageFileFilter
-  }))
   @UseGuards(AuthGuard('jwt'))
-  async createNewCustomer(@Req() req: any, @UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
-    if (!file || req.fileValidationError) {
-      return new ResponseError(`CREATE:CUSTOMER:ERROR: ${req.fileValidationError}`);
-    }
-    
-    // Else creating file path
-    createCustomerDto.photo = `${file.filename}`;
-
+  async createNewCustomer(@Body() createCustomerDto: CreateCustomerDto) {
     try {
       const customer = await this.customersService.create(createCustomerDto);
 
@@ -55,7 +41,7 @@ export class CustomersController {
     }
   }
 
-  @Post('/:customerId/images')
+  @Post('/:customerId/avatar')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FileInterceptor('photo', {
     storage: diskStorage({
@@ -64,7 +50,38 @@ export class CustomersController {
     }),
     fileFilter: Helper.imageFileFilter
   }))
-  async uploadPhotos(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
+  async savePhoto(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string) {
+    if (!file || req.fileValidationError) {
+      return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
+    }
+    
+    try {
+      const customer: any = await this.customersService.findOne({ _id: customerId });
+      const toUpdateCustomer = {...customer._doc, photo: file.filename};
+
+      await this.customersService.update(customerId, toUpdateCustomer)
+
+      if (toUpdateCustomer) {
+        return new ResponseSuccess('CUSTOMER.PHOTO:SUCCESS', toUpdateCustomer);
+      } else {
+        return new ResponseError('CUSTOMER.ERROR.PHOTO_CUSTOMER_FAILED');
+      }
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError('CUSTOMER.ERROR.UPLOAD_IMAGES_CUSTOMER_FAILED', error);
+    }
+  }
+
+  @Post('/:customerId/images')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: Helper.destinationPath,
+      filename: Helper.customFileName
+    }),
+    fileFilter: Helper.imageFileFilter
+  }))
+  async uploadFile(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
     if (!file || req.fileValidationError) {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
     }
@@ -97,7 +114,17 @@ export class CustomersController {
 
   @Get('/avatars/:fileId')
   async serveAvatar(@Param('fileId') fileId, @Res() res): Promise<any> {
-    res.sendFile(fileId, { root: 'uploads' });
+    const fs = require('fs');
+    const p = require('path');
+    const dirPath = p.join(__dirname, '..', '..', '..', '/uploads/');
+    const path = dirPath + fileId;
+
+    if (fs.existsSync(path)) {
+      console.log('file exists');
+      return res.sendFile(fileId, { root: 'uploads' });
+    }
+
+    return res.sendStatus(404);
   }
 
   @Get()
