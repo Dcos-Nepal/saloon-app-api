@@ -39,11 +39,11 @@ export class AppointmentsController {
 
   @Get()
   async findAll(@Query() query: AppointmentQueryDto) {
-    let filter: mongoose.FilterQuery<Type> = { ...query };
+    const filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
       if (query.appointmentDate) {
-        filter.appointmentDate = { $eq: query.appointmentDate};
+        filter.appointmentDate = { $eq: query.appointmentDate };
       }
 
       if (query.status) {
@@ -60,13 +60,13 @@ export class AppointmentsController {
 
       let rowsCount = 0;
       if (query.q) {
-        appointmentResponse.rows = appointmentResponse.rows.filter((row => {
-          if((row.customer as any).fullName.includes(query.q)) {
+        appointmentResponse.rows = appointmentResponse.rows.filter((row) => {
+          if ((row.customer as any).fullName.includes(query.q)) {
             rowsCount += 1;
             return true;
           }
           return false;
-        }));
+        });
       }
 
       if (appointmentResponse) {

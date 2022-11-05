@@ -1,6 +1,5 @@
 import { Dictionary } from 'code-config/dist';
 import { Request } from 'express';
-import { Socket } from 'socket.io';
 import { Client } from './get-client';
 
 const getAddressFrom = (ip: string, headers: Client['headers']) => {
@@ -9,10 +8,6 @@ const getAddressFrom = (ip: string, headers: Client['headers']) => {
   return (!isProxy && ip) || headers['x-forwarded-for'] || headers['x-real-ip'] || ip;
 };
 
-export const getAddress = (client: Socket | Request): string => {
-  if (client instanceof Socket) {
-    return getAddressFrom(client.handshake.address, client.handshake.headers as Dictionary);
-  }
-
+export const getAddress = (client: Request): string => {
   return getAddressFrom(client.ip, client.headers as Dictionary);
 };

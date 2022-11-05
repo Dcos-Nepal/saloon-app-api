@@ -1,32 +1,26 @@
 import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
-import { Status } from '../interfaces/appointment.interface';
+import { OrderProduct, OrderStatus } from '../interfaces/order.interface';
 
-export class CreateAppointmentDto {
+export class CreateOrderDto {
   @IsOptional()
   @IsString()
   customer?: string;
 
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
   @IsString()
   @IsOptional()
-  type?: string;
+  orderDate: string;
 
   @IsArray()
   @IsOptional()
-  services?: string[];
+  products?: OrderProduct[];
 
   @IsOptional()
-  status: Status;
+  status: OrderStatus;
 
   @IsOptional()
-  appointmentDate?: string;
-
-  @IsOptional()
-  appointmentTime?: string;
+  @IsString()
+  orderNotes?: string;
 
   @IsOptional()
   @IsBoolean()
@@ -35,12 +29,9 @@ export class CreateAppointmentDto {
   @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
-
-  @IsOptional()
-  createdDate?: string;
 }
 
-export class AppointmentQueryDto extends PaginationQueryDto {
+export class OrderQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   q?: string;
@@ -58,5 +49,5 @@ export class AppointmentQueryDto extends PaginationQueryDto {
   isDeleted?: boolean;
 
   @IsOptional()
-  appointmentDate?: string;
+  orderDate?: string;
 }

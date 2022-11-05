@@ -5,9 +5,12 @@ import { validate } from 'class-validator';
 @Injectable()
 export class CustomValidationPipe implements PipeTransform<any> {
   async transform(value, metadata: ArgumentMetadata) {
-    if (!value) {
-      throw new BadRequestException('No request payload provided');
-    }
+    // Note:
+    // Careful about this Section
+    // This will always throw Bad Exception of the provided value is undefined or null
+    // if (!value) {
+    //   throw new BadRequestException('No request payload provided');
+    // }
 
     const { metatype } = metadata;
 

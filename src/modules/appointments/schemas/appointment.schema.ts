@@ -18,10 +18,10 @@ const StatusSchema: any = new Schema({
   name: {
     type: String,
     enum: AppointmentStatus,
-    default: AppointmentStatus.WAITING,
+    default: AppointmentStatus.WAITING
   },
   date: { type: Date, default: new Date() },
-  duration: { type: String, default: ''},
+  duration: { type: String, default: '' },
   reason: { type: String, default: '' }
 });
 
@@ -31,24 +31,28 @@ export const AppointmentSchema: any = new Schema(
     appointmentDate: { type: String, default: '' },
     appointmentTime: { type: String, default: '' },
     notes: { type: String, default: '' },
-    services: [{ type: String, default: ''}],
+    services: [{ type: String, default: '' }],
     type: {
       type: String,
-      enum : AppointmentType,
+      enum: AppointmentType,
       default: AppointmentType.CONSULTATION
     },
-    status: { type: StatusSchema, required: true, default: {
-      name: AppointmentStatus.WAITING,
-      date: new Date().toISOString(),
-      duration: '',
-      reason: ''
-    }},
+    status: {
+      type: StatusSchema,
+      required: true,
+      default: {
+        name: AppointmentStatus.WAITING,
+        date: new Date().toISOString(),
+        duration: '',
+        reason: ''
+      }
+    },
     history: [{ type: StatusSchema }],
-    interval: { type: String, default: 'Regular'},
-    session: { type: Number, default: 1},
+    interval: { type: String, default: 'Regular' },
+    session: { type: Number, default: 1 },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
-    createdDate: [{ type: String, default: new Date()}],
+    createdDate: [{ type: String, default: new Date() }]
   },
   {
     timestamps: true,

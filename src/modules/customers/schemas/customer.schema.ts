@@ -11,9 +11,9 @@ export enum PhotoType {
 }
 
 const PhotoSchema: any = new Schema({
-  photo: {type: String, default: ''},
-  caption: {type: String, default: ''},
-  type:  {type: String, enum: PhotoType, default: PhotoType.NORMAL},
+  photo: { type: String, default: '' },
+  caption: { type: String, default: '' },
+  type: { type: String, enum: PhotoType, default: PhotoType.NORMAL },
   date: { type: Date, default: new Date() }
 });
 
@@ -24,8 +24,8 @@ export const CustomerSchema: any = new Schema(
     memberCode: { type: String, required: false, default: null },
 
     // Fillable fields
-    firstName: { type: String, default: '-'  },
-    lastName: { type: String, rdefault: '-'  },
+    firstName: { type: String, default: '-' },
+    lastName: { type: String, rdefault: '-' },
     photo: { type: String, default: '-' },
     address: { type: String, required: false },
     phoneNumber: { type: String, default: '-' },
@@ -33,14 +33,14 @@ export const CustomerSchema: any = new Schema(
     dateOfBirth: { type: Date, required: true },
     email: { type: String, required: false },
     referredBy: { type: String, default: '' },
-    photos: [{ type: PhotoSchema, required: false}],
+    photos: [{ type: PhotoSchema, required: false }],
 
     // Boolean fields
     isActive: { type: Boolean, required: true, default: true },
     isDeleted: { type: Boolean, required: true, default: false },
 
     // Refrenced fields
-    shopId: { type: Types.ObjectId, ref: 'Shop', required: false },
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false }
   },
   {
     timestamps: true,
@@ -52,7 +52,7 @@ export const CustomerSchema: any = new Schema(
 /**
  * Before saving new User
  */
- CustomerSchema.pre('save', function (this: Customer, next) {
+CustomerSchema.pre('save', function (this: Customer, next) {
   this.fullName = `${this.firstName} ${this.lastName}`;
   this.memberCode = `CUS-${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}-${randomStringCaps()}`;
   next();
@@ -61,7 +61,7 @@ export const CustomerSchema: any = new Schema(
 /**
  * Before finding and updating the User
  */
- CustomerSchema.pre('findOneAndUpdate', async function (next) {
+CustomerSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());
   this.set('fullName', `${this.getUpdate()['firstName'] || docToUpdate.firstName} ${this.getUpdate()['lastName'] || docToUpdate.lastName}`);
   next();

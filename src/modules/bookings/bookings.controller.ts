@@ -22,14 +22,11 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class BookingsController {
-  constructor(
-    @InjectConnection() private readonly connection: mongoose.Connection,
-    private readonly visitsService: BookingsService
-  ) {}
+  constructor(@InjectConnection() private readonly connection: mongoose.Connection, private readonly visitsService: BookingsService) {}
 
   @Get()
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
-    let filter: mongoose.FilterQuery<Booking> = { ...query };
+    const filter: mongoose.FilterQuery<Booking> = { ...query };
     // Get only not deleted visits
     filter.isDeleted = false;
 

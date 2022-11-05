@@ -15,6 +15,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { BookingsModule } from './modules/bookings/bookings.module';
     ServicesModule,
     ProductsModule,
     CustomersModule,
-    AppointmentsModule
+    AppointmentsModule,
+    OrdersModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService]

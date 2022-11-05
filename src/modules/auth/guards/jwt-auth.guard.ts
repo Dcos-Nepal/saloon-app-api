@@ -1,7 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject, forwardRef } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Socket } from 'socket.io';
 import { UsersService } from 'src/modules/users/users.service';
 import { Client, getClient } from 'src/common/utils/get-client';
 
@@ -84,10 +83,6 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   throwException(ctx: ExecutionContext, message: string) {
-    if (ctx.getType() === 'ws') {
-      ctx.switchToWs().getClient<Socket>().disconnect(true);
-    }
-
     throw new UnauthorizedException(message);
   }
 

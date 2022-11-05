@@ -1,7 +1,9 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as mongoose from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { diskStorage } from 'multer';
-import { Res, Req, Controller, Post, Get, Query, Param, Patch, Delete, Body, Logger, Type, UseGuards, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Res, Req, Controller, Post, Get, Query, Param, Patch, Delete, Body, Logger, Type, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto, CustomerQueryDto } from './dto/create-customer.dto';
@@ -26,7 +28,23 @@ export class CustomersController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  async createNewCustomer(@Body() createCustomerDto: CreateCustomerDto) {
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: Helper.destinationPath,
+        filename: Helper.customFileName
+      }),
+      fileFilter: Helper.imageFileFilter
+    })
+  )
+  async createNewCustomer(@Req() req: any, @UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
+    if (!!req?.fileValidationError) {
+      return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
+    }
+
+    // Add photo the the data
+    createCustomerDto.photo = file.filename;
+
     try {
       const customer = await this.customersService.create(createCustomerDto);
 
@@ -43,23 +61,25 @@ export class CustomersController {
 
   @Post('/:customerId/avatar')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('photo', {
-    storage: diskStorage({
-      destination: Helper.destinationPath,
-      filename: Helper.customFileName
-    }),
-    fileFilter: Helper.imageFileFilter
-  }))
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: Helper.destinationPath,
+        filename: Helper.customFileName
+      }),
+      fileFilter: Helper.imageFileFilter
+    })
+  )
   async savePhoto(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string) {
     if (!file || req.fileValidationError) {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
     }
-    
+
     try {
       const customer: any = await this.customersService.findOne({ _id: customerId });
-      const toUpdateCustomer = {...customer._doc, photo: file.filename};
+      const toUpdateCustomer = { ...customer._doc, photo: file.filename };
 
-      await this.customersService.update(customerId, toUpdateCustomer)
+      await this.customersService.update(customerId, toUpdateCustomer);
 
       if (toUpdateCustomer) {
         return new ResponseSuccess('CUSTOMER.PHOTO:SUCCESS', toUpdateCustomer);
@@ -74,18 +94,20 @@ export class CustomersController {
 
   @Post('/:customerId/images')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: Helper.destinationPath,
-      filename: Helper.customFileName
-    }),
-    fileFilter: Helper.imageFileFilter
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: Helper.destinationPath,
+        filename: Helper.customFileName
+      }),
+      fileFilter: Helper.imageFileFilter
+    })
+  )
   async uploadFile(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
     if (!file || req.fileValidationError) {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
     }
-    
+
     try {
       const customer: any = await this.customersService.findOne({ _id: customerId });
 
@@ -93,13 +115,13 @@ export class CustomersController {
       const prepFiles = {
         photo: file.filename,
         caption: fileUploadDto.caption,
-        type:  fileUploadDto.type,
+        type: fileUploadDto.type,
         date: new Date()
       };
 
-      const toUpdateCustomer = {...customer._doc, photos: [...customer._doc.photos, prepFiles]};
+      const toUpdateCustomer = { ...customer._doc, photos: [...customer._doc.photos, prepFiles] };
 
-      await this.customersService.update(customerId, toUpdateCustomer)
+      await this.customersService.update(customerId, toUpdateCustomer);
 
       if (toUpdateCustomer) {
         return new ResponseSuccess('CUSTOMER.UPLOAD_IMAGES', toUpdateCustomer);
@@ -114,12 +136,10 @@ export class CustomersController {
 
   @Get('/avatars/:fileId')
   async serveAvatar(@Param('fileId') fileId, @Res() res): Promise<any> {
-    const fs = require('fs');
-    const p = require('path');
-    const dirPath = p.join(__dirname, '..', '..', '..', '/uploads/');
-    const path = dirPath + fileId;
+    const dirPath = path.join(__dirname, '..', '..', '..', '/uploads/');
+    const filePath = dirPath + fileId;
 
-    if (fs.existsSync(path)) {
+    if (fs.existsSync(filePath)) {
       console.log('file exists');
       return res.sendFile(fileId, { root: 'uploads' });
     }
@@ -171,7 +191,23 @@ export class CustomersController {
 
   @Patch('/:customerId')
   @UseGuards(AuthGuard('jwt'))
-  async update(@Param('customerId') customerId: string, @Body() updateCustomerDto: UpdateCustomerDto) {
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: Helper.destinationPath,
+        filename: Helper.customFileName
+      }),
+      fileFilter: Helper.imageFileFilter
+    })
+  )
+  async update(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string, @Body() updateCustomerDto: UpdateCustomerDto) {
+    if (!!req?.fileValidationError) {
+      return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
+    }
+
+    // Update photo the data
+    updateCustomerDto.photo = file.filename;
+
     try {
       const customer = await this.customersService.update(customerId, updateCustomerDto);
 

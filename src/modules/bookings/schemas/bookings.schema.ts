@@ -10,7 +10,7 @@ export const BookingSchema: any = new Schema(
     bookingDate: { type: Date, required: true },
     type: {
       type: String,
-      enum : AppointmentType,
+      enum: AppointmentType,
       default: AppointmentType.CONSULTATION
     },
     status: {

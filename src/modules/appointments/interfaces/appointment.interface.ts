@@ -1,4 +1,4 @@
-import { AppointmentStatus } from "../schemas/appointment.schema";
+import { AppointmentStatus } from '../schemas/appointment.schema';
 
 export interface Status {
   name: AppointmentStatus;

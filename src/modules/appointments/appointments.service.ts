@@ -85,7 +85,7 @@ export class AppointmentsService extends BaseService<Appointment, IAppointment> 
         name: updateAppointmentDto.status.name,
         reason: updateAppointmentDto.status.reason,
         duration: ''
-      }
+      };
     }
 
     const updatedAppointment = await appointment.save();
