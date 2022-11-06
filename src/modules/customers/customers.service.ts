@@ -74,15 +74,12 @@ export class CustomersService extends BaseService<Customer, ICustomer> {
   async update(id: string, updateCustomerDto: UpdateCustomerDto) {
     this.logger.log(`Update: Update Customer of id: ${id}`);
     const existingCustomer = await this.customerModel.findById(id);
-    const updatedCustomer = await this.customerModel
+    const updatedCus = await this.customerModel
       .findOneAndUpdate(
         { _id: id },
-        {
-          ...updateCustomerDto
-        },
+        { ...updateCustomerDto },
         { new: true }
-      )
-      .exec();
+      ).exec();
 
     // Let's delete the previous file if the photo is changed
     if (updateCustomerDto.photo && updateCustomerDto.photo !== existingCustomer.photo) {
@@ -98,11 +95,46 @@ export class CustomersService extends BaseService<Customer, ICustomer> {
       }
     }
 
-    if (!updatedCustomer) {
+    if (!updatedCus) {
       throw new NotFoundException(`Customer with ${id} is not found`);
     }
     this.logger.log(`Update: updated Customer of id ${id} successfully`);
 
-    return updatedCustomer;
+    return updatedCus;
+  }
+
+  /**
+   * Delete Client's File
+   * @param id String
+   * @param fileId String
+   * @param updateCustomerDto UpdateCustomerDto
+   * @returns UpdateCustomerDto
+   */
+  async deleteClientFile(id: string, fileId: string, updateCustomerDto: UpdateCustomerDto) {
+    this.logger.log(`Delete: Update customer of id: ${id}`);
+    const updatedCus = await this.customerModel
+      .updateOne(
+        { _id: id },
+        { ...updateCustomerDto },
+        { new: true }
+      ).exec();
+
+    // Let's delete the file if the file exists
+    if (fileId) {
+      const dirPath = path.join(__dirname, '..', '..', '..', '/uploads/');
+      const filePath = dirPath + fileId;
+
+      if (fs.existsSync(filePath)) {
+        await fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(err);
+          }
+        });
+      }
+    }
+
+    this.logger.log(`Update: Removed Client's file of id ${id} successfully`);
+
+    return updatedCus;
   }
 }

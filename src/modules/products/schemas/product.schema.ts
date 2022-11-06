@@ -11,6 +11,7 @@ export const ProductSchema: any = new Schema(
       }
     },
     description: { type: String },
+    rate: { type: String },
     isActive: { type: Boolean, required: true, default: true },
     isDeleted: { type: Boolean, required: true, default: false }
   },

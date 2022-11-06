@@ -43,7 +43,7 @@ class BaseService<EntityModel, Entity> {
    */
   async findOne(query: FilterQuery<Entity>, options?: IServiceOptions): Promise<EntityModel> {
     let response = null;
-    const findOnePromise = this.model.findOne(query, options?.fields || '');
+    const findOnePromise = this.model.findOne(query, options?.fields || '').lean();
 
     if (options?.toPopulate) {
       response = await findOnePromise.populate(options.toPopulate);

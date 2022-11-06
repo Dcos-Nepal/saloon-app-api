@@ -42,8 +42,10 @@ export class CustomersController {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
     }
 
-    // Add photo the the data
-    createCustomerDto.photo = file.filename;
+    if (file) {
+      // Add photo the the data
+      createCustomerDto.photo = file.filename;
+    }
 
     try {
       const customer = await this.customersService.create(createCustomerDto);
@@ -71,13 +73,17 @@ export class CustomersController {
     })
   )
   async savePhoto(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string) {
-    if (!file || req.fileValidationError) {
+    if (file && req.fileValidationError) {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
+    }
+
+    if (!file) {
+      return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: No File/Photo provided`);
     }
 
     try {
       const customer: any = await this.customersService.findOne({ _id: customerId });
-      const toUpdateCustomer = { ...customer._doc, photo: file.filename };
+      const toUpdateCustomer = { ...customer, photo: file.filename };
 
       await this.customersService.update(customerId, toUpdateCustomer);
 
@@ -119,7 +125,7 @@ export class CustomersController {
         date: new Date()
       };
 
-      const toUpdateCustomer = { ...customer._doc, photos: [...customer._doc.photos, prepFiles] };
+      const toUpdateCustomer = { ...customer, photos: [...customer.photos, prepFiles] };
 
       await this.customersService.update(customerId, toUpdateCustomer);
 
@@ -131,6 +137,27 @@ export class CustomersController {
     } catch (error) {
       this.logger.error('Error: ', error);
       return new ResponseError('CUSTOMER.ERROR.UPLOAD_IMAGES_CUSTOMER_FAILED', error);
+    }
+  }
+
+  @Delete('/:customerId/images/:fileId')
+  @UseGuards(AuthGuard('jwt'))
+  async removeClientPhoto(@Param('customerId') customerId: string, @Param('fileId') fileId: string) {
+    try {
+      const customer: any = await this.customersService.findOne({ _id: customerId });
+      const photos = customer.photos.filter((photo) => photo.photo !== fileId) || [];
+      const toUpdateCustomer = { ...customer, photos };
+
+      await this.customersService.deleteClientFile(customerId, fileId, toUpdateCustomer);
+
+      if (toUpdateCustomer) {
+        return new ResponseSuccess('CUSTOMER.DELETE.IMAGES', toUpdateCustomer);
+      } else {
+        return new ResponseError('CUSTOMER.ERROR.DELETE.IMAGES_FAILED');
+      }
+    } catch (error) {
+      this.logger.error('Error: ', error);
+      return new ResponseError('CUSTOMER.ERROR.DELETE.IMAGES_FAILED', error);
     }
   }
 

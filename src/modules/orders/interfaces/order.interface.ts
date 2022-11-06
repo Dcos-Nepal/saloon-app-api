@@ -7,16 +7,18 @@ export interface OrderStatus {
 }
 
 export interface OrderProduct {
-  product: any;
-  rate: number;
-  quantitiy: number;
+  name: string;
+  description: string;
+  unitPrice: number;
+  quantity: number;
   notes: string;
 }
 
 export interface IOrder {
   _id?: string;
+  title: string;
   customer: string;
-  orderNotes: string;
+  notes: string;
   status: OrderStatus;
   prevStatus?: OrderStatus[];
   products?: OrderProduct[];

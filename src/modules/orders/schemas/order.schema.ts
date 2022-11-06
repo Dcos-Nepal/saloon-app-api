@@ -10,9 +10,10 @@ export enum OrderStatuses {
 }
 
 const OrderProduct: any = new Schema({
-  name: { type: Types.ObjectId, ref: 'Product' },
-  rate: { type: Number, default: new Date() },
-  quantity: { type: Number, default: new Date() },
+  name: { type: String, default: '' },
+  description: { type: String },
+  unitPrice: { type: Number, default: 0 },
+  quantity: { type: Number, default: 0 },
   notes: { type: String, default: '' }
 });
 
@@ -28,6 +29,7 @@ const StatusSchema: any = new Schema({
 
 export const OrderSchema: any = new Schema(
   {
+    title: { type: String, default: ''},
     customer: { type: Types.ObjectId, ref: 'Customer' },
     status: {
       type: StatusSchema,
@@ -40,7 +42,7 @@ export const OrderSchema: any = new Schema(
     },
     products: [{ type: OrderProduct }],
     prevStatus: [{ type: StatusSchema }],
-    orderNotes: { type: String, default: '' },
+    notes: { type: String, default: '' },
     orderDate: { type: String, default: new Date() },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false }
