@@ -74,12 +74,7 @@ export class CustomersService extends BaseService<Customer, ICustomer> {
   async update(id: string, updateCustomerDto: UpdateCustomerDto) {
     this.logger.log(`Update: Update Customer of id: ${id}`);
     const existingCustomer = await this.customerModel.findById(id);
-    const updatedCus = await this.customerModel
-      .findOneAndUpdate(
-        { _id: id },
-        { ...updateCustomerDto },
-        { new: true }
-      ).exec();
+    const updatedCus = await this.customerModel.findOneAndUpdate({ _id: id }, { ...updateCustomerDto }, { new: true }).exec();
 
     // Let's delete the previous file if the photo is changed
     if (updateCustomerDto.photo && updateCustomerDto.photo !== existingCustomer.photo) {
@@ -112,12 +107,7 @@ export class CustomersService extends BaseService<Customer, ICustomer> {
    */
   async deleteClientFile(id: string, fileId: string, updateCustomerDto: UpdateCustomerDto) {
     this.logger.log(`Delete: Update customer of id: ${id}`);
-    const updatedCus = await this.customerModel
-      .updateOne(
-        { _id: id },
-        { ...updateCustomerDto },
-        { new: true }
-      ).exec();
+    const updatedCus = await this.customerModel.updateOne({ _id: id }, { ...updateCustomerDto }, { new: true }).exec();
 
     // Let's delete the file if the file exists
     if (fileId) {
