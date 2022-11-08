@@ -53,24 +53,24 @@ export async function createApp(): Promise<NestExpressApplication> {
   // /* Start Security */
   app.use(helmet());
 
-  app.use(
-    rateLimit({
-      windowMs: 5 * 60 * 1000, // 5 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
-      message: 'Too many requests from this IP, please try again later'
-    })
-  );
+  // app.use(
+  //   rateLimit({
+  //     windowMs: 5 * 60 * 1000, // 5 minutes
+  //     max: 100, // limit each IP to 100 requests per windowMs
+  //     message: 'Too many requests from this IP, please try again later'
+  //   })
+  // );
 
-  const requestLimiter = (duration: number, maxRequest: number, message: string) =>
-    rateLimit({
-      windowMs: duration * 60 * 1000, // x(minute) hour window
-      max: maxRequest, // start blocking after x requests
-      message: message
-    });
+  // const requestLimiter = (duration: number, maxRequest: number, message: string) =>
+  //   rateLimit({
+  //     windowMs: duration * 60 * 1000, // x(minute) hour window
+  //     max: maxRequest, // start blocking after x requests
+  //     message: message
+  //   });
 
   // Apply request limit to user login/register API endpoint
-  app.use('/auth/login', requestLimiter(5, 15, 'Too many login attempts from this IP, please try again after 5 minutes'));
-  app.use('/auth/register', requestLimiter(20, 10, 'Too many register attempts from this IP, please try again after 20 minutes'));
+  // app.use('/auth/login', requestLimiter(5, 15, 'Too many login attempts from this IP, please try again after 5 minutes'));
+  // app.use('/auth/register', requestLimiter(20, 10, 'Too many register attempts from this IP, please try again after 20 minutes'));
   // /** End Security **/
   // Swagger Documentation
   const options = new DocumentBuilder()
