@@ -12,6 +12,8 @@ export interface ICustomer {
   referredBy?: string;
   email?: string;
   shopId?: string;
+  notes?: string;
+  tags?: string;
   memberCode?: string;
   isActive?: boolean;
   isDeleted?: boolean;

@@ -10,6 +10,13 @@ export enum PhotoType {
   NORMAL = 'NORMAL'
 }
 
+export enum CustomerTagTypes {
+  'VIP' = 'VIP',
+  'MONTHLY' = 'MONTHLY',
+  'REGULAR' = 'REGULAR',
+  '15_DAYS' = '15 DAYS'
+}
+
 const PhotoSchema: any = new Schema({
   photo: { type: String, default: '' },
   caption: { type: String, default: '' },
@@ -20,20 +27,22 @@ const PhotoSchema: any = new Schema({
 export const CustomerSchema: any = new Schema(
   {
     // Auto generated fields
-    fullName: { type: String, default: '-' },
+    fullName: { type: String, default: '' },
     memberCode: { type: String, required: false, default: null },
 
     // Fillable fields
-    firstName: { type: String, default: '-' },
-    lastName: { type: String, rdefault: '-' },
-    photo: { type: String, default: '-' },
+    firstName: { type: String, default: '' },
+    lastName: { type: String, rdefault: '' },
+    photo: { type: String, default: '' },
     address: { type: String, required: false },
-    phoneNumber: { type: String, default: '-' },
+    phoneNumber: { type: String, default: '' },
     gender: { type: String, required: false },
     dateOfBirth: { type: Date, required: true },
     email: { type: String, required: false },
     referredBy: { type: String, default: '' },
+    notes: { type: String, default: '' },
     photos: [{ type: PhotoSchema, required: false }],
+    tags: [{ type: String, enum: CustomerTagTypes, required: true, default: CustomerTagTypes.REGULAR}],
 
     // Boolean fields
     isActive: { type: Boolean, required: true, default: true },

@@ -38,6 +38,14 @@ export class CreateCustomerDto {
   @IsOptional()
   shopId: string;
 
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsString()
+  @IsOptional()
+  tags?: string;
+
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
