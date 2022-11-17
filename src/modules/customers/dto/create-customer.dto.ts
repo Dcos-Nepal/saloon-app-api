@@ -26,6 +26,7 @@ export class CreateCustomerDto {
   gender?: string;
 
   @IsString()
+  @IsOptional()
   dateOfBirth?: string;
 
   @IsString()
