@@ -14,7 +14,7 @@ export enum CustomerTagTypes {
   'VIP' = 'VIP',
   'MONTHLY' = 'MONTHLY',
   'REGULAR' = 'REGULAR',
-  '15_DAYS' = '15 DAYS'
+  '15 DAYS' = '15 DAYS'
 }
 
 const PhotoSchema: any = new Schema({
@@ -42,7 +42,7 @@ export const CustomerSchema: any = new Schema(
     referredBy: { type: String, default: '' },
     notes: { type: String, default: '' },
     photos: [{ type: PhotoSchema, required: false }],
-    tags: [{ type: String, enum: CustomerTagTypes, required: true, default: CustomerTagTypes.REGULAR}],
+    tags: [{ type: String, enum: CustomerTagTypes, required: true, default: '' }],
 
     // Boolean fields
     isActive: { type: Boolean, required: true, default: true },
