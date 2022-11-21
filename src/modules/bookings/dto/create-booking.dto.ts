@@ -5,6 +5,10 @@ import { Status } from './status.dto';
 
 export class CreateBookingDto {
   @IsString()
+  @IsOptional()
+  customer?: string;
+
+  @IsString()
   fullName: string;
 
   @IsString()

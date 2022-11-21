@@ -2,7 +2,7 @@ import { Schema, Types } from 'mongoose';
 
 export enum AppointmentType {
   'TREATMENT' = 'TREATMENT',
-  'CONSULTATION' = 'CONSULTATION',
+  'CONSULATION' = 'CONSULATION',
   'MAINTAINANCE' = 'MAINTAINANCE',
   'FOLLOW UP' = 'FOLLOW UP'
 }
@@ -35,7 +35,7 @@ export const AppointmentSchema: any = new Schema(
     type: {
       type: String,
       enum: AppointmentType,
-      default: AppointmentType.CONSULTATION
+      default: AppointmentType.CONSULATION
     },
     status: {
       type: StatusSchema,

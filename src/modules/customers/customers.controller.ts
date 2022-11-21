@@ -232,8 +232,10 @@ export class CustomersController {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
     }
 
-    // Update photo the data
-    updateCustomerDto.photo = file.filename;
+    if (file) {
+      // Update photo the data
+      updateCustomerDto.photo = file.filename;
+    }
 
     try {
       const customer = await this.customersService.update(customerId, updateCustomerDto);

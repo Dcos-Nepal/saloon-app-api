@@ -4,14 +4,15 @@ import { BookingStatusType } from '../interfaces/booking.interface';
 
 export const BookingSchema: any = new Schema(
   {
-    fullName: { type: String },
-    phoneNumber: { type: String, required: true },
-    address: { type: String, required: true },
+    customer: { type: Types.ObjectId, ref: 'Customer', required: false, default: null},
+    fullName: { type: String, required: false, default: ''},
+    phoneNumber: { type: String, required: false, default: ''},
+    address: { type: String, required: false, default: '' },
     bookingDate: { type: Date, required: true },
     type: {
       type: String,
       enum: AppointmentType,
-      default: AppointmentType.CONSULTATION
+      default: AppointmentType.CONSULATION
     },
     status: {
       updatedAt: { type: Date, required: true, default: new Date() },

@@ -34,7 +34,7 @@ export class BookingsController {
       filter.title = { $regex: query.q, $options: 'i' };
     }
 
-    const toPopulate = [];
+    const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber'] }];
 
     try {
       const visits = await this.visitsService.findAll(filter, { authUser, query, toPopulate });

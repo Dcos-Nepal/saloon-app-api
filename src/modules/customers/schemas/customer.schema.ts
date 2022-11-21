@@ -37,12 +37,12 @@ export const CustomerSchema: any = new Schema(
     address: { type: String, required: false },
     phoneNumber: { type: String, required: true, default: '' },
     gender: { type: String, required: true },
-    dateOfBirth: { type: Date, required: false },
+    dateOfBirth: { type: String, required: false, default: null },
     email: { type: String, required: false },
     referredBy: { type: String, default: '' },
     notes: { type: String, default: '', required: false },
     photos: [{ type: PhotoSchema, required: false }],
-    tags: [{ type: String, required: false, default: '' }],
+    tags: { type: String, required: false, default: '' },
 
     // Boolean fields
     isActive: { type: Boolean, required: true, default: true },
