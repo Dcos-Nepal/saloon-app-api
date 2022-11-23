@@ -110,7 +110,7 @@ export class CustomersController {
     })
   )
   async uploadFile(@Req() req: any, @UploadedFile() file, @Param('customerId') customerId: string, @Body() fileUploadDto: FileUploadDto) {
-    if (!file || req.fileValidationError) {
+    if (!!req?.fileValidationError) {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
     }
 
@@ -125,7 +125,9 @@ export class CustomersController {
         date: new Date()
       };
 
-      const toUpdateCustomer = { ...customer, photos: [...customer.photos, prepFiles] };
+      const toUpdateCustomer = customer?.photos
+        ? { ...customer, photos: [...customer.photos, prepFiles] }
+        : { ...customer, photos: [prepFiles] };
 
       await this.customersService.update(customerId, toUpdateCustomer);
 

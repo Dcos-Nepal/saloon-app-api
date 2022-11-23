@@ -5,10 +5,6 @@ import { OrderProduct, OrderStatus } from '../interfaces/order.interface';
 export class CreateOrderDto {
   @IsOptional()
   @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
   customer?: string;
 
   @IsString()

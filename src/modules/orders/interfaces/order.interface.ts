@@ -16,7 +16,6 @@ export interface OrderProduct {
 
 export interface IOrder {
   _id?: string;
-  title: string;
   customer: string;
   notes: string;
   status: OrderStatus;

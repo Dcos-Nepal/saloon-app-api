@@ -29,7 +29,6 @@ const StatusSchema: any = new Schema({
 
 export const OrderSchema: any = new Schema(
   {
-    title: { type: String, default: '' },
     customer: { type: Types.ObjectId, ref: 'Customer' },
     status: {
       type: StatusSchema,

@@ -4,9 +4,9 @@ import { BookingStatusType } from '../interfaces/booking.interface';
 
 export const BookingSchema: any = new Schema(
   {
-    customer: { type: Types.ObjectId, ref: 'Customer', required: false, default: null},
-    fullName: { type: String, required: false, default: ''},
-    phoneNumber: { type: String, required: false, default: ''},
+    customer: { type: Types.ObjectId, ref: 'Customer', required: false, default: null },
+    fullName: { type: String, required: false, default: '' },
+    phoneNumber: { type: String, required: false, default: '' },
     address: { type: String, required: false, default: '' },
     bookingDate: { type: Date, required: true },
     type: {
