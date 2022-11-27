@@ -24,6 +24,7 @@ export interface IBookingStatus {
 export enum BookingStatusType {
   'BOOKED' = 'BOOKED',
   'ARRIVED' = 'ARRIVED',
+  'NOT VISITED' = 'NOT VISITED',
   'CANCELLED' = 'CANCELLED'
 }
 

@@ -61,7 +61,7 @@ export class OrdersController {
       let rowsCount = 0;
       if (query.q) {
         orderResponse.rows = orderResponse.rows.filter((row) => {
-          if ((row.customer as any).fullName.includes(query.q)) {
+          if ((row.customer as any).fullName.includes(query.q) || (row.customer as any).phoneNumber.includes(query.q) || (row.customer as any).address.includes(query.q) ) {
             rowsCount += 1;
             return true;
           }

@@ -125,9 +125,7 @@ export class CustomersController {
         date: new Date()
       };
 
-      const toUpdateCustomer = customer?.photos
-        ? { ...customer, photos: [...customer.photos, prepFiles] }
-        : { ...customer, photos: [prepFiles] };
+      const toUpdateCustomer = customer?.photos ? { ...customer, photos: [...customer.photos, prepFiles] } : { ...customer, photos: [prepFiles] };
 
       await this.customersService.update(customerId, toUpdateCustomer);
 
