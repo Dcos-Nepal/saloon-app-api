@@ -22,12 +22,12 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class BookingsController {
-  constructor(@InjectConnection() private readonly connection: mongoose.Connection, private readonly visitsService: BookingsService) {}
+  constructor(@InjectConnection() private readonly connection: mongoose.Connection, private readonly bookingsService: BookingsService) {}
 
   @Get()
   async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     const filter: mongoose.FilterQuery<Booking> = { ...query };
-    // Get only not deleted visits
+    // Get only not deleted bookings
     filter.isDeleted = false;
 
     if (query.q) {
@@ -37,30 +37,30 @@ export class BookingsController {
     const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber'] }];
 
     try {
-      const visits = await this.visitsService.findAll(filter, { authUser, query, toPopulate });
-      return new ResponseSuccess('COMMON.SUCCESS', visits);
+      const bookings = await this.bookingsService.findAll(filter, { authUser, query, toPopulate });
+      return new ResponseSuccess('COMMON.SUCCESS', bookings);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
-  @Get('/:visitId')
+  @Get('/:bookingId')
   async findById(@Param() param, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
-      const visit = await this.visitsService.findById(param.visitId, { authUser });
-      return new ResponseSuccess('COMMON.SUCCESS', visit);
+      const booking = await this.bookingsService.findById(param.bookingId, { authUser });
+      return new ResponseSuccess('COMMON.SUCCESS', booking);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
   }
 
   @Post()
-  async create(@Body() visit: CreateBookingDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async create(@Body() booking: CreateBookingDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let newJob: IBooking;
       await session.withTransaction(async () => {
-        newJob = await this.visitsService.create(visit as IBooking, session, { authUser });
+        newJob = await this.bookingsService.create(booking as IBooking, session, { authUser });
       });
       session.endSession();
 
@@ -70,14 +70,14 @@ export class BookingsController {
     }
   }
 
-  @Put('/:visitId')
-  async update(@Param() param, @Body() visit: UpdateBookingDto, @Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+  @Put('/:bookingId')
+  async update(@Param() param, @Body() booking: UpdateBookingDto, @Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       let updatedBooking: IBooking;
       const session = await this.connection.startSession();
 
       await session.withTransaction(async () => {
-        updatedBooking = await this.visitsService.update(param.visitId, visit, session, { authUser });
+        updatedBooking = await this.bookingsService.update(param.bookingId, booking, session, { authUser });
       });
       session.endSession();
 
@@ -87,13 +87,13 @@ export class BookingsController {
     }
   }
 
-  @Put('/:visitId/update-status')
+  @Put('/:bookingId/update-status')
   async updateStatus(@Param() param, @Body() job: UpdateJobStatusDto, @CurrentUser() authUser: User): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let updatedBooking: IBooking;
       await session.withTransaction(async () => {
-        updatedBooking = await this.visitsService.updateStatus(param.visitId, job.status, session, { authUser });
+        updatedBooking = await this.bookingsService.updateStatus(param.bookingId, job.status, session, { authUser });
       });
       session.endSession();
 
@@ -103,13 +103,13 @@ export class BookingsController {
     }
   }
 
-  @Delete('/:visitId')
+  @Delete('/:bookingId')
   async delete(@Param() param): Promise<IResponse> {
     try {
       const session = await this.connection.startSession();
       let deletedBooking: Booking;
       await session.withTransaction(async () => {
-        deletedBooking = await this.visitsService.softDelete(param.visitId, session);
+        deletedBooking = await this.bookingsService.softDelete(param.bookingId, session);
       });
       session.endSession();
 
