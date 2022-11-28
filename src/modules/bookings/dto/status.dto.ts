@@ -2,13 +2,16 @@ import { IsEnum, IsMongoId, IsOptional } from 'class-validator';
 import { BookingStatusType } from '../interfaces/booking.interface';
 
 export class Status {
+  @IsEnum(BookingStatusType)
+  status: BookingStatusType;
+
   @IsOptional()
-  updatedAt: Date;
+  reason?: string;
+
+  @IsOptional()
+  updatedAt?: Date;
 
   @IsMongoId()
   @IsOptional()
-  updatedBy: string;
-
-  @IsEnum(BookingStatusType)
-  status: BookingStatusType;
+  updatedBy?: string;
 }

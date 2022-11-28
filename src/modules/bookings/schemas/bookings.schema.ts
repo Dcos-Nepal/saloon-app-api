@@ -17,13 +17,15 @@ export const BookingSchema: any = new Schema(
     status: {
       updatedAt: { type: Date, required: true, default: new Date() },
       updatedBy: { type: Types.ObjectId, ref: 'User' },
-      status: { type: String, enum: Object.keys(BookingStatusType), default: 'BOOKED' }
+      status: { type: String, enum: Object.keys(BookingStatusType), default: 'BOOKED' },
+      reason: { type: String, required: false, default: ''}
     },
     statusHistory: [
       {
         updatedAt: { type: Date, required: true },
         updatedBy: { type: Types.ObjectId, ref: 'User' },
-        status: { type: String, enum: Object.keys(BookingStatusType), default: 'PENDING' }
+        status: { type: String, enum: Object.keys(BookingStatusType), default: 'PENDING' },
+        reason: { type: String, required: false, default: ''}
       }
     ],
     description: { type: String, required: false },

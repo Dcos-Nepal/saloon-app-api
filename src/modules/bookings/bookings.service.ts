@@ -5,6 +5,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import BaseService from 'src/base/base-service';
 import { IServiceOptions } from 'src/common/interfaces';
 import { Booking, IBooking, BookingStatusType } from './interfaces/booking.interface';
+import { Status } from './dto/status.dto';
 
 @Injectable()
 export class BookingsService extends BaseService<Booking, IBooking> {
@@ -49,11 +50,11 @@ export class BookingsService extends BaseService<Booking, IBooking> {
    * @param param IServiceOptions
    * @returns Promise<Object>
    */
-  async updateStatus(visitId: string, statusType: BookingStatusType, session: ClientSession, { authUser }: IServiceOptions) {
+  async updateStatus(visitId: string, statusType: Status, session: ClientSession, { authUser }: IServiceOptions) {
     const visit = await this.findById(visitId);
     visit.statusHistory.push(visit.status);
-    visit.status = { status: statusType, updatedBy: authUser._id, updatedAt: new Date() };
-
+    visit.status = { reason: statusType.reason, status: statusType.status, updatedBy: authUser._id, updatedAt: new Date() };
+    
     return await this.update(visitId, visit, session, { authUser });
   }
 }

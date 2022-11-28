@@ -1,7 +1,6 @@
-import { IsEnum } from 'class-validator';
-import { BookingStatusType } from '../interfaces/booking.interface';
+import { IsString } from 'class-validator';
+import { Status } from './status.dto';
 
 export class UpdateJobStatusDto {
-  @IsEnum(BookingStatusType)
-  status: BookingStatusType;
+  status: Status;
 }

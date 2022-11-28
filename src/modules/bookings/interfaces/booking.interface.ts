@@ -1,6 +1,7 @@
 import { Document } from 'mongoose';
 import { AppointmentType } from 'src/modules/appointments/schemas/appointment.schema';
 import { User } from 'src/modules/users/interfaces/user.interface';
+import { Status } from '../dto/status.dto';
 
 export interface IBooking {
   _id?: any;
@@ -9,8 +10,8 @@ export interface IBooking {
   address: string;
   bookingDate: string;
   type: AppointmentType;
-  status?: IBookingStatus;
-  statusHistory?: IBookingStatus[];
+  status?: Status;
+  statusHistory?: Status[];
   description?: string;
   isDeleted?: boolean;
 }
@@ -23,8 +24,10 @@ export interface IBookingStatus {
 
 export enum BookingStatusType {
   'BOOKED' = 'BOOKED',
-  'ARRIVED' = 'ARRIVED',
+  'RE_SCHEDULED' = 'RE_SCHEDULED',
+  'VISITED' = 'VISITED',
   'NOT VISITED' = 'NOT VISITED',
+  'PNR' = 'PNR',
   'CANCELLED' = 'CANCELLED'
 }
 
