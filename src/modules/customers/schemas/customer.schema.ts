@@ -24,6 +24,13 @@ const PhotoSchema: any = new Schema({
   date: { type: Date, default: new Date() }
 });
 
+const DiagnosisSchema: any = new Schema({
+  title: { type: String, default: '' },
+  description: { type: String, default: '' },
+  addedBy: { type: Types.ObjectId, ref: 'User', required: false, default: null },
+  createdDate: { type: Date, default: new Date() }
+});
+
 export const CustomerSchema: any = new Schema(
   {
     // Auto generated fields
@@ -42,6 +49,7 @@ export const CustomerSchema: any = new Schema(
     referredBy: { type: String, default: '' },
     notes: { type: String, default: '', required: false },
     photos: [{ type: PhotoSchema, required: false }],
+    diagnosis: [{ type: DiagnosisSchema, required: false }],
     tags: { type: String, required: false, default: '' },
 
     // Boolean fields

@@ -20,9 +20,6 @@ export class CreateBookingDto {
   @IsString()
   type: AppointmentType;
 
-  @IsString()
-  bookingDate: string;
-
   @IsOptional()
   @IsString()
   description?: string;

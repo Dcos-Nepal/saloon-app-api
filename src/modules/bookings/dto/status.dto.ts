@@ -9,7 +9,7 @@ export class Status {
   reason?: string;
 
   @IsOptional()
-  updatedAt?: Date;
+  date?: Date;
 
   @IsMongoId()
   @IsOptional()
