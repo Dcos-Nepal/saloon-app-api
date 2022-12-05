@@ -16,6 +16,9 @@ export class CreateCustomerDto {
   @IsOptional()
   photo?: string;
 
+  @IsOptional()
+  diagonis?: any[];
+
   @IsString()
   address: string;
 
@@ -33,6 +36,7 @@ export class CreateCustomerDto {
   referredBy?: string;
 
   @IsString()
+  @IsOptional()
   email?: string;
 
   @IsString()

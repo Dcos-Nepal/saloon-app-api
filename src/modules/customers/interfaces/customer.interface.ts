@@ -4,7 +4,8 @@ export interface ICustomer {
   firstName?: string;
   lastName?: string;
   photo?: string;
-  photos?: any;
+  photos?: any[];
+  diagnosis?: any[];
   address: string;
   phoneNumber?: string;
   gender?: string;

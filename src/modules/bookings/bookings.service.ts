@@ -50,11 +50,11 @@ export class BookingsService extends BaseService<Booking, IBooking> {
    * @param param IServiceOptions
    * @returns Promise<Object>
    */
-  async updateStatus(visitId: string, statusType: Status, session: ClientSession, { authUser }: IServiceOptions) {
+  async updateStatus(visitId: string, status: Status, session: ClientSession, { authUser }: IServiceOptions) {
     const visit = await this.findById(visitId);
     visit.statusHistory.push(visit.status);
-    visit.status = { reason: statusType.reason, status: statusType.status, updatedBy: authUser._id, updatedAt: new Date() };
-    
+    visit.status = { status: status.status, date: status.date || visit.status.date, reason: status.reason, updatedBy: authUser._id};
+
     return await this.update(visitId, visit, session, { authUser });
   }
 }

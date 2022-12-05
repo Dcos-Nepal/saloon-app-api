@@ -8,7 +8,6 @@ export interface IBooking {
   fullName: string;
   phoneNumber: string;
   address: string;
-  bookingDate: string;
   type: AppointmentType;
   status?: Status;
   statusHistory?: Status[];
