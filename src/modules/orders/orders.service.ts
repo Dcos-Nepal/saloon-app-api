@@ -73,7 +73,12 @@ export class OrdersService extends BaseService<Order, IOrder> {
 
     const order: any = await this.OrderModel.findOne({ _id: id });
 
-    if (order.status.name !== updateOrderDto.status.name) {
+    order.products = updateOrderDto.products;
+    order.notes = updateOrderDto.notes;
+    order.customer = updateOrderDto.customer;
+    order.orderDate = updateOrderDto.orderDate;
+
+    if (updateOrderDto?.status && order.status.name !== updateOrderDto?.status?.name) {
       order.prevStatus.push({
         name: order.status.name,
         date: order.status?.date || new Date(),

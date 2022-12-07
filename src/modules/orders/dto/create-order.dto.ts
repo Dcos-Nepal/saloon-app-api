@@ -9,14 +9,14 @@ export class CreateOrderDto {
 
   @IsString()
   @IsOptional()
-  orderDate: string;
+  orderDate?: string;
 
   @IsArray()
   @IsOptional()
   products?: OrderProduct[];
 
   @IsOptional()
-  status: OrderStatus;
+  status?: OrderStatus;
 
   @IsOptional()
   @IsString()

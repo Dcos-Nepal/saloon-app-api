@@ -47,7 +47,7 @@ export class OrdersController {
       }
 
       if (query.status) {
-        filter['status.name'] = query.status.toString();
+        filter['status.name'] = query.status;
       }
 
       filter['$or'] = [{ isDeleted: false }];
