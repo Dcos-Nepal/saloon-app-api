@@ -21,7 +21,7 @@ export const BookingSchema: any = new Schema(
     },
     statusHistory: [
       {
-        data: { type: Date, required: true },
+        date: { type: Date, required: true },
         status: { type: String, enum: Object.keys(BookingStatusType), default: 'PENDING' },
         reason: { type: String, required: false, default: '' },
         updatedBy: { type: Types.ObjectId, ref: 'User' }
