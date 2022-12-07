@@ -53,7 +53,7 @@ export class BookingsService extends BaseService<Booking, IBooking> {
   async updateStatus(visitId: string, status: Status, session: ClientSession, { authUser }: IServiceOptions) {
     const visit = await this.findById(visitId);
     visit.statusHistory.push(visit.status);
-    visit.status = { status: status.status, date: status.date || visit.status.date, reason: status.reason, updatedBy: authUser._id};
+    visit.status = { status: status.status, date: status.date || visit.status.date, reason: status.reason, updatedBy: authUser._id };
 
     return await this.update(visitId, visit, session, { authUser });
   }
