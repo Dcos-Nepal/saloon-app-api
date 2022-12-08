@@ -28,6 +28,7 @@ const DiagnosisSchema: any = new Schema({
   title: { type: String, default: '' },
   description: { type: String, default: '' },
   addedBy: { type: Types.ObjectId, ref: 'User', required: false, default: null },
+  isPrivate: {type: Boolean, required: true, default: false},
   createdDate: { type: Date, default: new Date() }
 });
 
