@@ -44,6 +44,7 @@ export const CustomerSchema: any = new Schema(
     photo: { type: String, default: '' },
     address: { type: String, required: false },
     phoneNumber: { type: String, required: true, default: '' },
+    altPhoneNumber: { type: String, required: false, default: '' },
     gender: { type: String, required: true },
     dateOfBirth: { type: String, required: false, default: null },
     email: { type: String, required: false },
