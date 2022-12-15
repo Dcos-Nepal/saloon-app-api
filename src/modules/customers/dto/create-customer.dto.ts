@@ -23,7 +23,11 @@ export class CreateCustomerDto {
   address: string;
 
   @IsString()
+  @IsOptional()
   phoneNumber?: string;
+
+  @IsString()
+  altPhoneNumber?: string;
 
   @IsString()
   gender?: string;

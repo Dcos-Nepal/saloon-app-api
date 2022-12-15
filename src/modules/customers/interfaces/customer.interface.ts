@@ -8,6 +8,7 @@ export interface ICustomer {
   diagnosis?: any[];
   address: string;
   phoneNumber?: string;
+  altPhoneNumber?: string;
   gender?: string;
   dateOfBirth?: string;
   referredBy?: string;
