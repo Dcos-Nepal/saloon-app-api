@@ -34,6 +34,12 @@ export class BookingsController {
       filter.title = { $regex: query.q, $options: 'i' };
     }
 
+    if (query.status) {
+      filter['status.status'] = query.status;
+    }
+
+    delete filter.status;
+
     const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber'] }];
 
     try {

@@ -25,7 +25,7 @@ export enum BookingStatusType {
   'BOOKED' = 'BOOKED',
   'RE_SCHEDULED' = 'RE_SCHEDULED',
   'VISITED' = 'VISITED',
-  'NOT VISITED' = 'NOT VISITED',
+  'NOT_VISITED' = 'NOT_VISITED',
   'PNR' = 'PNR',
   'CANCELLED' = 'CANCELLED'
 }
