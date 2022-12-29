@@ -1,5 +1,20 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
+
+export class CreateSuggestionDto {
+  @IsString()
+  title: string;
+
+  @IsMongoId()
+  product: Types.ObjectId;
+
+  @IsString()
+  description: string;
+
+  createdDate: Date
+}
 
 export class CreateCustomerDto {
   @IsString()
@@ -18,6 +33,11 @@ export class CreateCustomerDto {
 
   @IsOptional()
   diagonis?: any[];
+
+  @IsOptional()
+  @IsArray()
+  @Type(() => CreateSuggestionDto)
+  productSuggestions?: CreateSuggestionDto[];
 
   @IsString()
   address: string;
