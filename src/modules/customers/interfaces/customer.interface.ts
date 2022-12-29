@@ -6,6 +6,7 @@ export interface ICustomer {
   photo?: string;
   photos?: any[];
   diagnosis?: any[];
+  productSuggestions?: any[];
   address: string;
   phoneNumber?: string;
   altPhoneNumber?: string;

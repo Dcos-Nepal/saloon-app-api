@@ -32,6 +32,13 @@ const DiagnosisSchema: any = new Schema({
   createdDate: { type: Date, default: new Date() }
 });
 
+const ProductSuggestionSchema: any = new Schema({
+  title: { type: String, default: '' },
+  product: { type: Types.ObjectId, ref: 'Product', required: false, default: null },
+  description: { type: String, default: '' },
+  createdDate: { type: Date, default: new Date() }
+});
+
 export const CustomerSchema: any = new Schema(
   {
     // Auto generated fields
@@ -52,6 +59,7 @@ export const CustomerSchema: any = new Schema(
     notes: { type: String, default: '', required: false },
     photos: [{ type: PhotoSchema, required: false }],
     diagnosis: [{ type: DiagnosisSchema, required: false }],
+    productSuggestions: [{ type: ProductSuggestionSchema, required: false }],
     tags: { type: String, required: false, default: '' },
 
     // Boolean fields

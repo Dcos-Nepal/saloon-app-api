@@ -202,8 +202,22 @@ export class CustomersController {
   @Get('/:customerId')
   @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('customerId') customerId: string) {
+    const toPopulate: any = [
+      {
+        path: 'productSuggestions',
+        populate: [
+          {
+            path: 'product',
+            model: 'Product',
+            select: ['_id', 'name', 'description']
+          }
+        ],
+        select: []
+      }
+    ];
+
     try {
-      const customer = await this.customersService.findOne({ _id: customerId });
+      const customer = await this.customersService.findOne({ _id: customerId }, { toPopulate });
 
       if (customer) {
         return new ResponseSuccess('CUSTOMER.FIND', customer);
