@@ -72,11 +72,7 @@ export class OrdersService extends BaseService<Order, IOrder> {
     this.logger.log(`Update: Update Order of id: ${id}`);
 
     const order: any = await this.OrderModel.findOne({ _id: id });
-
-    order.products = updateOrderDto.products;
-    order.notes = updateOrderDto.notes;
-    order.customer = updateOrderDto.customer;
-    order.orderDate = updateOrderDto.orderDate;
+    Object.assign(order, updateOrderDto);
 
     if (updateOrderDto?.status && order.status.name !== updateOrderDto?.status?.name) {
       order.prevStatus.push({
