@@ -13,7 +13,7 @@ export class CreateSuggestionDto {
   @IsString()
   description: string;
 
-  createdDate: Date
+  createdDate: Date;
 }
 
 export class CreateCustomerDto {

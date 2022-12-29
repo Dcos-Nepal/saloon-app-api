@@ -13,7 +13,7 @@ export interface IBaseAddress {
 export interface IPopulate {
   path: string;
   select: string[];
-  populate?: IPopulate
+  populate?: IPopulate;
 }
 
 export interface IServiceOptions {

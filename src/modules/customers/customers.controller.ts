@@ -205,11 +205,13 @@ export class CustomersController {
     const toPopulate: any = [
       {
         path: 'productSuggestions',
-        populate: [{
-          path: 'product',
-          model: 'Product',
-          select: ['_id', 'name', 'description']
-        }],
+        populate: [
+          {
+            path: 'product',
+            model: 'Product',
+            select: ['_id', 'name', 'description']
+          }
+        ],
         select: []
       }
     ];
