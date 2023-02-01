@@ -12,8 +12,9 @@ export interface IBaseAddress {
 
 export interface IPopulate {
   path: string;
+  model?: string;
   select: string[];
-  populate?: IPopulate;
+  populate?: IPopulate | IPopulate[];
 }
 
 export interface IServiceOptions {

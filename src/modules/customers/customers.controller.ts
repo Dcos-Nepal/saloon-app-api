@@ -14,6 +14,7 @@ import { Customer } from './interfaces/customer.interface';
 import { AuthGuard } from '@nestjs/passport';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { Helper } from 'src/common/utils/helper';
+import { CurrentUser } from 'src/common/decorators/current-user';
 
 @Controller({
   path: '/customers',
@@ -207,9 +208,14 @@ export class CustomersController {
         path: 'productSuggestions',
         populate: [
           {
-            path: 'product',
+            path: 'products',
             model: 'Product',
             select: ['_id', 'name', 'description']
+          },
+          {
+            path: 'addedBy',
+            model: 'User',
+            select: ['fullName', 'firstName', 'lastName']
           }
         ],
         select: []

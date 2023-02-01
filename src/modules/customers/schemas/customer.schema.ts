@@ -34,9 +34,10 @@ const DiagnosisSchema: any = new Schema({
 
 const ProductSuggestionSchema: any = new Schema({
   title: { type: String, default: '' },
-  product: { type: Types.ObjectId, ref: 'Product', required: false, default: null },
+  products: [{ type: Types.ObjectId, ref: 'Product', required: false, default: null }],
   description: { type: String, default: '' },
-  createdDate: { type: Date, default: new Date() }
+  createdDate: { type: Date, default: new Date() },
+  addedBy: { type: Types.ObjectId, ref: 'User', required: false, default: null }
 });
 
 export const CustomerSchema: any = new Schema(
