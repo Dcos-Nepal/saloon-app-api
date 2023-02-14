@@ -16,6 +16,7 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { PackageClientsModule } from './modules/package-clients/package-clients.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     ServicesModule,
     ProductsModule,
     CustomersModule,
+    PackageClientsModule,
     AppointmentsModule,
     OrdersModule
   ],
