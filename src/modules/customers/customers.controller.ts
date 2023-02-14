@@ -14,7 +14,6 @@ import { Customer } from './interfaces/customer.interface';
 import { AuthGuard } from '@nestjs/passport';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { Helper } from 'src/common/utils/helper';
-import { CurrentUser } from 'src/common/decorators/current-user';
 
 @Controller({
   path: '/customers',
