@@ -1,4 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 export class CreatePackageClientDto {
   @IsString()
   customer: string;
@@ -14,10 +15,12 @@ export class CreatePackageClientDto {
   description?: string;
 
   @IsOptional()
-  @IsString()
+  @IsBoolean()
+  @Type(() => Boolean)
   isDeleted: boolean;
 
   @IsOptional()
-  @IsString()
+  @IsBoolean()
+  @Type(() => Boolean)
   isApproved?: boolean;
 }
