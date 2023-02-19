@@ -5,6 +5,7 @@ export interface IPackageClient {
   customer: string | { _id: string; fullName: string; phoneNumber: string };
   paymentType: 'CASH' | 'CHEQUE' | 'ONLINE';
   packagePaidDate: string;
+  noOfSessions: number;
   isApproved: boolean;
   description?: string;
   isDeleted?: boolean;

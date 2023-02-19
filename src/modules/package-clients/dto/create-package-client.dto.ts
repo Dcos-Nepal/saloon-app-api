@@ -1,14 +1,18 @@
 import { Type } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreatePackageClientDto {
   @IsString()
   customer: string;
 
   @IsString()
-  packagePaidDate: string;
+  paymentType: 'CASH' | 'ONLINE' | 'CHEQUE';
 
   @IsString()
-  paymentType: 'CASH' | 'ONLINE' | 'CHEQUE';
+  packagePaidDate: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  noOfSessions: number;
 
   @IsOptional()
   @IsString()
