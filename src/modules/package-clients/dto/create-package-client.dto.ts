@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer';
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Exclude, Type } from 'class-transformer';
+import { IsBoolean, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreatePackageClientDto {
   @IsString()
   customer: string;
@@ -27,4 +27,9 @@ export class CreatePackageClientDto {
   @IsBoolean()
   @Type(() => Boolean)
   isApproved?: boolean;
+
+  @Exclude()
+  @IsMongoId()
+  @IsOptional()
+  shopId?: string;
 }

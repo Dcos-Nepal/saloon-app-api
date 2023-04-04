@@ -50,9 +50,14 @@ export const AppointmentSchema: any = new Schema(
     history: [{ type: StatusSchema }],
     interval: { type: String, default: 'Regular' },
     session: { type: Number, default: 1 },
-    isActive: { type: Boolean, default: true },
-    isDeleted: { type: Boolean, default: false },
-    createdDate: [{ type: String, default: new Date() }]
+    createdDate: { type: String, default: new Date() },
+
+    // Boolean fields
+    isActive: { type: Boolean, required: true, default: true },
+    isDeleted: { type: Boolean, required: true, default: false },
+
+    // Refrenced fields
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false }
   },
   {
     timestamps: true,

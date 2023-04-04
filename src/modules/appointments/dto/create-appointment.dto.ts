@@ -1,4 +1,5 @@
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
 import { Status } from '../interfaces/appointment.interface';
 
@@ -38,6 +39,11 @@ export class CreateAppointmentDto {
 
   @IsOptional()
   createdDate?: string;
+
+  @Exclude()
+  @IsMongoId()
+  @IsOptional()
+  shopId?: string;
 }
 
 export class AppointmentQueryDto extends PaginationQueryDto {

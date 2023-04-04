@@ -9,6 +9,8 @@ import * as mongoose from 'mongoose';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Product } from './interfaces/product.interface';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { User } from '../users/interfaces/user.interface';
 
 @Controller({
   path: '/products',
@@ -25,7 +27,10 @@ export class ProductsController {
   @Post()
   @Roles('ADMIN')
   @UseGuards(RolesGuard)
-  async create(@Body() createProductDto: CreateProductDto) {
+  async create(@CurrentUser() authUser: User, @Body() createProductDto: CreateProductDto) {
+    // Set Shop ID for Packaged Client
+    createProductDto.shopId = authUser.shopId;
+
     try {
       const Product = await this.ProductsService.create(createProductDto);
 
@@ -41,7 +46,7 @@ export class ProductsController {
   }
 
   @Get()
-  async findAll(@Query() query: ProductQueryDto) {
+  async findAll(@CurrentUser() authUser: User, @Query() query: ProductQueryDto) {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
@@ -50,6 +55,9 @@ export class ProductsController {
       }
 
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
+
+      // Default Filter
+      filter['shopId'] = { $eq: authUser.shopId };
 
       const ProductResponse = await this.ProductsService.findAll(filter, { query });
 

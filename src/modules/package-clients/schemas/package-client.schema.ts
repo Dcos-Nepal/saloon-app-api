@@ -7,8 +7,14 @@ export const PackageClientSchema: any = new Schema(
     packagePaidDate: { type: Date, required: true, default: Date.now() },
     noOfSessions: { type: Number, required: true, default: 0 },
     description: { type: String, required: false },
+
+    // Boolean fields
+    isActive: { type: Boolean, required: true, default: true },
+    isDeleted: { type: Boolean, required: true, default: false },
     isApproved: { type: Boolean, default: false },
-    isDeleted: { type: Boolean, default: false }
+
+    // Refrenced fields
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false }
   },
   {
     timestamps: true,

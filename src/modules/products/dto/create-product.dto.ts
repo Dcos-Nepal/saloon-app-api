@@ -1,4 +1,5 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
 
 export class CreateProductDto {
@@ -16,6 +17,11 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
+
+  @Exclude()
+  @IsMongoId()
+  @IsOptional()
+  shopId?: string;
 }
 
 export class ProductQueryDto extends PaginationQueryDto {

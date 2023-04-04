@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer';
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Exclude, Type } from 'class-transformer';
+import { IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { AppointmentType } from 'src/modules/appointments/schemas/appointment.schema';
 import { Status } from './status.dto';
 
@@ -35,4 +35,9 @@ export class CreateBookingDto {
   @IsOptional()
   @IsString()
   isDeleted?: boolean;
+
+  @Exclude()
+  @IsMongoId()
+  @IsOptional()
+  shopId?: string;
 }

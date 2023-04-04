@@ -7,6 +7,7 @@ export interface IPackageClient {
   packagePaidDate: string;
   noOfSessions: number;
   isApproved: boolean;
+  shopId?: string;
   description?: string;
   isDeleted?: boolean;
 }

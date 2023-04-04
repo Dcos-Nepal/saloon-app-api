@@ -1,6 +1,6 @@
-import * as mongoose from 'mongoose';
+import { Schema, Types } from 'mongoose';
 
-export const ServiceSchema = new mongoose.Schema(
+export const ServiceSchema = new Schema(
   {
     name: {
       type: String,
@@ -11,8 +11,13 @@ export const ServiceSchema = new mongoose.Schema(
       }
     },
     description: { type: String },
+
+    // Boolean fields
     isActive: { type: Boolean, required: true, default: true },
-    isDeleted: { type: Boolean, required: true, default: false }
+    isDeleted: { type: Boolean, required: true, default: false },
+
+    // Refrenced fields
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false }
   },
   {
     timestamps: true,

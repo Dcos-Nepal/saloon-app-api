@@ -8,6 +8,7 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { CreateAppointmentDto, AppointmentQueryDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { Appointment } from './interfaces/appointment.interface';
+import { CurrentUser } from 'src/common/decorators/current-user';
 
 @Controller({
   path: '/appointments',
@@ -22,7 +23,9 @@ export class AppointmentsController {
   }
 
   @Post()
-  async create(@Body() createAppointmentDto: CreateAppointmentDto) {
+  async create(@CurrentUser() authUser, @Body() createAppointmentDto: CreateAppointmentDto) {
+    createAppointmentDto.shopId = authUser.shopId;
+
     try {
       const Appointment = await this.appointmentsService.createAppointment(createAppointmentDto);
 
@@ -38,7 +41,7 @@ export class AppointmentsController {
   }
 
   @Get()
-  async findAll(@Query() query: AppointmentQueryDto) {
+  async findAll(@CurrentUser() authUser, @Query() query: AppointmentQueryDto) {
     const filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
@@ -51,6 +54,9 @@ export class AppointmentsController {
       }
 
       filter['$or'] = [{ isDeleted: false }];
+
+      // Default Filter
+      filter['shopId'] = { $eq: authUser.shopId };
 
       // Remove unnecessary fields
       delete filter.status;

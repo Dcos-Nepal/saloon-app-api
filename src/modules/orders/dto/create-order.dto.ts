@@ -1,4 +1,5 @@
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
 import { OrderProduct, OrderStatus } from '../interfaces/order.interface';
 
@@ -29,6 +30,11 @@ export class CreateOrderDto {
   @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
+
+  @Exclude()
+  @IsMongoId()
+  @IsOptional()
+  shopId?: string;
 }
 
 export class OrderQueryDto extends PaginationQueryDto {

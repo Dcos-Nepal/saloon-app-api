@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 
 export const ProductSchema: any = new Schema(
   {
@@ -12,8 +12,13 @@ export const ProductSchema: any = new Schema(
     },
     description: { type: String },
     rate: { type: String },
+
+    // Boolean fields
     isActive: { type: Boolean, required: true, default: true },
-    isDeleted: { type: Boolean, required: true, default: false }
+    isDeleted: { type: Boolean, required: true, default: false },
+
+    // Refrenced fields
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false }
   },
   {
     timestamps: true,

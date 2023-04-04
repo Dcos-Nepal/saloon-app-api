@@ -43,8 +43,13 @@ export const OrderSchema: any = new Schema(
     prevStatus: [{ type: StatusSchema }],
     notes: { type: String, default: '' },
     orderDate: { type: String, default: new Date() },
-    isActive: { type: Boolean, default: true },
-    isDeleted: { type: Boolean, default: false }
+
+    // Boolean fields
+    isActive: { type: Boolean, required: true, default: true },
+    isDeleted: { type: Boolean, required: true, default: false },
+
+    // Refrenced fields
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false }
   },
   {
     timestamps: true,

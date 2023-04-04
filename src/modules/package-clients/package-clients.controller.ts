@@ -24,7 +24,7 @@ export class PackageClientsController {
   constructor(@InjectConnection() private readonly connection: mongoose.Connection, private readonly packageClientService: PackageClientsService) {}
 
   @Get()
-  async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+  async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
     const filter: mongoose.FilterQuery<PackageClient> = { ...query };
     // Get only not deleted packageClients
     filter.isDeleted = false;
@@ -32,6 +32,9 @@ export class PackageClientsController {
     if (query.q) {
       filter.title = { $regex: query.q, $options: 'i' };
     }
+
+    // Default Filter
+    filter['shopId'] = { $eq: authUser.shopId };
 
     const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'phoneNumber'] }];
 
@@ -54,7 +57,10 @@ export class PackageClientsController {
   }
 
   @Post()
-  async create(@Body() packageClient: CreatePackageClientDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async create(@CurrentUser() authUser: User, @Body() packageClient: CreatePackageClientDto): Promise<IResponse> {
+    // Set Shop ID for Packaged Client
+    packageClient.shopId = authUser.shopId;
+
     try {
       const session = await this.connection.startSession();
       let newJob: IPackageClient;

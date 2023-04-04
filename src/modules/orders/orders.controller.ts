@@ -8,6 +8,8 @@ import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
 import { CreateOrderDto, OrderQueryDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from './interfaces/order.interface';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { User } from '../users/interfaces/user.interface';
 
 @Controller({
   path: '/orders',
@@ -22,7 +24,8 @@ export class OrdersController {
   }
 
   @Post()
-  async create(@Body() createOrderDto: CreateOrderDto) {
+  async create(@CurrentUser() authUser: User, @Body() createOrderDto: CreateOrderDto) {
+    createOrderDto.shopId = authUser.shopId;
     try {
       const Order = await this.ordersService.createOrder(createOrderDto);
 
@@ -38,7 +41,7 @@ export class OrdersController {
   }
 
   @Get()
-  async findAll(@Query() query: OrderQueryDto) {
+  async findAll(@CurrentUser() authUser: User, @Query() query: OrderQueryDto) {
     const filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
@@ -51,6 +54,9 @@ export class OrdersController {
       }
 
       filter['$or'] = [{ isDeleted: false }];
+
+      // Default Filter
+      filter['shopId'] = { $eq: authUser.shopId };
 
       // Remove unnecessary fields
       delete filter.status;

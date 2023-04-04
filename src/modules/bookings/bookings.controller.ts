@@ -25,7 +25,7 @@ export class BookingsController {
   constructor(@InjectConnection() private readonly connection: mongoose.Connection, private readonly bookingsService: BookingsService) {}
 
   @Get()
-  async find(@Query() query, @CurrentUser() authUser: User): Promise<IResponse> {
+  async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
     const filter: mongoose.FilterQuery<Booking> = { ...query };
     // Get only not deleted bookings
     filter.isDeleted = false;
@@ -37,6 +37,9 @@ export class BookingsController {
     if (query.status) {
       filter['status.status'] = query.status;
     }
+
+    // Default Filter
+    filter['shopId'] = { $eq: authUser.shopId };
 
     delete filter.status;
 
@@ -61,7 +64,10 @@ export class BookingsController {
   }
 
   @Post()
-  async create(@Body() booking: CreateBookingDto, @CurrentUser() authUser: User): Promise<IResponse> {
+  async create(@CurrentUser() authUser: User, @Body() booking: CreateBookingDto): Promise<IResponse> {
+    // Set Shop ID for Packaged Client
+    booking.shopId = authUser.shopId;
+
     try {
       const session = await this.connection.startSession();
       let newJob: IBooking;

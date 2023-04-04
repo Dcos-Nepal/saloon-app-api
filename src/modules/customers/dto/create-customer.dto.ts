@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { Types } from 'mongoose';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
@@ -65,10 +65,6 @@ export class CreateCustomerDto {
 
   @IsString()
   @IsOptional()
-  shopId: string;
-
-  @IsString()
-  @IsOptional()
   notes?: string;
 
   @IsString()
@@ -82,6 +78,11 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
+
+  @Exclude()
+  @IsMongoId()
+  @IsOptional()
+  shopId?: string;
 }
 
 export class CustomerQueryDto extends PaginationQueryDto {

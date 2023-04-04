@@ -22,6 +22,7 @@ export interface IOrder {
   prevStatus?: OrderStatus[];
   products?: OrderProduct[];
   orderDate?: string;
+  shopId?: string;
   isActive?: boolean;
   isDeleted?: boolean;
 }

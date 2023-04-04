@@ -16,6 +16,7 @@ export interface IAppointment {
   history?: Status[];
   services?: string[];
   dateTime: Date;
+  shopId?: string;
   isActive?: boolean;
   isDeleted?: boolean;
   createdDate?: string;

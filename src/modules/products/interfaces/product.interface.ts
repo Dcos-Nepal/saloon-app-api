@@ -1,6 +1,7 @@
 export interface IProduct {
   _id?: string;
   name: string;
+  shopId?: string;
   description?: string;
   isActive?: boolean;
   isDeleted?: boolean;

@@ -13,6 +13,7 @@ export interface IBooking {
   statusHistory?: Status[];
   description?: string;
   isDeleted?: boolean;
+  shopId?: string;
 }
 
 export interface IBookingStatus {

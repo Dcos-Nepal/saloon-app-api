@@ -9,6 +9,8 @@ import * as mongoose from 'mongoose';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Service } from './interfaces/service.interface';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { User } from '../users/interfaces/user.interface';
 
 @Controller({
   path: '/services',
@@ -25,7 +27,10 @@ export class ServicesController {
   @Post()
   @Roles('ADMIN')
   @UseGuards(RolesGuard)
-  async create(@Body() createServiceDto: CreateServiceDto) {
+  async create(@CurrentUser() authUser: User, @Body() createServiceDto: CreateServiceDto) {
+    // Set Shop ID for Packaged Client
+    createServiceDto.shopId = authUser.shopId;
+
     try {
       const Service = await this.serviceService.create(createServiceDto);
 
@@ -41,7 +46,7 @@ export class ServicesController {
   }
 
   @Get()
-  async findAll(@Query() query: ServiceQueryDto) {
+  async findAll(@CurrentUser() authUser: User, @Query() query: ServiceQueryDto) {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
@@ -50,6 +55,9 @@ export class ServicesController {
       }
 
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
+
+      // Default Filter
+      filter['shopId'] = { $eq: authUser.shopId };
 
       const ServicesResponse = await this.serviceService.findAll(filter, { query });
 

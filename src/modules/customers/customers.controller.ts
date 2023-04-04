@@ -14,6 +14,8 @@ import { Customer } from './interfaces/customer.interface';
 import { AuthGuard } from '@nestjs/passport';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { Helper } from 'src/common/utils/helper';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { User } from '../users/interfaces/user.interface';
 
 @Controller({
   path: '/customers',
@@ -37,7 +39,10 @@ export class CustomersController {
       fileFilter: Helper.imageFileFilter
     })
   )
-  async createNewCustomer(@Req() req: any, @UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
+  async createNewCustomer(@Req() req: any, @CurrentUser() authUser: User, @UploadedFile() file, @Body() createCustomerDto: CreateCustomerDto) {
+    // Set Shop ID for Customer
+    createCustomerDto.shopId = authUser.shopId;
+
     if (!!req?.fileValidationError) {
       return new ResponseError(`UPLOAD:CUSTOMER:PHOTO:ERROR: ${req.fileValidationError}`);
     }
@@ -176,7 +181,7 @@ export class CustomersController {
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  async findAll(@Query() query: CustomerQueryDto) {
+  async findAll(@CurrentUser() authUser: User, @Query() query: CustomerQueryDto) {
     let filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
@@ -185,6 +190,9 @@ export class CustomersController {
       }
 
       filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
+
+      // Default Filter
+      filter['shopId'] = { $eq: authUser.shopId };
 
       const customerResponse = await this.customersService.findAll(filter, { query });
 
