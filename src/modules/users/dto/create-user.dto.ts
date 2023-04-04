@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Matches, MinLength, MaxLength, IsArray, IsOptional, ValidateIf } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import { IsNotEmpty, IsString, Matches, MinLength, MaxLength, IsArray, IsOptional, ValidateIf, IsMongoId } from 'class-validator';
 
 import { IUserRole } from '../interfaces/user.interface';
 
@@ -42,4 +43,9 @@ export class CreateUserDto {
 
   @IsOptional()
   createdBy?: string;
+
+  @Exclude()
+  @IsMongoId()
+  @IsOptional()
+  shopId?: string;
 }

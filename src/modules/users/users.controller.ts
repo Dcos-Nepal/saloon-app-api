@@ -45,6 +45,9 @@ export class UsersController {
     if (query.roles) filter.roles = { $in: query.roles.split(',') };
     if (query.createdBy) filter.createdBy = { $eq: query.createdBy };
 
+    // Default Filter
+    filter['shopId'] = { $eq: authUser.shopId };
+
     try {
       const users = await this.usersService.findAll(filter, { authUser, query, fields: '-password' });
       return new ResponseSuccess('COMMON.SUCCESS', users);
@@ -58,6 +61,7 @@ export class UsersController {
     try {
       let autoPass = '';
       const session = await this.connection.startSession();
+      createUserDto.shopId = authUser.shopId;
 
       if (createUserDto?.password === createUserDto?.phoneNumber || !!createUserDto?.phoneNumber) {
         autoPass = randomString(10);

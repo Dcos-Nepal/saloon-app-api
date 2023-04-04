@@ -24,11 +24,15 @@ export const UserSchema: any = new Schema(
       }
     },
     roles: [{ type: String, required: true }],
-    shopId: { type: Types.ObjectId, ref: 'Shop', required: false },
     memberCode: { type: String, required: false, default: null },
     createdBy: { type: Types.ObjectId, ref: 'User' },
-    isActive: { type: Boolean, default: true },
-    isDeleted: { type: Boolean, default: false }
+
+    // Boolean fields
+    isActive: { type: Boolean, required: true, default: true },
+    isDeleted: { type: Boolean, required: true, default: false },
+
+    // Refrenced fields
+    shopId: { type: Types.ObjectId, ref: 'Shop', required: false }
   },
   {
     timestamps: true,
