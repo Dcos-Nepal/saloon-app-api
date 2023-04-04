@@ -26,7 +26,7 @@ export class AuthService {
    * @param userLogin
    */
   async loginUser(userLogin: UserLoginDto) {
-    const authUser = await this.validateLogin(userLogin.email, userLogin.password);
+    const authUser = await this.validateLogin(userLogin.email, userLogin.password, userLogin.shopId);
 
     if (!authUser.user?._id) {
       throw new NotFoundException('User for given credentials is not found');
@@ -45,10 +45,11 @@ export class AuthService {
    *
    * @param email string
    * @param password string
+   * @param tenant string
    * @returns Object
    */
-  async validateLogin(email: string, password: string) {
-    const userFromDb = await this.userModel.findOne({ email: email, isDeleted: false });
+  async validateLogin(email: string, password: string, shopId: string) {
+    const userFromDb = await this.userModel.findOne({ email, shopId, isDeleted: false });
 
     if (!userFromDb) {
       throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
@@ -57,7 +58,7 @@ export class AuthService {
     const isValidPass = await bcrypt.compare(password, userFromDb.password);
 
     if (isValidPass) {
-      const tokenDetails = await this.jwtService.createToken(userFromDb._id, email, userFromDb.roles);
+      const tokenDetails = await this.jwtService.createToken(userFromDb._id, email, userFromDb.roles, userFromDb.shopId);
       return { user: new UserDto(userFromDb), token: { ...tokenDetails } };
     } else {
       throw new HttpException('LOGIN.ERROR', HttpStatus.UNAUTHORIZED);
@@ -100,7 +101,7 @@ export class AuthService {
       await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
       const user = await this.userModel.findById(decodedToken.id);
-      const tokenDetails = await this.jwtService.createToken(user._id, user.email, user.roles);
+      const tokenDetails = await this.jwtService.createToken(user._id, user.email, user.roles, user.shopId);
 
       return { ...tokenDetails };
     } catch (e) {

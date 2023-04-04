@@ -1,6 +1,10 @@
-import { IsNotEmpty, IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, IsEmail, IsString, MaxLength, MinLength, IsMongoId } from 'class-validator';
 
 export class UserLoginDto {
+  @IsNotEmpty({ message: 'Shop can not be empty' })
+  @IsMongoId()
+  shopId: string;
+
   @IsNotEmpty({ message: 'Email can not be empty' })
   @IsEmail({ message: 'Invalid email provided' })
   email: string;
