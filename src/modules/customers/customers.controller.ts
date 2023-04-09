@@ -186,10 +186,13 @@ export class CustomersController {
 
     try {
       if (query.q) {
-        filter = { fullName: { $regex: query.q, $options: 'i' } };
+        filter = {'$or': [
+          { fullName: { $regex: query.q, $options: 'i' }},
+          { phoneNumber: { $regex: query.q, $options: 'i' }}
+        ]};
+      } else {
+        filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
       }
-
-      filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
 
       // Default Filter
       filter['shopId'] = { $eq: authUser.shopId };
