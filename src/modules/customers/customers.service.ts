@@ -6,7 +6,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { CreateCustomerDto, CustomerQueryDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { ICustomer, Customer } from './interfaces/customer.interface';
+import { Customer, ICustomer } from './interfaces/customer.interface';
 import BaseService from 'src/base/base-service';
 
 @Injectable()
@@ -35,33 +35,132 @@ export class CustomersService extends BaseService<Customer, ICustomer> {
     return Customer;
   }
 
+  private getCustomerWithAppointmentsLookUp() {
+    const sort: Record<string, 1 | -1 | { $meta: 'textScore' }> = { 'customer_appointments.createdAt': -1 };
+
+    return [
+      {
+        $lookup: {
+          from: 'appointments',
+          localField: '_id',
+          foreignField: 'customer',
+          as: 'customer_appointments'
+        }
+      },
+      {
+        $unwind: {
+          path: '$customer_appointments',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $sort: sort
+      },
+      {
+        $group: {
+          _id: '$_id',
+          session: { $max: '$customer_appointments.session' },
+          customerData: { $first: '$$ROOT' }
+        }
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ['$customerData', { session: '$session' }]
+          }
+        }
+      }
+    ];
+  }
+
+  private getCustomerWithAppointmentsFilter(shopId: string, query: CustomerQueryDto) {
+    const filter = { shopId: { $eq: shopId } };
+    if (query.tags) {
+      filter['tags'] = query.tags;
+    }
+    if (query.q) {
+      filter['$or'] = [
+        { fullName: { $regex: query.q, $options: 'i' } },
+        {
+          phoneNumber: {
+            $regex: query.q,
+            $options: 'i'
+          }
+        }
+      ];
+    } else {
+      filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
+    }
+
+    if (query.isNewCustomer === 'true') {
+      filter['session'] = 0;
+    }
+
+    if (query.type) {
+      filter['customer_appointments.type'] = query.type;
+    }
+
+    if (query.appointmentStatus) {
+      filter['customer_appointments.status.name'] = query.appointmentStatus;
+    }
+
+    const dateFilter = {};
+
+    if (query.minDate) {
+      dateFilter['$gte'] = new Date(query.minDate);
+    }
+
+    if (query.maxDate) {
+      const maxDate = new Date(query.maxDate);
+      maxDate.setDate(maxDate.getDate() + 1);
+      dateFilter['$lt'] = maxDate;
+    }
+
+    if (!!Object.keys(dateFilter).length) {
+      filter['createdAt'] = dateFilter;
+    }
+
+    return filter;
+  }
+
   /**
    * Filter Customers based on the query strings
    *
+   * @param shopId
    * @param query CustomerQueryDto
    * @returns Customer[]
    */
-  async filterCustomers(query: CustomerQueryDto) {
+  async filterCustomersWithAppointments(shopId: string, query: CustomerQueryDto) {
     this.logger.log(`Filter: Fetch Customers, set query payload `);
+    const limit = query.limit || 10;
+    const page = parseInt(query['page'] || 1);
+    const skip = (page - 1) * limit;
 
     const sortQuery = {};
-    const dataQuery = {};
-    const { q, isActive = true, isDeleted = false, limit = 10, offset = 0, sort = 'createdAt', order = 'desc' } = query;
+    const { sort = 'createdAt', order = 'desc' } = query;
 
     sortQuery[sort] = order;
 
-    if (q) dataQuery['name'] = { $regex: q, $options: 'i' };
+    const filter = this.getCustomerWithAppointmentsFilter(shopId, query);
 
-    const Customers = await this.customerModel
-      .find({ ...dataQuery, isActive: isActive, isDeleted: isDeleted })
+    const customers: Customer[] = await this.customerModel
+      .aggregate(this.getCustomerWithAppointmentsLookUp())
+      .match(filter)
       .sort(sortQuery)
-      .skip(+offset)
-      .limit(+limit)
+      .skip(skip)
+      .limit(limit)
       .exec();
+
+    let totalCount = 0;
+    const countPipeline = await this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).count('count').exec();
+
+    countPipeline.forEach((doc) => {
+      totalCount = doc.count;
+    });
 
     this.logger.log(`Filter: Fetched Customers successfully`);
 
-    return Customers;
+    return { rows: customers, totalCount };
   }
 
   /**
