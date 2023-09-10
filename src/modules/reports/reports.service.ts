@@ -187,15 +187,29 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
           $sum: 1
         }
       })
+      .sort({ _id: 1 })
+      .exec();
+
+    const sessionPromise = this.customerModel
+      .aggregate(this.getCustomerWithAppointmentsLookUp())
+      .match(filter)
+      .group({
+        _id: '$session',
+        count: {
+          $sum: 1
+        }
+      })
+      .sort({ _id: 1 })
       .exec();
 
     const totalPromise = this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).count('count').exec();
 
-    const [countByTags, countByTypes, countByStatus, countByService, countTotal]: CountType[][] = await Promise.all([
+    const [countByTags, countByTypes, countByStatus, countByService, countBySession, countTotal]: CountType[][] = await Promise.all([
       tagsPromise,
       typesPromise,
       statusPromise,
       servicePromise,
+      sessionPromise,
       totalPromise
     ]);
 
@@ -227,6 +241,16 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
       services[key] = item.count;
     });
 
+    const sessions = {};
+    countBySession.forEach((item) => {
+      const key = categorizeRange(item._id);
+
+      if (sessions[key] === undefined) {
+        sessions[key] = 0;
+      }
+      sessions[key] += item.count;
+    });
+
     let totalCount = 0;
     countTotal.forEach((doc) => {
       totalCount = doc.count;
@@ -234,6 +258,26 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
 
     this.logger.log(`Filter: Fetched Customers successfully`);
 
-    return { totalCount, tags, appointmentStatus, appointmentTypes, services };
+    return { totalCount, tags, appointmentStatus, appointmentTypes, services, sessions };
+  }
+}
+
+function categorizeRange(num: string | null): string {
+  if (num === null) {
+    return 'None';
+  }
+
+  const numb = Number(num);
+
+  if (numb === 0) {
+    return '0';
+  } else if (numb <= 3) {
+    return '1-3';
+  } else if (numb <= 6) {
+    return '4-6';
+  } else if (numb <= 9) {
+    return '7-9';
+  } else {
+    return '10+';
   }
 }
