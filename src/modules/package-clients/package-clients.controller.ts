@@ -36,7 +36,9 @@ export class PackageClientsController {
     // Default Filter
     filter['shopId'] = { $eq: authUser.shopId };
 
-    const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'phoneNumber', 'photo', 'dateOfBirth', 'gender', 'createdAt', 'address'] }];
+    const toPopulate = [
+      { path: 'customer', select: ['fullName', 'firstName', 'lastName', 'phoneNumber', 'photo', 'dateOfBirth', 'gender', 'createdAt', 'address'] }
+    ];
 
     try {
       const packageClients = await this.packageClientService.findAll(filter, { authUser, query, toPopulate });

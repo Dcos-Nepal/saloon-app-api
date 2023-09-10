@@ -1,7 +1,7 @@
 import { PaginationQueryDto } from '../../../common/dto/pagination.dto';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
-export class CustomerQueryDto extends PaginationQueryDto {
+export class ReportQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   q?: string;

@@ -17,6 +17,7 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PackageClientsModule } from './modules/package-clients/package-clients.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -38,7 +39,8 @@ import { PackageClientsModule } from './modules/package-clients/package-clients.
     CustomersModule,
     PackageClientsModule,
     AppointmentsModule,
-    OrdersModule
+    OrdersModule,
+    ReportsModule
   ],
   controllers: [AppController],
   providers: [ConfigService, AppService]
