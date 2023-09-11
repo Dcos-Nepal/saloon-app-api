@@ -25,23 +25,8 @@ export class PackageClientsController {
 
   @Get()
   async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<PackageClient> = { ...query };
-    // Get only not deleted packageClients
-    filter.isDeleted = false;
-
-    if (query.q) {
-      filter.title = { $regex: query.q, $options: 'i' };
-    }
-
-    // Default Filter
-    filter['shopId'] = { $eq: authUser.shopId };
-
-    const toPopulate = [
-      { path: 'customer', select: ['fullName', 'firstName', 'lastName', 'phoneNumber', 'photo', 'dateOfBirth', 'gender', 'createdAt', 'address'] }
-    ];
-
     try {
-      const packageClients = await this.packageClientService.findAll(filter, { authUser, query, toPopulate });
+      const packageClients = await this.packageClientService.findPackageClients(query, authUser.shopId);
       return new ResponseSuccess('COMMON.SUCCESS', packageClients);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());

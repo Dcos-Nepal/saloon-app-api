@@ -3,8 +3,7 @@ import { Model } from 'mongoose';
 import { Injectable, Logger } from '@nestjs/common';
 
 import BaseService from 'src/base/base-service';
-import { IServiceOptions } from 'src/common/interfaces';
-import { PackageClient, IPackageClient } from './interfaces/package-client.interface';
+import { IPackageClient, PackageClient } from './interfaces/package-client.interface';
 
 @Injectable()
 export class PackageClientsService extends BaseService<PackageClient, IPackageClient> {
@@ -18,11 +17,42 @@ export class PackageClientsService extends BaseService<PackageClient, IPackageCl
   /**
    * Get PackageClients based on the provided filters
    *
-   * @param filter
-   * @param options
    * @returns
+   * @param query
+   * @param shopId
    */
-  async findAll(filter: any, options?: IServiceOptions) {
-    return super.findAll(filter, options);
+  async findPackageClients(query: any, shopId: string) {
+    const filter = { isDeleted: false, shopId: { $eq: shopId } };
+
+    if (query.q) {
+      filter['customer.fullName'] = { $regex: query.q, $options: 'i' };
+    }
+
+    const limit = parseInt(query['limit'] || 10);
+    const page = parseInt(query['page'] || 1);
+    const skip = (page - 1) * limit;
+
+    const sortOptions = query.sortBy || '-createdAt';
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'customers',
+          localField: 'customer',
+          foreignField: '_id',
+          as: 'customer'
+        }
+      },
+      {
+        $unwind: '$customer'
+      }
+    ];
+
+    const customersPromise = this.visitModel.aggregate(pipeline).match(filter).limit(limit).skip(skip).sort(sortOptions);
+    const countPromise = this.visitModel.aggregate(pipeline).match(filter).count('count');
+
+    const [rows, totalCount] = await Promise.all([customersPromise, countPromise]);
+
+    return { rows, totalCount: totalCount[0].count };
   }
 }
