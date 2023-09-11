@@ -16,6 +16,10 @@ export class ReportQueryDto extends PaginationQueryDto {
 
   @IsOptional()
   @IsString()
+  session?: string;
+
+  @IsOptional()
+  @IsString()
   type?: string;
 
   @IsOptional()
