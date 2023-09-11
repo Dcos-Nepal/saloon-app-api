@@ -236,7 +236,7 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
 
     const services = {};
     countByService.forEach((item) => {
-      const key = item._id === null ? 'OTHERS' : item._id;
+      const key = item._id === null ? 'Others' : item._id.split(' ')[0];
 
       services[key] = item.count;
     });
