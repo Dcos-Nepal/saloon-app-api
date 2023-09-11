@@ -139,6 +139,19 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
     return { rows: customers, totalCount };
   }
 
+  async getCustomersForReport(shopId: string, query: ReportQueryDto) {
+    const sortQuery = {};
+    const { sort = 'createdAt', order = 'desc' } = query;
+
+    sortQuery[sort] = order;
+
+    const filter = this.getCustomerWithAppointmentsFilter(shopId, query);
+
+    const customers: Customer[] = await this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).sort(sortQuery).exec();
+
+    return customers;
+  }
+
   async getStats(shopId: string, query: ReportQueryDto) {
     this.logger.log(`Get report `);
     type CountType = { _id: string; count: number };
