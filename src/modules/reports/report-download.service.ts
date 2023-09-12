@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { ReportQueryDto } from './dto/reports.dto';
-import * as Excel from 'exceljs';
+import { Workbook, Worksheet } from 'exceljs';
 import * as tmp from 'tmp';
+import { capitalize } from '../../common/utils/string-utils';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class ReportDownloadService {
@@ -15,21 +17,76 @@ export class ReportDownloadService {
   async downloadReport(shopId: string, query: ReportQueryDto) {
     const customers = await this.reportsService.getCustomersForReport(shopId, query);
 
-    const workbook = new Excel.Workbook();
+    const workbook = new Workbook();
     const sheet = workbook.addWorksheet('Sheet1');
 
     // write filters
+    sheet.mergeCells('A1', 'B1');
+    sheet.getCell('A1').value = 'Filters';
     const filterRows: string[][] = [];
     const filters = Object.fromEntries(Object.entries(query).filter(([_, value]) => !!value));
-    filterRows.push(Object.keys(filters));
+    filterRows.push(Object.keys(filters).map((value) => capitalize(value)));
     filterRows.push(Object.values(filters));
-
     sheet.addRows(filterRows);
+
+    // write customers rows
+    const headers = ['Sn', 'Name', 'Address', 'Phone', 'Email', 'Services', 'Session', 'Last Appointment', 'Type', 'Status'];
+    sheet.getRow(6).values = headers;
+
+    sheet.columns = [
+      { key: 'sn', width: 10 },
+      { key: 'name', width: 25 },
+      { key: 'address', width: 25 },
+      { key: 'phone', width: 20 },
+      { key: 'email', width: 20 },
+      { key: 'services', width: 30 },
+      { key: 'session', width: 10 },
+      { key: 'appointmentDate', width: 30, style: { numFmt: 'yyyy/mm/dd hh:mm AM/PM' } },
+      { key: 'type', width: 20 },
+      { key: 'status', width: 20 }
+    ];
+
+    customers.forEach((item, index) => {
+      const appointment = item.customer_appointments;
+      const appointmentDate = appointment ? `${appointment.appointmentDate} ${DateTime.fromISO(appointment.appointmentTime).toFormat('hh:mm a')}` : null;
+
+      sheet.addRow({
+        sn: index + 1,
+        name: item.fullName,
+        address: item.address,
+        phone: item.phoneNumber,
+        email: item.email,
+        services: appointment?.services?.join(',\n'),
+        session: item.session,
+        appointmentDate: appointmentDate,
+        type: appointment?.type,
+        status: appointment?.status?.name
+      });
+    });
+
+    this.styleSheet(sheet);
 
     return await new Promise((resolve, reject) => {
       tmp.file({ discardDescriptor: true, prefix: 'Report', postfix: '.xlsx', mode: parseInt('0600', 8) }, async (err, file) => {
         workbook.xlsx.writeFile(file).then((_) => resolve(file));
       });
     });
+  }
+
+  private styleSheet(sheet: Worksheet) {
+    sheet.columns.forEach((column) => {
+      column.font = {
+        size: 12
+      };
+    });
+
+    const bold = { bold: true };
+    const boldLarge = { size: 14, bold: true };
+    // filters
+    sheet.getRow(1).font = boldLarge;
+    sheet.getRow(2).font = bold;
+
+    // data rows
+    sheet.getRow(6).font = bold;
   }
 }

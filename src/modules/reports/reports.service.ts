@@ -151,7 +151,7 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
 
     const filter = this.getCustomerWithAppointmentsFilter(shopId, query);
 
-    const customers: Customer[] = await this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).sort(sortQuery).exec();
+    const customers: any[] = await this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).sort(sortQuery).exec();
 
     return customers;
   }
