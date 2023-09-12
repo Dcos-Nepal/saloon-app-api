@@ -87,6 +87,10 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
       filter['customer_appointments.status.name'] = query.appointmentStatus;
     }
 
+    if (query.service) {
+      filter['customer_appointments.services'] = query.service;
+    }
+
     const dateFilter = {};
 
     if (query.minDate) {

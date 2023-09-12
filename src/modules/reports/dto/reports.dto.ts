@@ -28,6 +28,10 @@ export class ReportQueryDto extends PaginationQueryDto {
 
   @IsOptional()
   @IsString()
+  service?: string;
+
+  @IsOptional()
+  @IsString()
   minDate?: string;
 
   @IsOptional()
