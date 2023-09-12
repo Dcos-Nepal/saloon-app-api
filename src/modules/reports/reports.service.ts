@@ -76,7 +76,7 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
     }
 
     if (query.session) {
-      filter['session'] = { $gte: Number(query.session) };
+      filter['session'] = Number(query.session);
     }
 
     if (query.type) {

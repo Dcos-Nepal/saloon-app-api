@@ -53,6 +53,6 @@ export class PackageClientsService extends BaseService<PackageClient, IPackageCl
 
     const [rows, totalCount] = await Promise.all([customersPromise, countPromise]);
 
-    return { rows, totalCount: totalCount[0].count };
+    return { rows, totalCount: totalCount[0]?.count || 0 };
   }
 }
