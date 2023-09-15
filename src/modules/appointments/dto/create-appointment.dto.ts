@@ -64,5 +64,8 @@ export class AppointmentQueryDto extends PaginationQueryDto {
   isDeleted?: boolean;
 
   @IsOptional()
-  appointmentDate?: string;
+  minDate?: string;
+
+  @IsOptional()
+  maxDate?: string;
 }

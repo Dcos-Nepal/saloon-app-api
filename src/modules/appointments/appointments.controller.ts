@@ -1,11 +1,11 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, UseGuards, Type } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Patch, Post, Query, Type, UseGuards } from '@nestjs/common';
 
 import { AppointmentsService } from './appointments.service';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
-import { CreateAppointmentDto, AppointmentQueryDto } from './dto/create-appointment.dto';
+import { AppointmentQueryDto, CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { Appointment } from './interfaces/appointment.interface';
 import { CurrentUser } from 'src/common/decorators/current-user';
@@ -45,8 +45,17 @@ export class AppointmentsController {
     const filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
-      if (query.appointmentDate) {
-        filter.appointmentDate = { $eq: query.appointmentDate };
+      if (query.minDate || query.maxDate) {
+        const dateFilter = {};
+
+        if (query.minDate) {
+          dateFilter['$gte'] = query.minDate;
+        }
+        if (query.maxDate) {
+          dateFilter['$lte'] = query.maxDate;
+        }
+
+        filter.appointmentDate = dateFilter;
       }
 
       if (query.status) {
@@ -61,7 +70,12 @@ export class AppointmentsController {
       // Remove unnecessary fields
       delete filter.status;
 
-      const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email', 'photo'] }];
+      const toPopulate = [
+        {
+          path: 'customer',
+          select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email', 'photo']
+        }
+      ];
       const appointmentResponse = await this.appointmentsService.findAll(filter, { query, toPopulate });
 
       let rowsCount = 0;
