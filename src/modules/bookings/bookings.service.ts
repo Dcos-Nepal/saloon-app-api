@@ -52,7 +52,7 @@ export class BookingsService extends BaseService<Booking, IBooking> {
     const page = parseInt(query['page'] || 1);
     const skip = (page - 1) * limit;
 
-    const sortOptions = query.sortBy || '-createdAt';
+    const sortOptions = query.sortBy || '-status.date';
 
     const pipeline = [
       {
