@@ -26,7 +26,7 @@ export class ReportsController {
       const customerResponse = await this.reportsService.filterCustomersWithAppointments(authUser.shopId, query);
 
       if (customerResponse) {
-        return new ResponseSuccess('REPORT.FILTER', customerResponse);
+        return new ResponseSuccess('REPORT.FILTER', customerResponse, true);
       } else {
         return new ResponseError('REPORT.ERROR.FILTER_CUSTOMER_FAILED');
       }
@@ -43,7 +43,7 @@ export class ReportsController {
       const response = await this.reportsService.getStats(authUser.shopId, query);
 
       if (response) {
-        return new ResponseSuccess('REPORT.FILTER', response);
+        return new ResponseSuccess('REPORT.FILTER', response, true);
       } else {
         return new ResponseError('REPORT.ERROR.FILTER_CUSTOMER_FAILED');
       }
