@@ -26,28 +26,9 @@ export class BookingsController {
 
   @Get()
   async find(@CurrentUser() authUser: User, @Query() query): Promise<IResponse> {
-    const filter: mongoose.FilterQuery<Booking> = { ...query };
-    // Get only not deleted bookings
-    filter.isDeleted = false;
-
-    if (query.q) {
-      filter.title = { $regex: query.q, $options: 'i' };
-    }
-
-    if (query.status) {
-      filter['status.status'] = query.status;
-    }
-
-    // Default Filter
-    filter['shopId'] = { $eq: authUser.shopId };
-
-    delete filter.status;
-
-    const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber'] }];
-
     try {
-      const bookings = await this.bookingsService.findAll(filter, { authUser, query, toPopulate });
-      return new ResponseSuccess('COMMON.SUCCESS', bookings);
+      const bookings = await this.bookingsService.findAllBookings(query, authUser.shopId);
+      return new ResponseSuccess('COMMON.SUCCESS', bookings, true);
     } catch (error) {
       return new ResponseError('COMMON.ERROR.GENERIC_ERROR', error.toString());
     }
