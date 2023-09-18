@@ -71,7 +71,7 @@ export class BookingsService extends BaseService<Booking, IBooking> {
       }
     ];
 
-    const customersPromise = this.visitModel.aggregate(pipeline).match(filter).limit(limit).skip(skip).sort(sortOptions);
+    const customersPromise = this.visitModel.aggregate(pipeline).match(filter).sort(sortOptions).skip(skip).limit(limit);
     const countPromise = this.visitModel.aggregate(pipeline).match(filter).count('count');
 
     const [rows, totalCount] = await Promise.all([customersPromise, countPromise]);
