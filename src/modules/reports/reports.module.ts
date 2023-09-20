@@ -3,11 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { ReportsService } from './reports.service';
 import { ReportsController } from './reports.controller';
-import { CustomerSchema } from '../customers/schemas/customer.schema';
 import { ReportDownloadService } from './report-download.service';
+import { AppointmentSchema } from '../appointments/schemas/appointment.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Customer', schema: CustomerSchema }])],
+  imports: [MongooseModule.forFeature([{ name: 'Appointment', schema: AppointmentSchema }])],
   controllers: [ReportsController],
   providers: [ReportsService, ReportDownloadService]
 })

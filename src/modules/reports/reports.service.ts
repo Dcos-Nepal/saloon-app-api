@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, Logger } from '@nestjs/common';
 import BaseService from 'src/base/base-service';
 import { ReportQueryDto } from './dto/reports.dto';
-import { Customer, ICustomer } from '../customers/interfaces/customer.interface';
+import { ICustomer } from '../customers/interfaces/customer.interface';
 import { Appointment } from '../appointments/interfaces/appointment.interface';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
     this.logger = new Logger(ReportsService.name);
   }
 
-  private getAppointmentsWithCustomerLookup(shopId, query) {
+  private getAppointmentsWithCustomerLookup(shopId, query, paginate = false) {
     const appointmentFilters = this.getAppointmentFilters(shopId, query);
     const defaultSort: Record<string, 1 | -1 | { $meta: 'textScore' }> = { appointmentDate: -1, appointmentTime: -1 };
 
@@ -26,17 +26,22 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       sortQuery[sort] = order;
     }
 
-    const limit = query.limit || 10;
-    const page = parseInt(query['page'] || 1);
-    const skip = (page - 1) * limit;
+    const paginationStage = [];
+
+    if (paginate) {
+      const limit = query.limit || 10;
+      const page = parseInt(query['page'] || 1);
+      const skip = (page - 1) * limit;
+
+      paginationStage.push({ $skip: skip }, { $limit: limit });
+    }
 
     return [
       {
         $match: appointmentFilters
       },
       { $sort: sort ? sortQuery : defaultSort },
-      { $skip: skip },
-      { $limit: limit },
+      ...paginationStage,
       {
         $lookup: {
           from: 'customers',
@@ -121,13 +126,14 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
   async filterAppointmentsWithCustomer(shopId: string, query: ReportQueryDto) {
     this.logger.log(`Filter: Fetch report, set query payload `);
 
-    const lookup = this.getAppointmentsWithCustomerLookup(shopId, query);
+    const customerLookup = this.getAppointmentsWithCustomerLookup(shopId, query, true);
+    const countLookup = this.getAppointmentsWithCustomerLookup(shopId, query);
     const customerFilters = this.getCustomerFilters(query);
 
-    const appointments: Appointment[] = await this.appointmentModel.aggregate(lookup).match(customerFilters).exec();
+    const appointments: Appointment[] = await this.appointmentModel.aggregate(customerLookup).match(customerFilters).exec();
 
     let totalCount = 0;
-    const countPipeline = await this.appointmentModel.aggregate(lookup).match(customerFilters).count('count').exec();
+    const countPipeline = await this.appointmentModel.aggregate(countLookup).match(customerFilters).count('count').exec();
 
     countPipeline.forEach((doc) => {
       totalCount = doc.count;
@@ -148,7 +154,7 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
   }
 
   async getStats(shopId: string, query: ReportQueryDto) {
-    this.logger.log(`Get report `);
+    this.logger.log(`Get report stats`);
     type CountType = { _id: string; count: number };
 
     const lookup = this.getAppointmentsWithCustomerLookup(shopId, query);
@@ -169,7 +175,7 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       .aggregate(lookup)
       .match(customerFilters)
       .group({
-        _id: 'type',
+        _id: '$type',
         count: {
           $sum: 1
         }
@@ -180,7 +186,7 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       .aggregate(lookup)
       .match(customerFilters)
       .group({
-        _id: 'status.name',
+        _id: '$status.name',
         count: {
           $sum: 1
         }
@@ -191,11 +197,11 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       .aggregate(lookup)
       .match(customerFilters)
       .unwind({
-        path: 'services',
+        path: '$services',
         preserveNullAndEmptyArrays: true
       })
       .group({
-        _id: 'services',
+        _id: '$services',
         count: {
           $sum: 1
         }
@@ -215,14 +221,27 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       .sort({ _id: 1 })
       .exec();
 
+    const appointmentDatePromise = this.appointmentModel
+      .aggregate(lookup)
+      .match(customerFilters)
+      .group({
+        _id: '$appointmentDate',
+        count: {
+          $sum: 1
+        }
+      })
+      .sort({ _id: 1 })
+      .exec();
+
     const totalPromise = this.appointmentModel.aggregate(lookup).match(customerFilters).count('count').exec();
 
-    const [countByTags, countByTypes, countByStatus, countByService, countBySession, countTotal]: CountType[][] = await Promise.all([
+    const [countByTags, countByTypes, countByStatus, countByService, countBySession, countByAppointmentDate, countTotal]: CountType[][] = await Promise.all([
       tagsPromise,
       typesPromise,
       statusPromise,
       servicePromise,
       sessionPromise,
+      appointmentDatePromise,
       totalPromise
     ]);
 
@@ -264,6 +283,16 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       sessions[key] += item.count;
     });
 
+    const appointmentDates = {};
+    countByAppointmentDate.forEach((item) => {
+      const key = item._id;
+
+      if (appointmentDates[key] === undefined) {
+        appointmentDates[key] = 0;
+      }
+      appointmentDates[key] += item.count;
+    });
+
     let totalCount = 0;
     countTotal.forEach((doc) => {
       totalCount = doc.count;
@@ -271,7 +300,7 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
 
     this.logger.log(`Filter: Fetched stats successfully`);
 
-    return { totalCount, tags, appointmentStatus, appointmentTypes, services, sessions };
+    return { totalCount, tags, appointmentStatus, appointmentTypes, services, appointmentDates, sessions };
   }
 }
 
