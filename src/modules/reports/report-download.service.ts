@@ -47,20 +47,20 @@ export class ReportDownloadService {
     ];
 
     customers.forEach((item, index) => {
-      const appointment = item.customer_appointments;
-      const appointmentDate = appointment ? `${appointment.appointmentDate} ${DateTime.fromISO(appointment.appointmentTime).toFormat('hh:mm a')}` : null;
+      const customer = item.customer;
+      const appointmentDate = `${item.appointmentDate} ${DateTime.fromISO(item.appointmentTime).toFormat('hh:mm a')}`;
 
       sheet.addRow({
         sn: index + 1,
-        name: item.fullName,
-        address: item.address,
-        phone: item.phoneNumber,
-        email: item.email,
-        services: appointment?.services?.join(',\n'),
+        name: customer.fullName,
+        address: customer.address,
+        phone: customer.phoneNumber,
+        email: customer.email,
+        services: item?.services?.join(',\n'),
         session: item.session,
         appointmentDate: appointmentDate,
-        type: appointment?.type,
-        status: appointment?.status?.name
+        type: item?.type,
+        status: item?.status?.name
       });
     });
 

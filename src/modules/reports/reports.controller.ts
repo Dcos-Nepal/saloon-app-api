@@ -23,10 +23,10 @@ export class ReportsController {
   @UseGuards(AuthGuard('jwt'))
   async findAll(@CurrentUser() authUser: User, @Query() query: ReportQueryDto) {
     try {
-      const customerResponse = await this.reportsService.filterCustomersWithAppointments(authUser.shopId, query);
+      const response = await this.reportsService.filterAppointmentsWithCustomer(authUser.shopId, query);
 
-      if (customerResponse) {
-        return new ResponseSuccess('REPORT.FILTER', customerResponse, true);
+      if (response) {
+        return new ResponseSuccess('REPORT.FILTER', response, true);
       } else {
         return new ResponseError('REPORT.ERROR.FILTER_CUSTOMER_FAILED');
       }

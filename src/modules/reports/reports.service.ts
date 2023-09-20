@@ -4,72 +4,57 @@ import { Injectable, Logger } from '@nestjs/common';
 import BaseService from 'src/base/base-service';
 import { ReportQueryDto } from './dto/reports.dto';
 import { Customer, ICustomer } from '../customers/interfaces/customer.interface';
+import { Appointment } from '../appointments/interfaces/appointment.interface';
 
 @Injectable()
-export class ReportsService extends BaseService<Customer, ICustomer> {
+export class ReportsService extends BaseService<Appointment, ICustomer> {
   private logger: Logger;
 
-  constructor(@InjectModel('Customer') private readonly customerModel: Model<Customer>) {
-    super(customerModel);
+  constructor(@InjectModel('Appointment') private readonly appointmentModel: Model<Appointment>) {
+    super(appointmentModel);
     this.logger = new Logger(ReportsService.name);
   }
 
-  private getCustomerWithAppointmentsLookUp() {
-    const sort: Record<string, 1 | -1 | { $meta: 'textScore' }> = { 'customer_appointments.createdAt': -1 };
+  private getAppointmentsWithCustomerLookup(shopId, query) {
+    const appointmentFilters = this.getAppointmentFilters(shopId, query);
+    const defaultSort: Record<string, 1 | -1 | { $meta: 'textScore' }> = { appointmentDate: -1, appointmentTime: -1 };
+
+    const sortQuery = {};
+    const { sort, order } = query;
+
+    if (sort) {
+      sortQuery[sort] = order;
+    }
+
+    const limit = query.limit || 10;
+    const page = parseInt(query['page'] || 1);
+    const skip = (page - 1) * limit;
 
     return [
       {
+        $match: appointmentFilters
+      },
+      { $sort: sort ? sortQuery : defaultSort },
+      { $skip: skip },
+      { $limit: limit },
+      {
         $lookup: {
-          from: 'appointments',
-          localField: '_id',
-          foreignField: 'customer',
-          as: 'customer_appointments'
+          from: 'customers',
+          localField: 'customer',
+          foreignField: '_id',
+          as: 'customer'
         }
       },
       {
         $unwind: {
-          path: '$customer_appointments',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $sort: sort
-      },
-      {
-        $group: {
-          _id: '$_id',
-          session: { $max: '$customer_appointments.session' },
-          customerData: { $first: '$$ROOT' }
-        }
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: ['$customerData', { session: '$session' }]
-          }
+          path: '$customer'
         }
       }
     ];
   }
 
-  private getCustomerWithAppointmentsFilter(shopId: string, query: ReportQueryDto) {
+  private getAppointmentFilters(shopId: string, query: ReportQueryDto) {
     const filter = { shopId: { $eq: shopId } };
-    if (query.tags) {
-      filter['tags'] = query.tags;
-    }
-    if (query.q) {
-      filter['$or'] = [
-        { fullName: { $regex: query.q, $options: 'i' } },
-        {
-          phoneNumber: {
-            $regex: query.q,
-            $options: 'i'
-          }
-        }
-      ];
-    } else {
-      filter['$or'] = [{ isDeleted: false }, { isDeleted: null }, { isDeleted: undefined }];
-    }
 
     if (query.isNewCustomer === 'true') {
       filter['session'] = 0;
@@ -80,15 +65,15 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
     }
 
     if (query.type) {
-      filter['customer_appointments.type'] = query.type;
+      filter['type'] = query.type;
     }
 
     if (query.appointmentStatus) {
-      filter['customer_appointments.status.name'] = query.appointmentStatus;
+      filter['status.name'] = query.appointmentStatus;
     }
 
     if (query.service) {
-      filter['customer_appointments.services'] = query.service;
+      filter['services'] = query.service;
     }
 
     const dateFilter = {};
@@ -104,106 +89,113 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
     }
 
     if (!!Object.keys(dateFilter).length) {
-      filter['createdAt'] = dateFilter;
+      filter['status.date'] = dateFilter;
     }
 
     return filter;
   }
 
-  async filterCustomersWithAppointments(shopId: string, query: ReportQueryDto) {
-    this.logger.log(`Filter: Fetch Customers, set query payload `);
-    const limit = query.limit || 10;
-    const page = parseInt(query['page'] || 1);
-    const skip = (page - 1) * limit;
+  private getCustomerFilters(query: ReportQueryDto) {
+    const filter = {};
 
-    const sortQuery = {};
-    const { sort = 'createdAt', order = 'desc' } = query;
+    if (query.tags) {
+      filter['customer.tags'] = query.tags;
+    }
+    if (query.q) {
+      filter['$or'] = [
+        { 'customer.fullName': { $regex: query.q, $options: 'i' } },
+        {
+          'customer.phoneNumber': {
+            $regex: query.q,
+            $options: 'i'
+          }
+        }
+      ];
+    } else {
+      filter['$or'] = [{ 'customer.isDeleted': false }, { 'customer.isDeleted': null }, { 'customer.isDeleted': undefined }];
+    }
 
-    sortQuery[sort] = order;
+    return filter;
+  }
 
-    const filter = this.getCustomerWithAppointmentsFilter(shopId, query);
+  async filterAppointmentsWithCustomer(shopId: string, query: ReportQueryDto) {
+    this.logger.log(`Filter: Fetch report, set query payload `);
 
-    const customers: Customer[] = await this.customerModel
-      .aggregate(this.getCustomerWithAppointmentsLookUp())
-      .match(filter)
-      .sort(sortQuery)
-      .skip(skip)
-      .limit(limit)
-      .exec();
+    const lookup = this.getAppointmentsWithCustomerLookup(shopId, query);
+    const customerFilters = this.getCustomerFilters(query);
+
+    const appointments: Appointment[] = await this.appointmentModel.aggregate(lookup).match(customerFilters).exec();
 
     let totalCount = 0;
-    const countPipeline = await this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).count('count').exec();
+    const countPipeline = await this.appointmentModel.aggregate(lookup).match(customerFilters).count('count').exec();
 
     countPipeline.forEach((doc) => {
       totalCount = doc.count;
     });
 
-    this.logger.log(`Filter: Fetched Customers successfully`);
+    this.logger.log(`Filter: Fetched report successfully`);
 
-    return { rows: customers, totalCount };
+    return { rows: appointments, totalCount };
   }
 
   async getCustomersForReport(shopId: string, query: ReportQueryDto) {
-    const sortQuery = {};
-    const { sort = 'createdAt', order = 'desc' } = query;
+    const lookup = this.getAppointmentsWithCustomerLookup(shopId, query);
+    const customerFilters = this.getCustomerFilters(query);
 
-    sortQuery[sort] = order;
+    const appointments: any[] = await this.appointmentModel.aggregate(lookup).match(customerFilters).exec();
 
-    const filter = this.getCustomerWithAppointmentsFilter(shopId, query);
-
-    const customers: any[] = await this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).sort(sortQuery).exec();
-
-    return customers;
+    return appointments;
   }
 
   async getStats(shopId: string, query: ReportQueryDto) {
     this.logger.log(`Get report `);
     type CountType = { _id: string; count: number };
 
-    const filter = this.getCustomerWithAppointmentsFilter(shopId, query);
+    const lookup = this.getAppointmentsWithCustomerLookup(shopId, query);
+    const customerFilters = this.getCustomerFilters(query);
 
-    const tagsPromise = this.customerModel
-      .aggregate(this.getCustomerWithAppointmentsLookUp())
-      .match(filter)
+    const tagsPromise = this.appointmentModel
+      .aggregate(lookup)
+      .match(customerFilters)
       .group({
-        _id: '$tags',
+        _id: '$customer.tags',
         count: {
           $sum: 1
         }
       })
       .exec();
 
-    const typesPromise = this.customerModel
-      .aggregate(this.getCustomerWithAppointmentsLookUp())
-      .match(filter)
+    const typesPromise = this.appointmentModel
+      .aggregate(lookup)
+      .match(customerFilters)
       .group({
-        _id: '$customer_appointments.type',
+        _id: 'type',
         count: {
           $sum: 1
         }
       })
       .exec();
 
-    const statusPromise = this.customerModel
-      .aggregate(this.getCustomerWithAppointmentsLookUp())
-      .match(filter)
+    const statusPromise = this.appointmentModel
+      .aggregate(lookup)
+      .match(customerFilters)
       .group({
-        _id: '$customer_appointments.status.name',
+        _id: 'status.name',
         count: {
           $sum: 1
         }
       })
       .exec();
 
-    const servicePromise = this.customerModel
-      .aggregate(this.getCustomerWithAppointmentsLookUp())
-      .match(filter)
+    const servicePromise = this.appointmentModel
+      .aggregate(lookup)
+      .match(customerFilters)
       .unwind({
-        path: '$customer_appointments.services',
+        path: 'services',
         preserveNullAndEmptyArrays: true
       })
       .group({
-        _id: '$customer_appointments.services',
+        _id: 'services',
         count: {
           $sum: 1
         }
@@ -211,9 +203,9 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
       .sort({ _id: 1 })
       .exec();
 
-    const sessionPromise = this.customerModel
-      .aggregate(this.getCustomerWithAppointmentsLookUp())
-      .match(filter)
+    const sessionPromise = this.appointmentModel
+      .aggregate(lookup)
+      .match(customerFilters)
       .group({
         _id: '$session',
         count: {
@@ -223,7 +215,7 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
       .sort({ _id: 1 })
       .exec();
 
-    const totalPromise = this.customerModel.aggregate(this.getCustomerWithAppointmentsLookUp()).match(filter).count('count').exec();
+    const totalPromise = this.appointmentModel.aggregate(lookup).match(customerFilters).count('count').exec();
 
     const [countByTags, countByTypes, countByStatus, countByService, countBySession, countTotal]: CountType[][] = await Promise.all([
       tagsPromise,
@@ -277,7 +269,7 @@ export class ReportsService extends BaseService<Customer, ICustomer> {
       totalCount = doc.count;
     });
 
-    this.logger.log(`Filter: Fetched Customers successfully`);
+    this.logger.log(`Filter: Fetched stats successfully`);
 
     return { totalCount, tags, appointmentStatus, appointmentTypes, services, sessions };
   }
