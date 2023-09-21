@@ -81,20 +81,17 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       filter['services'] = query.service;
     }
 
-    const dateFilter = {};
+    if (query.minDate || query.maxDate) {
+      const dateFilter = {};
 
-    if (query.minDate) {
-      dateFilter['$gte'] = new Date(query.minDate);
-    }
+      if (query.minDate) {
+        dateFilter['$gte'] = query.minDate;
+      }
+      if (query.maxDate) {
+        dateFilter['$lte'] = query.maxDate;
+      }
 
-    if (query.maxDate) {
-      const maxDate = new Date(query.maxDate);
-      maxDate.setDate(maxDate.getDate() + 1);
-      dateFilter['$lt'] = maxDate;
-    }
-
-    if (!!Object.keys(dateFilter).length) {
-      filter['status.date'] = dateFilter;
+      filter['appointmentDate'] = dateFilter;
     }
 
     return filter;
