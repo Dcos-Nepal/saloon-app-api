@@ -28,11 +28,26 @@ export class PackageClientsService extends BaseService<PackageClient, IPackageCl
       filter['customer.fullName'] = { $regex: query.q, $options: 'i' };
     }
 
+    if (query.minDate || query.maxDate) {
+      const dateFilter = {};
+
+      if (query.minDate) {
+        dateFilter['$gte'] = new Date(query.minDate);
+      }
+      if (query.maxDate) {
+        const date = new Date(query.maxDate);
+        date.setDate(date.getDate() + 1);
+        dateFilter['$lt'] = date;
+      }
+
+      filter['packagePaidDate'] = dateFilter;
+    }
+
     const limit = parseInt(query['limit'] || 10);
     const page = parseInt(query['page'] || 1);
     const skip = (page - 1) * limit;
 
-    const sortOptions = query.sortBy || '-createdAt';
+    const sortOptions = query.sortBy || '-packagePaidDate';
 
     const pipeline = [
       {
@@ -48,7 +63,7 @@ export class PackageClientsService extends BaseService<PackageClient, IPackageCl
       }
     ];
 
-    const customersPromise = this.visitModel.aggregate(pipeline).match(filter).limit(limit).skip(skip).sort(sortOptions);
+    const customersPromise = this.visitModel.aggregate(pipeline).match(filter).sort(sortOptions).limit(limit).skip(skip);
     const countPromise = this.visitModel.aggregate(pipeline).match(filter).count('count');
 
     const [rows, totalCount] = await Promise.all([customersPromise, countPromise]);
