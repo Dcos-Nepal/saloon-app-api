@@ -62,7 +62,7 @@ export class AppointmentsController {
         filter['status.name'] = query.status.toString();
       }
 
-      filter['$or'] = [{ isDeleted: false }];
+      filter['isDeleted'] = false;
 
       // Default Filter
       filter['shopId'] = { $eq: authUser.shopId };

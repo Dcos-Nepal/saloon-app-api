@@ -59,7 +59,7 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
   }
 
   private getAppointmentFilters(shopId: string, query: ReportQueryDto) {
-    const filter = { shopId: { $eq: shopId } };
+    const filter = { shopId: { $eq: shopId }, isDeleted: false };
 
     if (query.isNewCustomer === 'true') {
       filter['session'] = 0;
@@ -102,19 +102,6 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
 
     if (query.tags) {
       filter['customer.tags'] = query.tags;
-    }
-    if (query.q) {
-      filter['$or'] = [
-        { 'customer.fullName': { $regex: query.q, $options: 'i' } },
-        {
-          'customer.phoneNumber': {
-            $regex: query.q,
-            $options: 'i'
-          }
-        }
-      ];
-    } else {
-      filter['$or'] = [{ 'customer.isDeleted': false }, { 'customer.isDeleted': null }, { 'customer.isDeleted': undefined }];
     }
 
     return filter;
@@ -272,7 +259,7 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
 
     const sessions = {};
     countBySession.forEach((item) => {
-      const key = categorizeRange(item._id);
+      const key = item._id === null ? 'None' : item._id;
 
       if (sessions[key] === undefined) {
         sessions[key] = 0;
@@ -298,25 +285,5 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
     this.logger.log(`Filter: Fetched stats successfully`);
 
     return { totalCount, tags, appointmentStatus, appointmentTypes, services, appointmentDates, sessions };
-  }
-}
-
-function categorizeRange(num: string | null): string {
-  if (num === null) {
-    return 'None';
-  }
-
-  const numb = Number(num);
-
-  if (numb === 0) {
-    return '0';
-  } else if (numb <= 3) {
-    return '1-3';
-  } else if (numb <= 6) {
-    return '4-6';
-  } else if (numb <= 9) {
-    return '7-9';
-  } else {
-    return '10+';
   }
 }
