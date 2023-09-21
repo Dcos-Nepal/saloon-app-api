@@ -55,5 +55,8 @@ export class OrderQueryDto extends PaginationQueryDto {
   isDeleted?: boolean;
 
   @IsOptional()
-  orderDate?: string;
+  minDate?: string;
+
+  @IsOptional()
+  maxDate?: string;
 }

@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Controller, Post, Body, Logger, Get, Query, Param, Patch, Delete, UseGuards, Type } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Patch, Post, Query, Type, UseGuards } from '@nestjs/common';
 
 import { OrdersService } from './orders.service';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
@@ -45,8 +45,17 @@ export class OrdersController {
     const filter: mongoose.FilterQuery<Type> = { ...query };
 
     try {
-      if (query.orderDate) {
-        filter.orderDate = { $eq: query.orderDate };
+      if (query.minDate || query.maxDate) {
+        const dateFilter = {};
+
+        if (query.minDate) {
+          dateFilter['$gte'] = new Date(query.minDate);
+        }
+        if (query.maxDate) {
+          dateFilter['$lte'] = new Date(query.maxDate);
+        }
+
+        filter['createdAt'] = dateFilter;
       }
 
       if (query.status) {
@@ -61,7 +70,12 @@ export class OrdersController {
       // Remove unnecessary fields
       delete filter.status;
 
-      const toPopulate = [{ path: 'customer', select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email', 'photo'] }];
+      const toPopulate = [
+        {
+          path: 'customer',
+          select: ['fullName', 'firstName', 'lastName', 'address', 'phoneNumber', 'email', 'photo']
+        }
+      ];
       const orderResponse = await this.ordersService.findAll(filter, { query, toPopulate });
 
       let rowsCount = 0;
