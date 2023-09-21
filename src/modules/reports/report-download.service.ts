@@ -30,7 +30,7 @@ export class ReportDownloadService {
     sheet.addRows(filterRows);
 
     // write customers rows
-    const headers = ['Sn', 'Name', 'Address', 'Phone', 'Email', 'Services', 'Session', 'Last Appointment', 'Type', 'Status'];
+    const headers = ['Sn', 'Name', 'Address', 'Phone', 'Email', 'Services', 'Session', 'Appointment Date', 'Type', 'Status'];
     sheet.getRow(6).values = headers;
 
     sheet.columns = [
