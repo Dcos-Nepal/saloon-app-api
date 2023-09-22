@@ -26,6 +26,17 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       sortQuery[sort] = order;
     }
 
+    let maxSessionStage = [];
+    if (query.isNewCustomer || query.session) {
+      const maxSession = query.isNewCustomer ? 0 : Number(query.session);
+      maxSessionStage = [
+        { $sort: { customer: 1, session: -1 } },
+        { $group: { _id: '$customer', docWithMaxSession: { $first: '$$ROOT' } } },
+        { $replaceWith: '$docWithMaxSession' },
+        { $match: { session: maxSession } }
+      ];
+    }
+
     const paginationStage = [];
 
     if (paginate) {
@@ -40,8 +51,13 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
       {
         $match: appointmentFilters
       },
+
+      ...maxSessionStage,
+
       { $sort: sort ? sortQuery : defaultSort },
+
       ...paginationStage,
+
       {
         $lookup: {
           from: 'customers',
@@ -60,14 +76,6 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
 
   private getAppointmentFilters(shopId: string, query: ReportQueryDto) {
     const filter = { shopId: { $eq: shopId }, isDeleted: false };
-
-    if (query.isNewCustomer === 'true') {
-      filter['session'] = 0;
-    }
-
-    if (query.session) {
-      filter['session'] = Number(query.session);
-    }
 
     if (query.type) {
       filter['type'] = query.type;
@@ -231,21 +239,21 @@ export class ReportsService extends BaseService<Appointment, ICustomer> {
 
     const tags = {};
     countByTags.forEach((item) => {
-      const key = item._id === '' ? 'OTHERS' : item._id;
+      const key = item._id === '' ? 'NO TAGS' : item._id;
 
       tags[key] = item.count;
     });
 
     const appointmentStatus = {};
     countByStatus.forEach((item) => {
-      const key = item._id === null ? 'OTHERS' : item._id;
+      const key = item._id;
 
       appointmentStatus[key] = item.count;
     });
 
     const appointmentTypes = {};
     countByTypes.forEach((item) => {
-      const key = item._id === null ? 'OTHERS' : item._id;
+      const key = item._id;
 
       appointmentTypes[key] = item.count;
     });
