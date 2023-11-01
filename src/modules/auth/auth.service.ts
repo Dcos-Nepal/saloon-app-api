@@ -26,7 +26,7 @@ export class AuthService {
    * @param userLogin
    */
   async loginUser(userLogin: UserLoginDto) {
-    const authUser = await this.validateLogin(userLogin.email, userLogin.password, userLogin.shopId);
+    const authUser = await this.validateLogin(userLogin.email, userLogin.password);
 
     if (!authUser.user?._id) {
       throw new NotFoundException('User for given credentials is not found');
@@ -48,8 +48,8 @@ export class AuthService {
    * @param tenant string
    * @returns Object
    */
-  async validateLogin(email: string, password: string, shopId: string) {
-    const userFromDb = await this.userModel.findOne({ email, shopId, isDeleted: false });
+  async validateLogin(email: string, password: string) {
+    const userFromDb = await this.userModel.findOne({ email, isDeleted: false });
 
     if (!userFromDb) {
       throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
