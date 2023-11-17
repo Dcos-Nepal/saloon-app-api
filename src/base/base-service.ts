@@ -132,7 +132,7 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<EntityModel>
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(id: string, body: Partial<Entity>, session: ClientSession, options?: IServiceOptions): Promise<EntityModel> {
+  async update(id: string, body: Partial<Entity>, session: ClientSession, options?: IServiceOptions): Promise<any> {
     return await this.model.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session });
   }
 
@@ -160,7 +160,7 @@ class BaseService<EntityModel, Entity> {
 
     if (!resource) throw new Error('Entity Model not found');
 
-    await resource.remove({ session });
+    await resource.deleteOne({ session });
 
     return true;
   }
@@ -173,7 +173,7 @@ class BaseService<EntityModel, Entity> {
    * @param options IServiceOptions<Optional>
    * @returns Promise<EntityModel>
    */
-  async softDelete(id: string, session: ClientSession): Promise<EntityModel> {
+  async softDelete(id: string, session: ClientSession): Promise<any> {
     return await this.model.findByIdAndUpdate({ _id: id }, { isDeleted: true }, { new: true, lean: true, session });
   }
 }
