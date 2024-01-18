@@ -132,7 +132,7 @@ class BaseService<EntityModel, Entity> {
    * @returns Promise<EntityModel>
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(id: string, body: Partial<Entity>, session: ClientSession, options?: IServiceOptions): Promise<any> {
+  async update(id: string, body: Partial<any>, session: ClientSession, options?: IServiceOptions): Promise<any> {
     return await this.model.findOneAndUpdate({ _id: id }, body, { new: true, lean: true, session });
   }
 
